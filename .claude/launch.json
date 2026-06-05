@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "flutter-macos",
+      "runtimeExecutable": "/Users/rvz/development/flutter/bin/flutter",
+      "runtimeArgs": ["run", "-d", "macos"],
+      "port": 0
+    }
+  ]
+}
