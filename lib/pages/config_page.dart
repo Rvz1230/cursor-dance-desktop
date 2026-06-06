@@ -1,260 +1,137 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../bridge/overlay_bridge.dart';
-import '../effects/particle_burst.dart';
 import '../models/particle_config.dart';
+import '../state/workbench_state.dart';
+import '../widgets/workbench_header.dart';
+import '../widgets/workbench_sidebar.dart';
+import 'workspaces/diagnostics_workspace.dart';
+import 'workspaces/states_workspace.dart';
+import 'workspaces/workbench_workspace.dart';
 
 class ConfigPage extends StatefulWidget {
   const ConfigPage({super.key});
 
   @override
-  State<ConfigPage> createState() => _ConfigPageState();
+  State<ConfigPage> createState() => ConfigPageState();
 }
 
-class _ConfigPageState extends State<ConfigPage> with TickerProviderStateMixin {
-  final ParticleBurst _burst = ParticleBurst();
+class ConfigPageState extends State<ConfigPage> {
+  final WorkbenchState _state = WorkbenchState();
   final OverlayBridge _bridge = OverlayBridge();
-  final ShadSliderController _sizeController = ShadSliderController(initialValue: 12);
-  final ShadSliderController _speedController = ShadSliderController(initialValue: 5);
-  Ticker? _ticker;
-
-  bool _enabled = false;
-  double get _size => _sizeController.value;
-  double get _speed => _speedController.value;
-  int _selectedColorIndex = 0;
-
-  ParticleConfig get _config => ParticleConfig(
-        color: ParticleConfig.presets[_selectedColorIndex],
-        size: _size,
-        speed: _speed,
-      );
 
   @override
   void initState() {
     super.initState();
-    _ticker = createTicker(_onTick);
+    _state.addListener(_onStateChanged);
   }
 
   @override
   void dispose() {
-    _ticker?.dispose();
+    _state.removeListener(_onStateChanged);
+    _state.dispose();
     super.dispose();
   }
 
-  void _onTick(Duration elapsed) {
-    _burst.update(1.0 / 60);
-    if (!_burst.isAlive) {
-      _ticker?.stop();
-    }
+  void _onStateChanged() {
+    if (!mounted) return;
     setState(() {});
-  }
-
-  void _onPreviewTap(TapDownDetails details) {
-    _burst.spawn(details.localPosition.dx, details.localPosition.dy, _config);
-    if (!_ticker!.isActive) {
-      _ticker?.start();
-    }
-    setState(() {});
-  }
-
-  void _setColor(int index) {
-    setState(() => _selectedColorIndex = index);
-    if (_enabled) {
-      _bridge.updateConfig(_config);
-    }
-  }
-
-  void _setSize(double value) {
-    _sizeController.value = value;
-    if (_enabled) {
-      _bridge.updateConfig(_config);
-    }
-  }
-
-  void _setSpeed(double value) {
-    _speedController.value = value;
-    if (_enabled) {
-      _bridge.updateConfig(_config);
-    }
   }
 
   Future<void> _toggleEnabled() async {
-    if (_enabled) {
+    if (_state.enabled) {
       await _bridge.stop();
-      setState(() => _enabled = false);
+      _state.setEnabled(false);
     } else {
-      await _bridge.start(_config);
-      setState(() => _enabled = true);
+      _state.setEnabled(true);
+      final cfg = _state.currentActionConfig;
+      await _bridge.start(
+        // ignore: deprecated_member_use
+        ParticleConfig(
+          color: Color(int.parse(cfg.particlePalette.first.replaceFirst('#', '0xFF'))),
+          size: cfg.particleSize.toDouble(),
+          speed: cfg.particleCount.toDouble(),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = ShadTheme.of(context);
     return Column(
       children: [
+        // Top bar
+        WorkbenchHeader(state: _state),
+
+        // Main content area
         Expanded(
           child: Row(
             children: [
-              _buildSidebar(context),
-              const VerticalDivider(width: 1),
-              Expanded(child: _buildPreview(context)),
+              // Theme sidebar
+              WorkbenchSidebar(state: _state),
+
+              // Workspace content
+              Expanded(
+                child: _buildWorkspaceContent(),
+              ),
             ],
           ),
         ),
-        const Divider(height: 1),
-        _buildBottomBar(context),
-      ],
-    );
-  }
 
-  Widget _buildSidebar(BuildContext context) {
-    return SizedBox(
-      width: 260,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('粒子颜色', style: ShadTheme.of(context).textTheme.h4),
-            const SizedBox(height: 12),
-            _buildColorPresets(),
-            const SizedBox(height: 28),
-            Text('粒子大小', style: ShadTheme.of(context).textTheme.h4),
-            const SizedBox(height: 8),
-            ShadSlider(
-              controller: _sizeController,
-              min: 2,
-              max: 24,
-              divisions: 11,
-              label: _size.round().toString(),
-              onChanged: _setSize,
-            ),
-            const SizedBox(height: 28),
-            Text('爆发速度', style: ShadTheme.of(context).textTheme.h4),
-            const SizedBox(height: 8),
-            ShadSlider(
-              controller: _speedController,
-              min: 1,
-              max: 10,
-              divisions: 9,
-              label: _speed.round().toString(),
-              onChanged: _setSpeed,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildColorPresets() {
-    return Row(
-      children: [
-        for (int i = 0; i < ParticleConfig.presets.length; i++)
-          Padding(
-            padding: EdgeInsets.only(right: i < 2 ? 12 : 0),
-            child: GestureDetector(
-              onTap: () => _setColor(i),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: ParticleConfig.presets[i],
-                  shape: BoxShape.circle,
-                  border: _selectedColorIndex == i
-                      ? Border.all(
-                          color: Colors.white,
-                          width: 3,
-                        )
-                      : null,
-                  boxShadow: _selectedColorIndex == i
-                      ? [
-                          BoxShadow(
-                            color: ParticleConfig.presets[i].withValues(alpha: 0.5),
-                            blurRadius: 8,
-                          ),
-                        ]
-                      : null,
-                ),
-                child: _selectedColorIndex == i
-                    ? const Icon(Icons.check, color: Colors.white, size: 18)
-                    : null,
-              ),
+        // Bottom bar
+        Container(
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.background,
+            border: Border(
+              top: BorderSide(color: theme.colorScheme.border),
             ),
           ),
-      ],
-    );
-  }
-
-  Widget _buildPreview(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: ShadTheme.of(context).colorScheme.muted,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: GestureDetector(
-          onTapDown: _onPreviewTap,
-          child: Stack(
+          child: Row(
             children: [
-              Center(
-                child: Text(
-                  '点击此处预览动效',
-                  style: ShadTheme.of(context).textTheme.p.copyWith(
-                        color: ShadTheme.of(context).colorScheme.mutedForeground,
-                      ),
+              // Status indicator
+              Icon(
+                _state.enabled ? LucideIcons.circle : LucideIcons.radio,
+                size: 10,
+                color: _state.enabled
+                    ? const Color(0xFF22C55E)
+                    : theme.colorScheme.mutedForeground,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                _state.enabled ? '动效已启用' : '动效已停止',
+                style: theme.textTheme.p.copyWith(
+                  color: _state.enabled
+                      ? const Color(0xFF22C55E)
+                      : theme.colorScheme.mutedForeground,
                 ),
               ),
-              CustomPaint(
-                painter: ParticlePainter(_burst.particles),
-                size: Size.infinite,
+              const Spacer(),
+              ShadButton(
+                onPressed: _toggleEnabled,
+                backgroundColor: _state.enabled
+                    ? theme.colorScheme.destructive
+                    : theme.colorScheme.primary,
+                child: Text(_state.enabled ? '停止' : '启用'),
               ),
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildBottomBar(BuildContext context) {
-    final theme = ShadTheme.of(context);
-    return Container(
-      height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.background,
-      ),
-      child: Row(
-        children: [
-          Icon(
-            _enabled ? Icons.circle : Icons.circle_outlined,
-            size: 10,
-            color: _enabled
-                ? const Color(0xFF22C55E)
-                : theme.colorScheme.mutedForeground,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            _enabled ? '动效已启用' : '动效已停止',
-            style: theme.textTheme.p.copyWith(
-              color: _enabled
-                  ? const Color(0xFF22C55E)
-                  : theme.colorScheme.mutedForeground,
-            ),
-          ),
-          const Spacer(),
-          ShadButton(
-            onPressed: _toggleEnabled,
-            backgroundColor: _enabled
-                ? theme.colorScheme.destructive
-                : theme.colorScheme.primary,
-            child: Text(_enabled ? '停止' : '启用'),
-          ),
-        ],
-      ),
-    );
+  Widget _buildWorkspaceContent() {
+    switch (_state.workspaceId) {
+      case 'states':
+        return StatesWorkspace(state: _state);
+      case 'diagnostics':
+        return DiagnosticsWorkspace(state: _state);
+      default:
+        return WorkbenchWorkspace(state: _state);
+    }
   }
 }
