@@ -1,14 +1,105 @@
 import Cocoa
 import FlutterMacOS
 
+// MARK: - ActionConfig (decoded from Flutter JSON)
+
+struct ActionConfig: Decodable {
+    let actionId: String
+    let config: ConfigData
+
+    struct ConfigData: Decodable {
+        // Trigger
+        let triggerTiming: String?
+        let holdMs: Int?
+
+        // Text
+        let textEnabled: Bool?
+        let textKind: String?
+        let textContent: String?
+        let textColor: String?
+        let fontSize: Int?
+        let textDuration: Int?
+        let textEasing: String?
+        let textOpacity: Int?
+        let textOffsetY: Int?
+
+        // Particle
+        let particle: Bool?
+        let particleCount: Int?
+        let particleStyle: String?
+        let particleSize: Int?
+        let particleDuration: Int?
+        let particlePalette: [String]?
+        let particleGravity: Int?
+        let particleWind: Int?
+        let particleBounce: Int?
+        let particleOpacity: Int?
+        let particleDirection: String?
+        let particleSpread: Int?
+        let particleMotionMode: String?
+        let orbitalCount: Int?
+        let orbitalRadius: Int?
+        let orbitalSpeed: Int?
+
+        // Ripple
+        let ripple: Bool?
+        let rippleSize: Int?
+        let rippleDuration: Int?
+        let rippleStyle: String?
+        let rippleEasing: String?
+        let rippleOpacity: Int?
+        let rippleLineWidth: Int?
+        let rippleColor: String?
+
+        // Animation
+        let animationEnabled: Bool?
+        let animationStyle: String?
+        let animationDuration: Int?
+
+        // Cursor
+        let cursorOverride: String?
+        let cursorTrailEnabled: Bool?
+        let cursorGlowColor: String?
+        let shake: Int?
+    }
+}
+
+// MARK: - Easing mapping
+
+func timingFunction(from easing: String?) -> CAMediaTimingFunction {
+    switch easing {
+    case "线性": return CAMediaTimingFunction(name: .linear)
+    case "缓入": return CAMediaTimingFunction(name: .easeIn)
+    case "缓出": return CAMediaTimingFunction(name: .easeOut)
+    case "缓入缓出": return CAMediaTimingFunction(name: .easeInEaseOut)
+    case "弹跳": return CAMediaTimingFunction(controlPoints: 0.34, 1.56, 0.64, 1)
+    case "弹性": return CAMediaTimingFunction(controlPoints: 0.22, 1, 0.36, 1.18)
+    default: return CAMediaTimingFunction(name: .easeOut)
+    }
+}
+
+func hexColor(_ hex: String?) -> NSColor {
+    guard let hex = hex, !hex.isEmpty else { return NSColor.orange }
+    let sanitized = hex.replacingOccurrences(of: "#", with: "")
+    guard sanitized.count == 6, let intVal = Int(sanitized, radix: 16) else { return NSColor.orange }
+    let r = CGFloat((intVal >> 16) & 0xFF) / 255.0
+    let g = CGFloat((intVal >> 8) & 0xFF) / 255.0
+    let b = CGFloat(intVal & 0xFF) / 255.0
+    return NSColor(red: r, green: g, blue: b, alpha: 1)
+}
+
+// MARK: - OverlayManager
+
 class OverlayManager {
     private var overlayWindow: NSWindow?
     private var eventMonitor: Any?
     private var channel: FlutterMethodChannel?
 
-    private var color: Int = 0xFFFF8C00
-    private var size: Double = 12
-    private var speed: Double = 5
+    private let particleFX = OverlayParticleFX()
+    private let textFX = OverlayTextFX()
+    private let rippleFX = OverlayRippleFX()
+
+    private var currentConfig: ActionConfig?
 
     func setup(messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
@@ -18,18 +109,14 @@ class OverlayManager {
         channel?.setMethodCallHandler { [weak self] call, result in
             switch call.method {
             case "startOverlay":
-                if let args = call.arguments as? [String: Any] {
-                    self?.applyArgs(args)
-                }
+                self?.applyArgs(call.arguments)
                 self?.start()
                 result(nil)
             case "stopOverlay":
                 self?.stop()
                 result(nil)
             case "updateConfig":
-                if let args = call.arguments as? [String: Any] {
-                    self?.applyArgs(args)
-                }
+                self?.applyArgs(call.arguments)
                 result(nil)
             default:
                 result(FlutterMethodNotImplemented)
@@ -37,10 +124,11 @@ class OverlayManager {
         }
     }
 
-    private func applyArgs(_ args: [String: Any]) {
-        if let v = args["color"] as? Int { color = v }
-        if let v = args["size"] as? Double { size = v }
-        if let v = args["speed"] as? Double { speed = v }
+    private func applyArgs(_ args: Any?) {
+        guard let dict = args as? [String: Any],
+              let jsonString = dict["config"] as? String,
+              let data = jsonString.data(using: .utf8) else { return }
+        currentConfig = try? JSONDecoder().decode(ActionConfig.self, from: data)
     }
 
     private func start() {
@@ -79,6 +167,9 @@ class OverlayManager {
             NSEvent.removeMonitor(monitor)
             eventMonitor = nil
         }
+        textFX.clear()
+        rippleFX.clear()
+        particleFX.clear()
         overlayWindow?.contentView?.layer?.sublayers?.forEach { $0.removeFromSuperlayer() }
         overlayWindow?.orderOut(nil)
         overlayWindow = nil
@@ -86,71 +177,21 @@ class OverlayManager {
 
     private func handleClick() {
         let point = NSEvent.mouseLocation
-        spawnParticles(at: point)
-    }
-
-    private func spawnParticles(at point: NSPoint) {
         guard let contentView = overlayWindow?.contentView,
-              let layer = contentView.layer else { return }
+              let layer = contentView.layer,
+              let config = currentConfig else { return }
 
-        let count = 12 + Int.random(in: 0...8)
-        let baseSpeed = speed * 120
-        let duration = max(0.3, 2.5 - (speed - 1) * 0.25)
+        let c = config.config
+        let localPoint = contentView.convert(point, from: nil)
 
-        for _ in 0..<count {
-            let angle = Double.random(in: 0...(2 * .pi))
-            let particleSpeed = baseSpeed * Double.random(in: 0.4...1.0)
-            let radius = size * Double.random(in: 0.4...1.0)
-
-            let circle = CAShapeLayer()
-            circle.path = CGPath(
-                ellipseIn: CGRect(
-                    x: -radius / 2, y: -radius / 2,
-                    width: radius, height: radius
-                ),
-                transform: nil
-            )
-            circle.fillColor = argbToNSColor(color).cgColor
-            circle.position = point
-            circle.opacity = 1.0
-
-            layer.addSublayer(circle)
-
-            let dx = cos(angle) * particleSpeed
-            let dy = sin(angle) * particleSpeed
-
-            let moveX = CABasicAnimation(keyPath: "position.x")
-            moveX.byValue = dx
-            moveX.duration = duration
-
-            let moveY = CABasicAnimation(keyPath: "position.y")
-            moveY.byValue = dy
-            moveY.duration = duration
-
-            let fadeOut = CABasicAnimation(keyPath: "opacity")
-            fadeOut.fromValue = 1.0
-            fadeOut.toValue = 0.0
-            fadeOut.duration = duration
-
-            let group = CAAnimationGroup()
-            group.animations = [moveX, moveY, fadeOut]
-            group.duration = duration
-            group.fillMode = .forwards
-            group.isRemovedOnCompletion = false
-
-            circle.add(group, forKey: "burst")
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.05) {
-                circle.removeFromSuperlayer()
-            }
+        if c.textEnabled == true {
+            textFX.spawn(at: localPoint, config: c, parent: layer)
         }
-    }
-
-    private func argbToNSColor(_ argb: Int) -> NSColor {
-        let a = CGFloat((argb >> 24) & 0xFF) / 255.0
-        let r = CGFloat((argb >> 16) & 0xFF) / 255.0
-        let g = CGFloat((argb >> 8) & 0xFF) / 255.0
-        let b = CGFloat(argb & 0xFF) / 255.0
-        return NSColor(red: r, green: g, blue: b, alpha: a)
+        if c.particle == true {
+            particleFX.spawn(at: localPoint, config: c, parent: layer)
+        }
+        if c.ripple == true {
+            rippleFX.spawn(at: localPoint, config: c, parent: layer)
+        }
     }
 }

@@ -1,15 +1,13 @@
-import 'package:flutter/services.dart';
+import 'dart:convert';
 
-import '../models/particle_config.dart';
+import 'package:flutter/services.dart';
 
 class OverlayBridge {
   static const _channel = MethodChannel('cursor_dance/overlay');
 
-  Future<void> start(ParticleConfig config) async {
+  Future<void> start(Map<String, dynamic> config) async {
     await _channel.invokeMethod('startOverlay', {
-      'color': config.color.toARGB32(),
-      'size': config.size,
-      'speed': config.speed,
+      'config': jsonEncode(config),
     });
   }
 
@@ -17,11 +15,9 @@ class OverlayBridge {
     await _channel.invokeMethod('stopOverlay');
   }
 
-  Future<void> updateConfig(ParticleConfig config) async {
+  Future<void> updateConfig(Map<String, dynamic> config) async {
     await _channel.invokeMethod('updateConfig', {
-      'color': config.color.toARGB32(),
-      'size': config.size,
-      'speed': config.speed,
+      'config': jsonEncode(config),
     });
   }
 }

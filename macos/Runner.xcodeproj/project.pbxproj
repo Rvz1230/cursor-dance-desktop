@@ -29,6 +29,9 @@
 		33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F42044A3C60003C045 /* MainMenu.xib */; };
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
 			808998E75A2A453B9F5B501E /* OverlayManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149C8367A7AF4841ADBAF6EC /* OverlayManager.swift */; };
+			AAA00001 /* OverlayParticleFX.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00001 /* OverlayParticleFX.swift */; };
+			AAA00002 /* OverlayTextFX.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00002 /* OverlayTextFX.swift */; };
+			AAA00003 /* OverlayRippleFX.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00003 /* OverlayRippleFX.swift */; };
 		9A125C06F5AC9BED351665AC /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EC16B9F5335337E1F6AAD49 /* Pods_RunnerTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -77,6 +80,9 @@
 		33CC10F72044A3C60003C045 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Runner/Info.plist; sourceTree = "<group>"; };
 		33CC11122044BFA00003C045 /* MainFlutterWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainFlutterWindow.swift; sourceTree = "<group>"; };
 			149C8367A7AF4841ADBAF6EC /* OverlayManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayManager.swift; sourceTree = "<group>"; };
+			BBB00001 /* OverlayParticleFX.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayParticleFX.swift; sourceTree = "<group>"; };
+			BBB00002 /* OverlayTextFX.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayTextFX.swift; sourceTree = "<group>"; };
+			BBB00003 /* OverlayRippleFX.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayRippleFX.swift; sourceTree = "<group>"; };
 		33CEB47222A05771004F2AC0 /* Flutter-Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Flutter-Debug.xcconfig"; sourceTree = "<group>"; };
 		33CEB47422A05771004F2AC0 /* Flutter-Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Flutter-Release.xcconfig"; sourceTree = "<group>"; };
 		33CEB47722A0578A004F2AC0 /* Flutter-Generated.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Flutter-Generated.xcconfig"; path = "ephemeral/Flutter-Generated.xcconfig"; sourceTree = "<group>"; };
@@ -179,6 +185,9 @@
 			children = (
 				33CC10F02044A3C60003C045 /* AppDelegate.swift */,
 				149C8367A7AF4841ADBAF6EC /* OverlayManager.swift */,
+				BBB00001 /* OverlayParticleFX.swift */,
+				BBB00002 /* OverlayTextFX.swift */,
+				BBB00003 /* OverlayRippleFX.swift */,
 				33CC11122044BFA00003C045 /* MainFlutterWindow.swift */,
 				33E51913231747F40026EE4D /* DebugProfile.entitlements */,
 				33E51914231749380026EE4D /* Release.entitlements */,
@@ -424,6 +433,9 @@
 			files = (
 				33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */,
 				808998E75A2A453B9F5B501E /* OverlayManager.swift in Sources */,
+				AAA00001 /* OverlayParticleFX.swift in Sources */,
+				AAA00002 /* OverlayTextFX.swift in Sources */,
+				AAA00003 /* OverlayRippleFX.swift in Sources */,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
 			);

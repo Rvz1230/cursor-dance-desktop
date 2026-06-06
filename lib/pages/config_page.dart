@@ -1,8 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../bridge/overlay_bridge.dart';
-import '../models/particle_config.dart';
 import '../state/workbench_state.dart';
 import '../widgets/workbench_header.dart';
 import '../widgets/workbench_sidebar.dart';
@@ -20,6 +21,7 @@ class ConfigPage extends StatefulWidget {
 class ConfigPageState extends State<ConfigPage> {
   final WorkbenchState _state = WorkbenchState();
   final OverlayBridge _bridge = OverlayBridge();
+  String _lastConfigJson = '';
 
   @override
   void initState() {
@@ -37,7 +39,22 @@ class ConfigPageState extends State<ConfigPage> {
 
   void _onStateChanged() {
     if (!mounted) return;
+    // Auto-update overlay when config changes and overlay is enabled
+    if (_state.enabled) {
+      final newJson = jsonEncode(_state.currentActionConfig.toJson());
+      if (newJson != _lastConfigJson) {
+        _lastConfigJson = newJson;
+        _bridge.updateConfig(_buildConfigPayload());
+      }
+    }
     setState(() {});
+  }
+
+  Map<String, dynamic> _buildConfigPayload() {
+    return {
+      'actionId': _state.selectedActionId,
+      'config': _state.currentActionConfig.toJson(),
+    };
   }
 
   Future<void> _toggleEnabled() async {
@@ -46,15 +63,9 @@ class ConfigPageState extends State<ConfigPage> {
       _state.setEnabled(false);
     } else {
       _state.setEnabled(true);
-      final cfg = _state.currentActionConfig;
-      await _bridge.start(
-        // ignore: deprecated_member_use
-        ParticleConfig(
-          color: Color(int.parse(cfg.particlePalette.first.replaceFirst('#', '0xFF'))),
-          size: cfg.particleSize.toDouble(),
-          speed: cfg.particleCount.toDouble(),
-        ),
-      );
+      final payload = _buildConfigPayload();
+      _lastConfigJson = jsonEncode(_state.currentActionConfig.toJson());
+      await _bridge.start(payload);
     }
   }
 
@@ -63,25 +74,17 @@ class ConfigPageState extends State<ConfigPage> {
     final theme = ShadTheme.of(context);
     return Column(
       children: [
-        // Top bar
         WorkbenchHeader(state: _state),
-
-        // Main content area
         Expanded(
           child: Row(
             children: [
-              // Theme sidebar
               WorkbenchSidebar(state: _state),
-
-              // Workspace content
               Expanded(
                 child: _buildWorkspaceContent(),
               ),
             ],
           ),
         ),
-
-        // Bottom bar
         Container(
           height: 48,
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -93,7 +96,6 @@ class ConfigPageState extends State<ConfigPage> {
           ),
           child: Row(
             children: [
-              // Status indicator
               Icon(
                 _state.enabled ? LucideIcons.circle : LucideIcons.radio,
                 size: 10,
