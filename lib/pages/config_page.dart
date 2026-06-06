@@ -25,6 +25,7 @@ class ConfigPageState extends State<ConfigPage> {
   void initState() {
     super.initState();
     _state.addListener(_onStateChanged);
+    _state.loadSavedConfig();
   }
 
   @override

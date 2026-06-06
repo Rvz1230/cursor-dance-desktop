@@ -33,6 +33,7 @@ class WorkbenchWorkspace extends StatelessWidget {
                       actionId: state.selectedActionId,
                       config: state.currentActionConfig,
                       conflicts: state.currentConflicts,
+                      onUpdateConfig: state.updateActionConfig,
                     ),
                   ),
                 ),

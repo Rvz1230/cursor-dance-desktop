@@ -3,19 +3,28 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
 import '../../models/action_config_presets.dart';
+import 'panels/animation_feedback_card.dart';
+import 'panels/audio_feedback_card.dart';
+import 'panels/cursor_feedback_card.dart';
+import 'panels/image_feedback_card.dart';
 import 'panels/panel_card.dart';
-import 'panels/panel_placeholder_content.dart';
+import 'panels/particle_feedback_card.dart';
+import 'panels/ripple_feedback_card.dart';
+import 'panels/text_feedback_card.dart';
+import 'panels/trigger_behavior_card.dart';
 
 class ConfigPanel extends StatelessWidget {
   final String actionId;
   final ActionConfig config;
   final List<String> conflicts;
+  final void Function(ActionConfig Function(ActionConfig)) onUpdateConfig;
 
   const ConfigPanel({
     super.key,
     required this.actionId,
     required this.config,
     required this.conflicts,
+    required this.onUpdateConfig,
   });
 
   @override
@@ -33,10 +42,7 @@ class ConfigPanel extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                actionLabel,
-                style: theme.textTheme.h4,
-              ),
+              Text(actionLabel, style: theme.textTheme.h4),
               if (actionHint.isNotEmpty)
                 Text(
                   actionHint,
@@ -99,24 +105,15 @@ class ConfigPanel extends StatelessWidget {
             decoration: BoxDecoration(
               color: theme.colorScheme.muted,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: theme.colorScheme.border,
-                style: BorderStyle.solid,
-              ),
+              border: Border.all(color: theme.colorScheme.border),
             ),
             child: Column(
               children: [
-                Icon(
-                  LucideIcons.sparkles,
-                  size: 32,
-                  color: theme.colorScheme.mutedForeground,
-                ),
+                Icon(LucideIcons.sparkles, size: 32, color: theme.colorScheme.mutedForeground),
                 const SizedBox(height: 8),
                 Text(
                   '还没有开启任何效果',
-                  style: theme.textTheme.p.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: theme.textTheme.p.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -138,8 +135,10 @@ class ConfigPanel extends StatelessWidget {
               id: 'trigger',
               title: const Text('触发行为'),
               defaultOpen: true,
-              child: PanelPlaceholderContent(
-                panelName: '触发时机 / 触发区域 / 延迟',
+              child: TriggerBehaviorCard(
+                actionId: actionId,
+                config: config,
+                onUpdate: onUpdateConfig,
               ),
             ),
             PanelCard(
@@ -147,10 +146,11 @@ class ConfigPanel extends StatelessWidget {
               title: const Text('飘字'),
               action: ShadSwitch(
                 value: config.textEnabled,
-                onChanged: (_) {},
+                onChanged: (v) => onUpdateConfig((c) => c.copyWith(textEnabled: v)),
               ),
-              child: PanelPlaceholderContent(
-                panelName: '文字内容 / 样式 / 动效',
+              child: TextFeedbackCard(
+                config: config,
+                onUpdate: onUpdateConfig,
               ),
             ),
             PanelCard(
@@ -158,10 +158,11 @@ class ConfigPanel extends StatelessWidget {
               title: const Text('粒子'),
               action: ShadSwitch(
                 value: config.particle,
-                onChanged: (_) {},
+                onChanged: (v) => onUpdateConfig((c) => c.copyWith(particle: v)),
               ),
-              child: PanelPlaceholderContent(
-                panelName: '发射 / 样式 / 物理',
+              child: ParticleFeedbackCard(
+                config: config,
+                onUpdate: onUpdateConfig,
               ),
             ),
             PanelCard(
@@ -169,10 +170,11 @@ class ConfigPanel extends StatelessWidget {
               title: const Text('波纹'),
               action: ShadSwitch(
                 value: config.ripple,
-                onChanged: (_) {},
+                onChanged: (v) => onUpdateConfig((c) => c.copyWith(ripple: v)),
               ),
-              child: PanelPlaceholderContent(
-                panelName: '形态 / 消退',
+              child: RippleFeedbackCard(
+                config: config,
+                onUpdate: onUpdateConfig,
               ),
             ),
             PanelCard(
@@ -180,10 +182,11 @@ class ConfigPanel extends StatelessWidget {
               title: const Text('音效'),
               action: ShadSwitch(
                 value: config.sound,
-                onChanged: (_) {},
+                onChanged: (v) => onUpdateConfig((c) => c.copyWith(sound: v)),
               ),
-              child: PanelPlaceholderContent(
-                panelName: '音效文件 / 音量 / 触发模式',
+              child: AudioFeedbackCard(
+                config: config,
+                onUpdate: onUpdateConfig,
               ),
             ),
             PanelCard(
@@ -191,10 +194,11 @@ class ConfigPanel extends StatelessWidget {
               title: const Text('动效'),
               action: ShadSwitch(
                 value: config.animationEnabled,
-                onChanged: (_) {},
+                onChanged: (v) => onUpdateConfig((c) => c.copyWith(animationEnabled: v)),
               ),
-              child: PanelPlaceholderContent(
-                panelName: '动画样式 / 时长 / 缓动',
+              child: AnimationFeedbackCard(
+                config: config,
+                onUpdate: onUpdateConfig,
               ),
             ),
             PanelCard(
@@ -202,18 +206,19 @@ class ConfigPanel extends StatelessWidget {
               title: const Text('图片'),
               action: ShadSwitch(
                 value: config.imageEnabled,
-                onChanged: (_) {},
+                onChanged: (v) => onUpdateConfig((c) => c.copyWith(imageEnabled: v)),
               ),
-              child: PanelPlaceholderContent(
-                panelName: '图片贴纸',
-                description: '即将支持',
+              child: ImageFeedbackCard(
+                config: config,
+                onUpdate: onUpdateConfig,
               ),
             ),
             PanelCard(
               id: 'cursor',
               title: const Text('光标反馈'),
-              child: PanelPlaceholderContent(
-                panelName: '光标覆盖 / 拖尾 / 光晕',
+              child: CursorFeedbackCard(
+                config: config,
+                onUpdate: onUpdateConfig,
               ),
             ),
           ],
