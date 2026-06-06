@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import '../../effects/particle_burst.dart';
+import '../../effects/effects_engine.dart';
 import '../../models/action_config.dart';
 import '../../models/action_config_presets.dart';
-import '../../models/particle_config.dart';
 
 class PreviewPanel extends StatefulWidget {
   final String actionId;
@@ -22,7 +21,7 @@ class PreviewPanel extends StatefulWidget {
 }
 
 class _PreviewPanelState extends State<PreviewPanel> with TickerProviderStateMixin {
-  final ParticleBurst _burst = ParticleBurst();
+  final EffectsEngine _engine = EffectsEngine();
   Ticker? _ticker;
 
   @override
@@ -38,24 +37,18 @@ class _PreviewPanelState extends State<PreviewPanel> with TickerProviderStateMix
   }
 
   void _onTick(Duration elapsed) {
-    _burst.update(1.0 / 60);
-    if (!_burst.isAlive) {
+    _engine.update(1.0 / 60);
+    if (!_engine.isAlive) {
       _ticker?.stop();
     }
     setState(() {});
   }
 
   void _onPreviewTap(TapDownDetails details) {
-    final cfg = widget.config;
-    _burst.spawn(
+    _engine.trigger(
       details.localPosition.dx,
       details.localPosition.dy,
-      // ignore: deprecated_member_use
-      ParticleConfig(
-        color: Color(int.parse(cfg.particlePalette.first.replaceFirst('#', '0xFF'))),
-        size: cfg.particleSize.toDouble(),
-        speed: cfg.particleCount.toDouble(),
-      ),
+      widget.config,
     );
     if (!_ticker!.isActive) {
       _ticker?.start();
@@ -67,6 +60,7 @@ class _PreviewPanelState extends State<PreviewPanel> with TickerProviderStateMix
   Widget build(BuildContext context) {
     final theme = ShadTheme.of(context);
     final actionLabel = kActionLabels[widget.actionId] ?? widget.actionId;
+    final cfg = widget.config;
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -80,6 +74,7 @@ class _PreviewPanelState extends State<PreviewPanel> with TickerProviderStateMix
           onTapDown: _onPreviewTap,
           child: Stack(
             children: [
+              // Hint text (shown when no effects are active)
               Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -99,12 +94,59 @@ class _PreviewPanelState extends State<PreviewPanel> with TickerProviderStateMix
                   ],
                 ),
               ),
+
+              // Effects overlay
               CustomPaint(
-                painter: ParticlePainter(_burst.particles),
+                painter: EffectsPainter(_engine),
                 size: Size.infinite,
               ),
+
+              // Active effects indicator
+              if (_engine.isAlive)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: _buildEffectChips(theme, cfg),
+                ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEffectChips(ShadThemeData theme, ActionConfig cfg) {
+    final chips = <Widget>[];
+    if (cfg.particle) chips.add(_chip(theme, '${cfg.particleStyle}', LucideIcons.sparkles));
+    if (cfg.textEnabled) chips.add(_chip(theme, '飘字', LucideIcons.type));
+    if (cfg.ripple) chips.add(_chip(theme, '${cfg.rippleStyle}', LucideIcons.circleDashed));
+    if (chips.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: chips,
+    );
+  }
+
+  Widget _chip(ShadThemeData theme, String label, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.background.withValues(alpha: 0.85),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 10, color: theme.colorScheme.foreground),
+            const SizedBox(width: 3),
+            Text(
+              label,
+              style: theme.textTheme.small.copyWith(fontSize: 9),
+            ),
+          ],
         ),
       ),
     );
