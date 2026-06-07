@@ -21,7 +21,12 @@ struct ActionConfig: Decodable {
         let textDuration: Int?
         let textEasing: String?
         let textOpacity: Int?
+        let textOffsetX: Int?
         let textOffsetY: Int?
+        let textFontFamily: String?
+        let textWeight: String?
+        let textOutlineWidth: Int?
+        let textShadow: String?
 
         // Particle
         let particle: Bool?
@@ -40,6 +45,9 @@ struct ActionConfig: Decodable {
         let orbitalCount: Int?
         let orbitalRadius: Int?
         let orbitalSpeed: Int?
+        let particleTrail: Bool?
+        let particleColorMode: String?
+        let particleDelay: Int?
 
         // Ripple
         let ripple: Bool?
@@ -50,6 +58,7 @@ struct ActionConfig: Decodable {
         let rippleOpacity: Int?
         let rippleLineWidth: Int?
         let rippleColor: String?
+        let rippleDelay: Int?
 
         // Animation
         let animationEnabled: Bool?
@@ -144,7 +153,7 @@ class OverlayManager {
             backing: .buffered,
             defer: false
         )
-        window.level = .floating
+        window.level = .screenSaver // above full-screen apps
         window.isOpaque = false
         window.backgroundColor = .clear
         window.ignoresMouseEvents = true
