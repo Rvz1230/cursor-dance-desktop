@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config_presets.dart';
+import '../../theme/app_tokens.dart';
 
 class ActionTabs extends StatelessWidget {
   final String selectedActionId;
@@ -15,7 +15,6 @@ class ActionTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ShadTheme.of(context);
     return SizedBox(
       height: 40,
       child: ListView.separated(
@@ -33,14 +32,15 @@ class ActionTabs extends StatelessWidget {
               duration: const Duration(milliseconds: 150),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: active ? theme.colorScheme.primary : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
+                color: active ? AppColors.primary : Colors.transparent,
+                borderRadius: BorderRadius.circular(RadiusTokens.lg),
               ),
               child: Text(
                 label,
-                style: theme.textTheme.small.copyWith(
-                  color: active ? theme.colorScheme.primaryForeground : theme.colorScheme.mutedForeground,
+                style: TextStyle(
+                  fontSize: FontSizes.small,
                   fontWeight: active ? FontWeight.w600 : FontWeight.normal,
+                  color: active ? AppColors.primaryForeground : AppColors.mutedForeground,
                 ),
               ),
             ),

@@ -3,6 +3,8 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/theme.dart';
 import '../../state/workbench_state.dart';
+import '../../theme/app_tokens.dart';
+import 'controls/app_icon_button.dart';
 
 class WorkbenchSidebar extends StatefulWidget {
   final WorkbenchState state;
@@ -27,15 +29,13 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ShadTheme.of(context);
-
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       width: _collapsed ? 72 : 260,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.background,
+      decoration: const BoxDecoration(
+        color: AppColors.card,
         border: Border(
-          right: BorderSide(color: theme.colorScheme.border),
+          right: BorderSide(color: AppColors.border),
         ),
       ),
       child: Column(
@@ -43,48 +43,59 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
           // Header
           Container(
             height: 40,
-            padding: EdgeInsets.symmetric(horizontal: _collapsed ? 8 : 12),
+            padding: EdgeInsets.symmetric(
+              horizontal: _collapsed ? 8 : 10,
+            ),
             child: Row(
               children: [
                 if (!_collapsed) ...[
                   Expanded(
                     child: Text(
                       '主题库',
-                      style: theme.textTheme.p.copyWith(
+                      style: const TextStyle(
+                        fontSize: FontSizes.base,
                         fontWeight: FontWeight.w600,
+                        color: AppColors.foreground,
                       ),
                     ),
                   ),
-                  GestureDetector(
+                  AppIconButton(
+                    icon: LucideIcons.plus,
                     onTap: () => _showCreateDialog(context),
-                    child: Icon(LucideIcons.plus, size: 16, color: theme.colorScheme.mutedForeground),
+                    tooltip: '新建主题',
                   ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
+                  const SizedBox(width: 4),
+                  AppIconButton(
+                    icon: LucideIcons.panelLeftClose,
                     onTap: () => setState(() => _collapsed = true),
-                    child: Icon(LucideIcons.panelLeftClose, size: 16, color: theme.colorScheme.mutedForeground),
+                    tooltip: '收起侧栏',
                   ),
                 ] else ...[
-                  GestureDetector(
+                  AppIconButton(
+                    icon: LucideIcons.panelLeftOpen,
                     onTap: () => setState(() => _collapsed = false),
-                    child: Icon(LucideIcons.panelLeftOpen, size: 16, color: theme.colorScheme.mutedForeground),
+                    tooltip: '展开侧栏',
                   ),
                 ],
               ],
             ),
           ),
 
-          // Search
+          // Search (animated collapse)
           if (!_collapsed)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: ShadInput(
-                initialValue: _query,
-                onChanged: (v) => setState(() => _query = v),
-                placeholder: const Text('搜索主题...'),
-                leading: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(LucideIcons.search, size: 14, color: theme.colorScheme.mutedForeground),
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 150),
+              opacity: _collapsed ? 0.0 : 1.0,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: ShadInput(
+                  initialValue: _query,
+                  onChanged: (v) => setState(() => _query = v),
+                  placeholder: const Text('搜索主题...'),
+                  leading: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Icon(LucideIcons.search, size: IconSizes.md, color: AppColors.mutedForeground),
+                  ),
                 ),
               ),
             ),
@@ -92,7 +103,11 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
           // Theme list
           Expanded(
             child: ListView.builder(
-              padding: EdgeInsets.only(top: 4, left: _collapsed ? 8 : 4, right: _collapsed ? 8 : 4),
+              padding: EdgeInsets.only(
+                top: 4,
+                left: _collapsed ? 8 : 4,
+                right: _collapsed ? 8 : 4,
+              ),
               itemCount: _filteredThemes.length,
               itemBuilder: (context, index) {
                 final t = _filteredThemes[index];
@@ -118,17 +133,12 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
           if (_collapsed)
             Padding(
               padding: const EdgeInsets.all(8),
-              child: GestureDetector(
+              child: AppIconButton(
+                icon: LucideIcons.plus,
                 onTap: () => _showCreateDialog(context),
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.muted,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(LucideIcons.plus, size: 18, color: theme.colorScheme.primary),
-                ),
+                tooltip: '新建主题',
+                size: 44,
+                iconSize: IconSizes.lg,
               ),
             ),
         ],
@@ -218,27 +228,46 @@ class _ThemeCardState extends State<_ThemeCard> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ShadTheme.of(context);
-
     if (widget.collapsed) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 6),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: widget.active ? theme.colorScheme.primary.withValues(alpha: 0.1) : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
-              border: widget.active ? Border.all(color: theme.colorScheme.primary) : null,
-            ),
-            child: Center(
-              child: Text(
-                widget.theme.name.length <= 2 ? widget.theme.name : widget.theme.name.substring(0, 2),
-                style: theme.textTheme.small.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: widget.active ? theme.colorScheme.primary : theme.colorScheme.mutedForeground,
+        child: Semantics(
+          button: true,
+          label: widget.theme.name,
+          child: Tooltip(
+            message: widget.theme.name,
+            preferBelow: false,
+            triggerMode: TooltipTriggerMode.tap,
+            child: GestureDetector(
+              onTap: widget.onTap,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: widget.active
+                        ? AppColors.primary.withValues(alpha: 0.1)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(RadiusTokens.lg),
+                    border: widget.active
+                        ? Border.all(color: AppColors.primary.withValues(alpha: 0.4))
+                        : null,
+                  ),
+                  child: Center(
+                    child: Text(
+                      widget.theme.name.length <= 2
+                          ? widget.theme.name
+                          : widget.theme.name.substring(0, 2),
+                      style: TextStyle(
+                        fontSize: FontSizes.small,
+                        fontWeight: FontWeight.bold,
+                        color: widget.active
+                            ? AppColors.primary
+                            : AppColors.mutedForeground,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -247,96 +276,139 @@ class _ThemeCardState extends State<_ThemeCard> {
       );
     }
 
+    return _buildExpandedCard();
+  }
+
+  Widget _buildExpandedCard() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        onDoubleTap: () => setState(() => _renaming = true),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          decoration: BoxDecoration(
-            color: widget.active ? theme.colorScheme.muted : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: [
-              // Icon
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.accent.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: widget.onTap,
+          onDoubleTap: () => setState(() => _renaming = true),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            decoration: BoxDecoration(
+              color: widget.active
+                  ? AppColors.muted
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(RadiusTokens.lg),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Active accent bar
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  width: 3,
+                  height: _renaming ? 36 : 44,
+                  margin: const EdgeInsets.only(top: 4, right: 8),
+                  decoration: BoxDecoration(
+                    color: widget.active
+                        ? AppColors.primary
+                        : Colors.transparent,
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(2),
+                      bottomRight: Radius.circular(2),
+                    ),
+                  ),
                 ),
-                child: Icon(
-                  LucideIcons.wand2,
-                  size: 16,
-                  color: theme.colorScheme.accent,
-                ),
-              ),
-              const SizedBox(width: 10),
 
-              // Name + summary
-              Expanded(
-                child: _renaming
-                    ? SizedBox(
-                        height: 28,
-                        child: TextField(
-                          controller: _renameController,
-                          autofocus: true,
-                          style: theme.textTheme.small,
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 4),
-                            isDense: true,
-                          ),
-                          onSubmitted: (v) {
-                            if (v.trim().isNotEmpty) {
-                              widget.onRename(v.trim());
-                            }
-                            setState(() => _renaming = false);
-                          },
-                        ),
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.theme.name,
-                            style: theme.textTheme.small.copyWith(
-                              fontWeight: FontWeight.w600,
+                // Icon
+                Container(
+                  width: 28,
+                  height: 28,
+                  margin: const EdgeInsets.only(top: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.muted,
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
+                  ),
+                  child: Icon(
+                    LucideIcons.wand2,
+                    size: IconSizes.md,
+                    color: AppColors.mutedForeground,
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Name + summary
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 6, bottom: 6),
+                    child: _renaming
+                        ? SizedBox(
+                            height: 28,
+                            child: TextField(
+                              controller: _renameController,
+                              autofocus: true,
+                              style: const TextStyle(
+                                fontSize: FontSizes.small,
+                                color: AppColors.foreground,
+                              ),
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(horizontal: 4),
+                                isDense: true,
+                              ),
+                              onSubmitted: (v) {
+                                if (v.trim().isNotEmpty) {
+                                  widget.onRename(v.trim());
+                                }
+                                setState(() => _renaming = false);
+                              },
                             ),
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.theme.name,
+                                style: const TextStyle(
+                                  fontSize: FontSizes.small,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.foreground,
+                                ),
+                              ),
+                              Text(
+                                widget.theme.summary,
+                                style: const TextStyle(
+                                  fontSize: FontSizes.caption,
+                                  color: AppColors.mutedForeground,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
-                          Text(
-                            widget.theme.summary,
-                            style: theme.textTheme.small.copyWith(
-                              fontSize: 10,
-                              color: theme.colorScheme.mutedForeground,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                  ),
+                ),
+
+                if (widget.active && !_renaming)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: PopupMenuButton<String>(
+                      padding: EdgeInsets.zero,
+                      icon: Icon(
+                        LucideIcons.moreHorizontal,
+                        size: IconSizes.md,
+                        color: AppColors.mutedForeground,
                       ),
-              ),
-
-              if (widget.active && !_renaming)
-                PopupMenuButton<String>(
-                  padding: EdgeInsets.zero,
-                  icon: Icon(LucideIcons.moreHorizontal, size: 14, color: theme.colorScheme.mutedForeground),
-                  onSelected: (v) {
-                    switch (v) {
-                      case 'duplicate':
-                        widget.onDuplicate();
-                      case 'delete':
-                        widget.onDelete();
-                    }
-                  },
-                  itemBuilder: (_) => [
-                    const PopupMenuItem(value: 'duplicate', child: Text('复制')),
-                    const PopupMenuItem(value: 'delete', child: Text('删除')),
-                  ],
-                ),
-            ],
+                      onSelected: (v) {
+                        switch (v) {
+                          case 'duplicate':
+                            widget.onDuplicate();
+                          case 'delete':
+                            widget.onDelete();
+                        }
+                      },
+                      itemBuilder: (_) => [
+                        const PopupMenuItem(value: 'duplicate', child: Text('复制')),
+                        const PopupMenuItem(value: 'delete', child: Text('删除')),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

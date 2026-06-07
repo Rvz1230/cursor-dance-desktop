@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../state/workbench_state.dart';
+import '../../theme/app_tokens.dart';
 
 class WorkbenchHeader extends StatelessWidget {
   final WorkbenchState state;
@@ -10,15 +11,13 @@ class WorkbenchHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ShadTheme.of(context);
-
     return Container(
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.background,
+      decoration: const BoxDecoration(
+        color: AppColors.card,
         border: Border(
-          bottom: BorderSide(color: theme.colorScheme.border),
+          bottom: BorderSide(color: AppColors.border),
         ),
       ),
       child: Row(
@@ -28,21 +27,24 @@ class WorkbenchHeader extends StatelessWidget {
             children: [
               Icon(
                 LucideIcons.sparkles,
-                size: 18,
-                color: theme.colorScheme.primary,
+                size: IconSizes.lg,
+                color: AppColors.foreground,
               ),
               const SizedBox(width: 8),
               Text(
                 'CursorDance',
-                style: theme.textTheme.p.copyWith(
+                style: const TextStyle(
+                  fontSize: FontSizes.base,
                   fontWeight: FontWeight.bold,
+                  color: AppColors.foreground,
                 ),
               ),
               const SizedBox(width: 4),
               Text(
                 '桌面版',
-                style: theme.textTheme.small.copyWith(
-                  color: theme.colorScheme.mutedForeground,
+                style: const TextStyle(
+                  fontSize: FontSizes.small,
+                  color: AppColors.mutedForeground,
                 ),
               ),
             ],
@@ -54,11 +56,14 @@ class WorkbenchHeader extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                _workspaceTab(context, 'workbench', '主题工作台', LucideIcons.wand2),
+                _workspaceTab('workbench', '主题工作台', LucideIcons.wand2,
+                    showActiveBg: state.workspaceId == 'workbench'),
                 const SizedBox(width: 4),
-                _workspaceTab(context, 'states', '光标状态', LucideIcons.mousePointer2),
+                _workspaceTab('states', '光标状态', LucideIcons.mousePointer2,
+                    showActiveBg: state.workspaceId == 'states'),
                 const SizedBox(width: 4),
-                _workspaceTab(context, 'diagnostics', '诊断面板', LucideIcons.activity),
+                _workspaceTab('diagnostics', '诊断面板', LucideIcons.activity,
+                    showActiveBg: state.workspaceId == 'diagnostics'),
               ],
             ),
           ),
@@ -69,9 +74,12 @@ class WorkbenchHeader extends StatelessWidget {
               // Global enable switch
               Row(
                 children: [
-                  Text(
+                  const Text(
                     '全局',
-                    style: theme.textTheme.small,
+                    style: TextStyle(
+                      fontSize: FontSizes.small,
+                      color: AppColors.foreground,
+                    ),
                   ),
                   const SizedBox(width: 6),
                   ShadSwitch(
@@ -81,7 +89,7 @@ class WorkbenchHeader extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
 
               // Save button
               ShadButton(
@@ -92,12 +100,12 @@ class WorkbenchHeader extends StatelessWidget {
                   children: [
                     if (state.isSaving)
                       const SizedBox(
-                        width: 12,
-                        height: 12,
+                        width: IconSizes.sm,
+                        height: IconSizes.sm,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     else
-                      Icon(LucideIcons.save, size: 14),
+                      Icon(LucideIcons.save, size: IconSizes.md),
                     const SizedBox(width: 4),
                     Text(state.unsaved ? '保存' : '已保存'),
                   ],
@@ -106,7 +114,7 @@ class WorkbenchHeader extends StatelessWidget {
 
               if (state.saveError.isNotEmpty) ...[
                 const SizedBox(width: 8),
-                Icon(LucideIcons.alertCircle, size: 14, color: theme.colorScheme.destructive),
+                Icon(LucideIcons.alertCircle, size: IconSizes.md, color: AppColors.destructive),
               ],
             ],
           ),
@@ -115,32 +123,32 @@ class WorkbenchHeader extends StatelessWidget {
     );
   }
 
-  Widget _workspaceTab(BuildContext context, String id, String label, IconData icon) {
-    final active = state.workspaceId == id;
-    final theme = ShadTheme.of(context);
+  Widget _workspaceTab(String id, String label, IconData icon, {bool showActiveBg = false}) {
+    final active = showActiveBg;
     return GestureDetector(
       onTap: () => state.setWorkspaceId(id),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? theme.colorScheme.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
+          color: active ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: 14,
-              color: active ? theme.colorScheme.primaryForeground : theme.colorScheme.mutedForeground,
+              size: IconSizes.md,
+              color: active ? AppColors.primaryForeground : AppColors.mutedForeground,
             ),
             const SizedBox(width: 4),
             Text(
               label,
-              style: theme.textTheme.small.copyWith(
-                color: active ? theme.colorScheme.primaryForeground : theme.colorScheme.mutedForeground,
+              style: TextStyle(
+                fontSize: FontSizes.small,
                 fontWeight: active ? FontWeight.w600 : FontWeight.normal,
+                color: active ? AppColors.primaryForeground : AppColors.mutedForeground,
               ),
             ),
           ],

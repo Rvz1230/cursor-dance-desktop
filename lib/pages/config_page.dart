@@ -5,6 +5,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../bridge/overlay_bridge.dart';
 import '../state/workbench_state.dart';
+import '../theme/app_tokens.dart';
 import '../widgets/workbench_header.dart';
 import '../widgets/workbench_sidebar.dart';
 import 'workspaces/diagnostics_workspace.dart';
@@ -46,7 +47,6 @@ class ConfigPageState extends State<ConfigPage> {
 
   void _onStateChanged() {
     if (!mounted) return;
-    // Auto-update overlay when config changes and overlay is enabled
     if (_state.enabled) {
       final newJson = jsonEncode(_state.currentActionConfig.toJson());
       if (newJson != _lastConfigJson) {
@@ -78,7 +78,6 @@ class ConfigPageState extends State<ConfigPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ShadTheme.of(context);
     return Column(
       children: [
         WorkbenchHeader(state: _state),
@@ -92,45 +91,50 @@ class ConfigPageState extends State<ConfigPage> {
             ],
           ),
         ),
-        Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.background,
-            border: Border(
-              top: BorderSide(color: theme.colorScheme.border),
+        _buildStatusBar(),
+      ],
+    );
+  }
+
+  Widget _buildStatusBar() {
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: const BoxDecoration(
+        color: AppColors.card,
+        border: Border(
+          top: BorderSide(color: AppColors.border),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            _state.enabled ? LucideIcons.circle : LucideIcons.radio,
+            size: 10,
+            color: _state.enabled
+                ? AppColors.success
+                : AppColors.mutedForeground,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            _state.enabled ? '动效已启用' : '动效已停止',
+            style: TextStyle(
+              fontSize: FontSizes.base,
+              color: _state.enabled
+                  ? AppColors.success
+                  : AppColors.mutedForeground,
             ),
           ),
-          child: Row(
-            children: [
-              Icon(
-                _state.enabled ? LucideIcons.circle : LucideIcons.radio,
-                size: 10,
-                color: _state.enabled
-                    ? const Color(0xFF22C55E)
-                    : theme.colorScheme.mutedForeground,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                _state.enabled ? '动效已启用' : '动效已停止',
-                style: theme.textTheme.p.copyWith(
-                  color: _state.enabled
-                      ? const Color(0xFF22C55E)
-                      : theme.colorScheme.mutedForeground,
-                ),
-              ),
-              const Spacer(),
-              ShadButton(
-                onPressed: _toggleEnabled,
-                backgroundColor: _state.enabled
-                    ? theme.colorScheme.destructive
-                    : theme.colorScheme.primary,
-                child: Text(_state.enabled ? '停止' : '启用'),
-              ),
-            ],
+          const Spacer(),
+          ShadButton(
+            onPressed: _toggleEnabled,
+            backgroundColor: _state.enabled
+                ? AppColors.destructive
+                : AppColors.primary,
+            child: Text(_state.enabled ? '停止' : '启用'),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

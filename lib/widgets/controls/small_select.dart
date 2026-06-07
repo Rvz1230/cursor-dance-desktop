@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import '../../theme/app_tokens.dart';
+
 class SmallSelect extends StatelessWidget {
   final String label;
   final String value;
@@ -17,16 +19,27 @@ class SmallSelect extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ShadTheme.of(context);
     return ShadSelect<String>(
       initialValue: value,
       selectedOptionBuilder: (context, selectedValue) {
-        return Text(selectedValue, style: theme.textTheme.small);
+        return Text(
+          selectedValue,
+          style: const TextStyle(
+            fontSize: FontSizes.base,
+            color: AppColors.foreground,
+          ),
+        );
       },
       options: options.map((opt) {
         return ShadOption(
           value: opt,
-          child: Text(opt, style: theme.textTheme.small),
+          child: Text(
+            opt,
+            style: const TextStyle(
+              fontSize: FontSizes.base,
+              color: AppColors.foreground,
+            ),
+          ),
         );
       }).toList(),
       onChanged: onChanged != null
