@@ -43,25 +43,28 @@ class _TextTagEditorState extends State<TextTagEditor> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
-          spacing: 4,
-          runSpacing: 4,
-          children: [
-            for (int i = 0; i < widget.tags.length; i++)
-              Chip(
-                label: Text(widget.tags[i], style: theme.textTheme.small),
-                deleteIcon: Icon(LucideIcons.x, size: 12),
-                onDeleted: () => _removeTag(i),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                visualDensity: VisualDensity.compact,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-              ),
-          ],
+        Material(
+          type: MaterialType.transparency,
+          child: Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            children: [
+              for (int i = 0; i < widget.tags.length; i++)
+                Chip(
+                  label: Text(widget.tags[i], style: theme.textTheme.small),
+                  deleteIcon: Icon(LucideIcons.x, size: 12),
+                  onDeleted: () => _removeTag(i),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                ),
+            ],
+          ),
         ),
         const SizedBox(height: 4),
         Row(
           children: [
-            Expanded(
+            Flexible(
               child: ShadInput(
                 controller: _controller,
                 placeholder: const Text('添加标签...'),
@@ -72,7 +75,7 @@ class _TextTagEditorState extends State<TextTagEditor> {
             ShadButton(
               onPressed: _addTag,
               size: ShadButtonSize.sm,
-              child: const Text('添加'),
+              child: Text('添加'),
             ),
           ],
         ),

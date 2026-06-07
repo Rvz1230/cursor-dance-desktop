@@ -26,8 +26,15 @@ class ConfigPageState extends State<ConfigPage> {
   @override
   void initState() {
     super.initState();
+    _bridge.onOverlayStateChanged = (enabled) {
+      _state.setEnabled(enabled);
+    };
     _state.addListener(_onStateChanged);
-    _state.loadSavedConfig();
+    _state.loadSavedConfig().then((_) {
+      if (_state.enabled) {
+        _bridge.start(_buildConfigPayload());
+      }
+    });
   }
 
   @override

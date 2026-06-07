@@ -2,7 +2,7 @@ import Cocoa
 import FlutterMacOS
 
 class MainFlutterWindow: NSWindow {
-    private let overlayManager = OverlayManager()
+    let overlayManager = OverlayManager()
 
     override func awakeFromNib() {
         let flutterViewController = FlutterViewController()
@@ -13,6 +13,10 @@ class MainFlutterWindow: NSWindow {
         RegisterGeneratedPlugins(registry: flutterViewController)
 
         overlayManager.setup(messenger: flutterViewController.engine.binaryMessenger)
+
+        if let appDelegate = NSApp.delegate as? AppDelegate {
+            appDelegate.overlayManager = overlayManager
+        }
 
         super.awakeFromNib()
     }

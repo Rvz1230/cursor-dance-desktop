@@ -101,6 +101,8 @@ class OverlayManager {
 
     private var currentConfig: ActionConfig?
 
+    var isRunning: Bool { overlayWindow != nil }
+
     func setup(messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
             name: "cursor_dance/overlay",
@@ -131,7 +133,7 @@ class OverlayManager {
         currentConfig = try? JSONDecoder().decode(ActionConfig.self, from: data)
     }
 
-    private func start() {
+    func start() {
         guard overlayWindow == nil else { return }
         guard let screen = NSScreen.main else { return }
         let frame = screen.frame
@@ -160,9 +162,11 @@ class OverlayManager {
         ) { [weak self] _ in
             self?.handleClick()
         }
+
+        channel?.invokeMethod("overlayStateChanged", arguments: ["enabled": true])
     }
 
-    private func stop() {
+    func stop() {
         if let monitor = eventMonitor {
             NSEvent.removeMonitor(monitor)
             eventMonitor = nil
@@ -173,6 +177,8 @@ class OverlayManager {
         overlayWindow?.contentView?.layer?.sublayers?.forEach { $0.removeFromSuperlayer() }
         overlayWindow?.orderOut(nil)
         overlayWindow = nil
+
+        channel?.invokeMethod("overlayStateChanged", arguments: ["enabled": false])
     }
 
     private func handleClick() {
