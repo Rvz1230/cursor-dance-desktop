@@ -6,6 +6,49 @@ import 'package:flutter/material.dart';
 import '../models/action_config.dart';
 
 // ═══════════════════════════════════════════════════════════════
+// Easing — mirrors Swift's timingFunction(from:)
+// ═══════════════════════════════════════════════════════════════
+
+double _cubicBezierY(double t, double cp1x, double cp1y, double cp2x, double cp2y) {
+  final mt = 1.0 - t;
+  return 3.0 * mt * mt * t * cp1y + 3.0 * mt * t * t * cp2y + t * t * t;
+}
+
+/// Solve cubic bezier for x(t) = inputX using Newton-Raphson,
+/// then return y(t). Mirrors CAMediaTimingFunction evaluation.
+double _solveBezier(double x, double cp1x, double cp1y, double cp2x, double cp2y) {
+  double t = x;
+  for (int i = 0; i < 10; i++) {
+    final mt = 1.0 - t;
+    final xSamp = 3.0 * mt * mt * t * cp1x + 3.0 * mt * t * t * cp2x + t * t * t;
+    final dx = 3.0 * mt * mt * cp1x + 6.0 * mt * t * (cp2x - cp1x) + 3.0 * t * t * (1.0 - cp2x);
+    if (dx.abs() < 1e-10) break;
+    t -= (xSamp - x) / dx;
+    t = t.clamp(0.0, 1.0);
+  }
+  return _cubicBezierY(t, cp1x, cp1y, cp2x, cp2y);
+}
+
+double ease(String name, double t) {
+  switch (name) {
+    case '线性':
+      return t;
+    case '缓入':
+      return t * t;
+    case '缓出':
+      return 1.0 - (1.0 - t) * (1.0 - t);
+    case '缓入缓出':
+      return t < 0.5 ? 2.0 * t * t : 1.0 - (-2.0 * t + 2.0) * (-2.0 * t + 2.0) / 2.0;
+    case '弹跳':
+      return _solveBezier(t, 0.34, 1.56, 0.64, 1.0);
+    case '弹性':
+      return _solveBezier(t, 0.22, 1.0, 0.36, 1.18);
+    default:
+      return 1.0 - (1.0 - t) * (1.0 - t); // easeOut
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
 // Particle styles
 // ═══════════════════════════════════════════════════════════════
 
@@ -29,53 +72,81 @@ ParticleShape shapeFromString(String style) {
 // ═══════════════════════════════════════════════════════════════
 
 class PreviewParticle {
-  double x, y;
-  final double vx;
-  double vy;
+  // Computed each frame
+  double x, y, opacity;
+  // Fixed interpolation params (matching Swift CAAnimation model)
+  final double startX, startY;
+  final double deltaX, deltaY;
   final double size;
-  double opacity;
+  final double startOpacity;
+  final double duration; // seconds
+  final String easing;
   final Color color;
   final ParticleShape shape;
+  double elapsed;
 
   PreviewParticle({
     required this.x,
     required this.y,
-    required this.vx,
-    required this.vy,
+    required this.startX,
+    required this.startY,
+    required this.deltaX,
+    required this.deltaY,
     required this.size,
+    required this.startOpacity,
+    required this.duration,
     required this.color,
     required this.shape,
+    this.easing = '缓出',
+    this.elapsed = 0.0,
     this.opacity = 1.0,
   });
 }
 
 class PreviewText {
-  double x, y;
+  // Computed each frame
+  double x, y, opacity;
+  // Fixed interpolation params
+  final double startY;
+  final double totalOffsetY; // positive = float-up distance
+  final double duration;
+  final String easing;
   final String content;
-  double opacity;
   final Color color;
   final double fontSize;
-  double vy = 0; // vertical drift per frame
+  final double startOpacity;
+  double elapsed;
 
   PreviewText({
     required this.x,
     required this.y,
+    required this.startY,
+    required this.totalOffsetY,
+    required this.duration,
     required this.content,
     required this.color,
     required this.fontSize,
+    required this.startOpacity,
+    this.easing = '缓出',
+    this.elapsed = 0.0,
     this.opacity = 1.0,
-    this.vy = 0,
   });
 }
 
 class PreviewRipple {
-  double progress; // 0.0 → 1.0
+  // Computed each frame
+  double progress; // 0→1, linear
+  // Fixed params
   final double x, y;
   final double maxSize;
   final double opacityPeak;
   final double lineWidth;
+  final double delay; // stagger offset
+  final double duration;
+  final String easing;
   final Color color;
   final bool filled;
+  double elapsed;
 
   PreviewRipple({
     required this.x,
@@ -83,14 +154,18 @@ class PreviewRipple {
     required this.maxSize,
     required this.opacityPeak,
     required this.lineWidth,
+    required this.delay,
+    required this.duration,
     required this.color,
+    this.easing = '缓出',
     this.filled = false,
+    this.elapsed = 0.0,
     this.progress = 0.0,
   });
 }
 
 // ═══════════════════════════════════════════════════════════════
-// EffectsEngine — manages all preview effects
+// EffectsEngine
 // ═══════════════════════════════════════════════════════════════
 
 class EffectsEngine {
@@ -112,37 +187,40 @@ class EffectsEngine {
   }
 
   void _spawnParticles(double x, double y, ActionConfig config) {
-    final count = min(config.particleCount, 40);
-    final baseSpeed = config.particleSpread * 3.0;
+    final count = min(config.particleCount, 60);
     final shape = shapeFromString(config.particleStyle);
-    final palette = config.particlePalette;
-    final colorMode = config.particleColorMode;
-    final gravity = config.particleGravity * 0.3;
-    final wind = config.particleWind * 0.3;
+    // Swift uses palette.first for all particles
+    final baseColor = config.particlePalette.isNotEmpty
+        ? config.particlePalette.first
+        : '#F59E0B';
+    final spread = config.particleSpread.toDouble();
+    final gravity = config.particleGravity.toDouble();
+    final wind = config.particleWind.toDouble();
     final size = config.particleSize.toDouble();
-    final opacity = config.particleOpacity / 100.0;
+    final startOpacity = config.particleOpacity / 100.0;
+    final duration = config.particleDuration / 1000.0;
 
     for (int i = 0; i < count; i++) {
       final angle = _angleForDirection(i, count, config.particleDirection);
-      final speed = baseSpeed * (0.3 + _random.nextDouble() * 0.7);
+      // Match Swift: random dist * spread, then endpoint = angle vector + wind/gravity adjust
+      final dist = (0.4 + _random.nextDouble() * 0.6) * spread;
+      final deltaX = cos(angle) * dist + wind * dist * 0.02;
+      final deltaY = sin(angle) * dist + gravity * dist * 0.03;
       final pSize = size * (0.5 + _random.nextDouble() * 0.5);
-
-      Color pColor;
-      if (colorMode == '随机轻变化') {
-        pColor = _randomizedColor(palette.isNotEmpty ? palette.first : '#F59E0B');
-      } else {
-        pColor = _parseHex(palette.isNotEmpty ? palette[i % palette.length] : '#F59E0B');
-      }
 
       _particles.add(PreviewParticle(
         x: x,
         y: y,
-        vx: cos(angle) * speed + wind * _random.nextDouble(),
-        vy: sin(angle) * speed + gravity,
+        startX: x,
+        startY: y,
+        deltaX: deltaX,
+        deltaY: deltaY,
         size: pSize.clamp(2.0, 32.0),
-        color: pColor,
+        startOpacity: startOpacity,
+        duration: duration,
+        color: _parseHex(baseColor),
         shape: shape,
-        opacity: opacity,
+        opacity: startOpacity,
       ));
     }
   }
@@ -151,20 +229,23 @@ class EffectsEngine {
     final content = config.textContent.isNotEmpty ? config.textContent : '✦';
     final fontSize = config.fontSize.toDouble();
     final color = _parseHex(config.textColor);
-    final offsetY = config.textOffsetY.toDouble().abs(); // drift distance
+    final offsetY = config.textOffsetY.toDouble().abs();
+    final startOpacity = config.textOpacity / 100.0;
+    final duration = config.textDuration / 1000.0;
 
     _texts.add(PreviewText(
       x: x,
       y: y,
+      startY: y,
+      totalOffsetY: offsetY,
       content: content,
       color: color,
       fontSize: fontSize,
-      opacity: config.textOpacity / 100.0,
+      duration: duration,
+      startOpacity: startOpacity,
+      easing: config.textEasing,
+      opacity: startOpacity,
     ));
-
-    final duration = config.textDuration / 1000.0;
-    // Store drift in vy as speed per frame
-    _texts.last.vy = offsetY / (duration * 60);
   }
 
   void _spawnRipples(double x, double y, ActionConfig config) {
@@ -173,6 +254,7 @@ class EffectsEngine {
     final opacity = config.rippleOpacity / 100.0;
     final color = _parseHex(config.rippleColor);
     final lineWidth = config.rippleLineWidth.toDouble();
+    final duration = config.rippleDuration / 1000.0;
 
     final layers = _rippleLayers(style, size, opacity, lineWidth, color);
     for (final layer in layers) {
@@ -184,53 +266,44 @@ class EffectsEngine {
         lineWidth: layer.lineWidth,
         color: color,
         filled: layer.filled,
+        easing: config.rippleEasing,
+        delay: layer.delay,
+        duration: duration,
       ));
     }
   }
 
   void update(double dt) {
-    // Update particles
+    // Particles — endpoint interpolation with easeOut
     for (final p in _particles) {
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      // Gravity accumulates
-      p.vy += p.vy.sign * 0.5; // slow deceleration
+      p.elapsed += dt;
+      final t = (p.elapsed / p.duration).clamp(0.0, 1.0);
+      final eased = ease(p.easing, t);
+      p.x = p.startX + p.deltaX * eased;
+      p.y = p.startY + p.deltaY * eased;
+      p.opacity = p.startOpacity * (1.0 - t); // linear fade
     }
-    // Fade particles
-    final particleDuration = 0.8; // seconds to fully fade
-    _updateFade(_particles, dt / particleDuration);
+    _particles.removeWhere((p) => p.elapsed >= p.duration);
 
-    // Update text: float up
+    // Texts — eased float-up + linear fade
     for (final t in _texts) {
-      t.y -= t.vy;
+      t.elapsed += dt;
+      final progress = (t.elapsed / t.duration).clamp(0.0, 1.0);
+      final eased = ease(t.easing, progress);
+      t.y = t.startY - t.totalOffsetY * eased;
+      t.opacity = t.startOpacity * (1.0 - progress);
     }
-    final textDuration = 1.0;
-    _updateFade(_texts, dt / textDuration);
+    _texts.removeWhere((t) => t.elapsed >= t.duration);
 
-    // Update ripples
+    // Ripples — eased scale + linear fade, with stagger delay
     for (final r in _ripples) {
-      r.progress += dt * 1.2;
+      r.elapsed += dt;
+      final activeTime = r.elapsed - r.delay;
+      if (activeTime <= 0) continue;
+      r.progress = (activeTime / r.duration).clamp(0.0, 1.0);
     }
-    final rippleDuration = 1.0;
-    _updateFade(_ripples, dt / rippleDuration);
+    _ripples.removeWhere((r) => r.elapsed >= r.duration + r.delay);
   }
-
-  void _updateFade(List<dynamic> items, double fadeStep) {
-    for (int i = items.length - 1; i >= 0; i--) {
-      final item = items[i];
-      if (item is PreviewParticle) {
-        item.opacity -= fadeStep;
-        if (item.opacity <= 0) items.removeAt(i);
-      } else if (item is PreviewText) {
-        item.opacity -= fadeStep * 0.8;
-        if (item.opacity <= 0) items.removeAt(i);
-      } else if (item is PreviewRipple) {
-        // Remove when progress exceeds 1
-        if (item.progress >= 1.0) items.removeAt(i);
-      }
-    }
-  }
-
 
   void clear() {
     _particles.clear();
@@ -245,9 +318,12 @@ class EffectsEngine {
   double _angleForDirection(int index, int count, String direction) {
     switch (direction) {
       case '向上喷发':
-        return pi + _random.nextDouble() * pi - pi / 2;
+        // Match Swift: random(in: -.pi * 0.9 ... .pi * 0.9)
+        return _random.nextDouble() * pi * 1.8 - pi * 0.9;
       case '旋转扫射':
-        return (2 * pi / count) * index + _random.nextDouble() * 0.3;
+        // Match Swift: step * i + random(-0.15...0.15)
+        final step = (2 * pi) / count;
+        return step * index + (_random.nextDouble() - 0.5) * 0.3;
       case '随机散射':
         return _random.nextDouble() * 2 * pi;
       default: // 四周扩散
@@ -261,49 +337,51 @@ class EffectsEngine {
     return Color(v);
   }
 
-  Color _randomizedColor(String hex) {
-    final base = _parseHex(hex);
-    final offset = (_random.nextDouble() - 0.5) * 0.3;
-    return Color.from(
-      alpha: 1.0,
-      red: (base.r + offset).clamp(0.0, 1.0),
-      green: (base.g + offset).clamp(0.0, 1.0),
-      blue: (base.b + offset).clamp(0.0, 1.0),
-    );
-  }
+  List<({double size, double opacity, double lineWidth, bool filled, double delay})>
+      _rippleLayers(String style, double size, double opacity, double lineWidth, Color color) {
+    const stagger = 0.08; // Match Swift stagger
 
-  List<({double size, double opacity, double lineWidth, bool filled})> _rippleLayers(
-    String style, double size, double opacity, double lineWidth, Color color,
-  ) {
+    List<(double sz, double op, double lw, bool fl)> raw;
     switch (style) {
       case '双环':
-        return [
-          (size: size, opacity: opacity, lineWidth: lineWidth, filled: false),
-          (size: size * 1.12, opacity: opacity * 0.82, lineWidth: lineWidth * 0.8, filled: false),
+        raw = [
+          (size, opacity, lineWidth, false),
+          (size * 1.12, opacity * 0.82, lineWidth * 0.8, false),
         ];
       case '柔和面波':
-        return [(size: size, opacity: opacity, lineWidth: lineWidth, filled: true)];
+        raw = [(size, opacity, lineWidth, true)];
       case '脉冲波纹':
-        return [
-          (size: size, opacity: opacity, lineWidth: lineWidth, filled: true),
-          (size: size * 1.24, opacity: opacity * 0.52, lineWidth: lineWidth, filled: false),
-          (size: size * 1.4, opacity: opacity * 0.26, lineWidth: lineWidth * 0.6, filled: false),
+        raw = [
+          (size, opacity, lineWidth, true),
+          (size * 1.24, opacity * 0.52, lineWidth, false),
+          (size * 1.4, opacity * 0.26, lineWidth * 0.6, false),
         ];
       case '回声环':
-        return [
-          (size: size, opacity: opacity, lineWidth: lineWidth, filled: false),
-          (size: size * 1.1, opacity: opacity * 0.68, lineWidth: lineWidth * 0.9, filled: false),
-          (size: size * 1.22, opacity: opacity * 0.44, lineWidth: lineWidth * 0.8, filled: false),
-          (size: size * 1.36, opacity: opacity * 0.22, lineWidth: lineWidth * 0.6, filled: false),
+        raw = [
+          (size, opacity, lineWidth, false),
+          (size * 1.1, opacity * 0.68, lineWidth * 0.9, false),
+          (size * 1.22, opacity * 0.44, lineWidth * 0.8, false),
+          (size * 1.36, opacity * 0.22, lineWidth * 0.6, false),
         ];
       case '能量脉冲':
-        return [
-          (size: size, opacity: opacity * 1.1, lineWidth: lineWidth, filled: true),
-          (size: size * 1.16, opacity: opacity * 0.58, lineWidth: lineWidth, filled: false),
+        raw = [
+          (size, opacity * 1.1, lineWidth, true),
+          (size * 1.16, opacity * 0.58, lineWidth, false),
         ];
       default: // 单环
-        return [(size: size, opacity: opacity, lineWidth: lineWidth, filled: false)];
+        raw = [(size, opacity, lineWidth, false)];
     }
+
+    return [
+      for (int i = 0; i < raw.length; i++)
+        (
+          size: raw[i].$1,
+          opacity: raw[i].$2,
+          lineWidth: raw[i].$3,
+          filled: raw[i].$4,
+          delay: i * stagger,
+        ),
+    ];
   }
 }
 
@@ -331,7 +409,8 @@ class EffectsPainter extends CustomPainter {
 
       switch (p.shape) {
         case ParticleShape.square:
-          canvas.drawRect(Rect.fromCenter(center: Offset(p.x, p.y), width: p.size, height: p.size), paint);
+          canvas.drawRect(
+              Rect.fromCenter(center: Offset(p.x, p.y), width: p.size, height: p.size), paint);
         case ParticleShape.diamond:
           final path = Path()
             ..moveTo(p.x, p.y - p.size / 2)
@@ -377,7 +456,10 @@ class EffectsPainter extends CustomPainter {
   void _drawRipples(Canvas canvas) {
     for (final r in engine.ripples) {
       final progress = r.progress.clamp(0.0, 1.0);
-      final currentSize = r.maxSize * lerpDouble(0.18, 1.0, progress)!;
+      // Scale uses easing (matching Swift's scaleAnim timingFunction)
+      final easedScale = ease(r.easing, progress);
+      final currentSize = r.maxSize * lerpDouble(0.18, 1.0, easedScale)!;
+      // Opacity fades linearly (matching Swift's opacity animation — no timing function)
       final alpha = (1.0 - progress) * r.opacityPeak;
       final paint = Paint()
         ..color = r.color.withValues(alpha: alpha.clamp(0.0, 1.0))
