@@ -164,9 +164,9 @@ class OverlayManager {
         guard let screen = NSScreen.main else { return }
         let frame = screen.frame
 
-        let window = NSPanel(
+        let window = NSWindow(
             contentRect: frame,
-            styleMask: [.borderless, .nonactivatingPanel],
+            styleMask: .borderless,
             backing: .buffered,
             defer: false
         )
@@ -209,9 +209,6 @@ class OverlayManager {
     }
 
     private func handleClick() {
-        // Re-assert window front on each click to stay above full-screen apps
-        overlayWindow?.orderFront(nil)
-
         let point = NSEvent.mouseLocation
         guard let contentView = overlayWindow?.contentView,
               let layer = contentView.layer,
