@@ -164,7 +164,7 @@ class OverlayManager {
         guard let screen = NSScreen.main else { return }
         let frame = screen.frame
 
-        let window = NSWindow(
+        let window = NSPanel(
             contentRect: frame,
             styleMask: .borderless,
             backing: .buffered,
@@ -209,6 +209,8 @@ class OverlayManager {
     }
 
     private func handleClick() {
+        overlayWindow?.orderFront(nil)
+
         let point = NSEvent.mouseLocation
         guard let contentView = overlayWindow?.contentView,
               let layer = contentView.layer,
