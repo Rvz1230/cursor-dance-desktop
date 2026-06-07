@@ -51,24 +51,25 @@ class OverlayRippleFX {
         color: NSColor,
         duration: Double
     ) -> [(CAShapeLayer, TimeInterval)] {
+        let stagger: TimeInterval = 0.08
         switch style {
         case "双环":
             return [
                 makeRing(size: size, lineWidth: lineWidth, color: color, opacity: opacity),
                 makeRing(size: size * 1.12, lineWidth: lineWidth * 0.8, color: color, opacity: opacity * 0.82),
-            ]
+            ].enumerated().map { ($0.element, Double($0.offset) * stagger) }
 
         case "柔和面波":
             return [
                 makeFilled(size: size, color: color, opacity: opacity),
-            ]
+            ].enumerated().map { ($0.element, Double($0.offset) * stagger) }
 
         case "脉冲波纹":
             return [
                 makeFilled(size: size, color: color, opacity: opacity),
                 makeRing(size: size * 1.24, lineWidth: lineWidth, color: color, opacity: opacity * 0.52),
                 makeRing(size: size * 1.4, lineWidth: lineWidth * 0.6, color: color, opacity: opacity * 0.26),
-            ]
+            ].enumerated().map { ($0.element, Double($0.offset) * stagger) }
 
         case "回声环":
             return [
@@ -76,18 +77,18 @@ class OverlayRippleFX {
                 makeRing(size: size * 1.1, lineWidth: lineWidth * 0.9, color: color, opacity: opacity * 0.68),
                 makeRing(size: size * 1.22, lineWidth: lineWidth * 0.8, color: color, opacity: opacity * 0.44),
                 makeRing(size: size * 1.36, lineWidth: lineWidth * 0.6, color: color, opacity: opacity * 0.22),
-            ]
+            ].enumerated().map { ($0.element, Double($0.offset) * stagger) }
 
         case "能量脉冲":
             return [
                 makeFilled(size: size, color: color, opacity: opacity * 1.1),
                 makeRing(size: size * 1.16, lineWidth: lineWidth, color: color, opacity: opacity * 0.58),
-            ]
+            ].enumerated().map { ($0.element, Double($0.offset) * stagger) }
 
         default: // 单环
             return [
                 makeRing(size: size, lineWidth: lineWidth, color: color, opacity: opacity),
-            ]
+            ].enumerated().map { ($0.element, Double($0.offset) * stagger) }
         }
     }
 
