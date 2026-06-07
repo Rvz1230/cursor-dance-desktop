@@ -12,6 +12,11 @@ class MainFlutterWindow: NSWindow {
 
         RegisterGeneratedPlugins(registry: flutterViewController)
 
+        // Register preview platform view for Flutter AppKitView embedding
+        let previewFactory = PreviewPlatformViewFactory(messenger: flutterViewController.engine.binaryMessenger)
+        flutterViewController.registrar(forPlugin: "PreviewEffectPlugin").register(
+            previewFactory, withId: "cursor_dance_preview")
+
         overlayManager.setup(messenger: flutterViewController.engine.binaryMessenger)
 
         if let appDelegate = NSApp.delegate as? AppDelegate {
