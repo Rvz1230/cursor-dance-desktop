@@ -103,6 +103,7 @@ class OverlayManager {
     private var overlayWindow: NSWindow?
     private var eventMonitor: Any?
     private var channel: FlutterMethodChannel?
+    private var spaceObserver: Any?
 
     private let particleFX = OverlayParticleFX()
     private let textFX = OverlayTextFX()
@@ -111,6 +112,12 @@ class OverlayManager {
     private var currentConfig: ActionConfig?
 
     var isRunning: Bool { overlayWindow != nil }
+
+    deinit {
+        if let observer = spaceObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+        }
+    }
 
     func setup(messenger: FlutterBinaryMessenger) {
         channel = FlutterMethodChannel(
@@ -133,6 +140,16 @@ class OverlayManager {
                 result(FlutterMethodNotImplemented)
             }
         }
+
+        // Re-assert overlay on top whenever the active Space changes
+        // (covers full-screen transitions of other apps).
+        spaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.activeSpaceDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.overlayWindow?.orderFront(nil)
+        }
     }
 
     private func applyArgs(_ args: Any?) {
@@ -147,17 +164,18 @@ class OverlayManager {
         guard let screen = NSScreen.main else { return }
         let frame = screen.frame
 
-        let window = NSWindow(
+        let window = NSPanel(
             contentRect: frame,
-            styleMask: .borderless,
+            styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
         )
-        window.level = .screenSaver // above full-screen apps
+        window.level = .screenSaver
         window.isOpaque = false
         window.backgroundColor = .clear
         window.ignoresMouseEvents = true
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        window.hidesOnDeactivate = false
 
         let view = NSView(frame: frame)
         view.wantsLayer = true
@@ -191,6 +209,9 @@ class OverlayManager {
     }
 
     private func handleClick() {
+        // Re-assert window front on each click to stay above full-screen apps
+        overlayWindow?.orderFront(nil)
+
         let point = NSEvent.mouseLocation
         guard let contentView = overlayWindow?.contentView,
               let layer = contentView.layer,
