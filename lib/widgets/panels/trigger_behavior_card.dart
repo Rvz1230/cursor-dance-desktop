@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
 import '../../models/action_config_presets.dart';
-import '../../theme/app_tokens.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
 import '../controls/small_select.dart';
 import '../panels/panel_card.dart';
 import '../panels/panel_meta.dart';
 
-/// 触发行为面板（始终展开，无开关）
+/// 触发行为面板 — 定义动作的触发条件、作用范围和延迟阈值
 class TriggerBehaviorCard extends StatelessWidget {
   final String actionId;
   final ActionConfig config;
@@ -45,11 +45,13 @@ class TriggerBehaviorCard extends StatelessWidget {
       title: '触发行为',
       meta: PanelMetaRegistry.trigger,
       summary: _buildSummary(),
-      collapsible: false,
+      collapsible: true,
+      defaultOpen: true,
       child: Column(
         children: [
           FieldRow(
             label: '触发时机',
+            hint: '触发节点。',
             child: SmallSelect(
               label: '触发时机',
               value: config.triggerTiming,
@@ -57,36 +59,35 @@ class TriggerBehaviorCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(triggerTiming: v)),
             ),
           ),
-          _divider(),
+          const SizedBox(height: 8),
           FieldRow(
-            label: '触发区域',
+            label: '作用范围',
+            hint: '监听目标。',
             child: SmallSelect(
-              label: '触发区域',
+              label: '作用范围',
               value: config.triggerZone,
               options: options['zones']!,
               onChanged: (v) => onUpdate((c) => c.copyWith(triggerZone: v)),
             ),
           ),
-          _divider(),
-          FieldRow(
-            label: timingMeta.label,
-            hint: timingMeta.hint,
-            child: ControlSlider(
+          if (timingMeta.min != timingMeta.max) ...[
+            const SizedBox(height: 8),
+            FieldRow(
               label: timingMeta.label,
-              value: config.holdMs.toDouble(),
-              min: timingMeta.min.toDouble(),
-              max: timingMeta.max.toDouble(),
-              divisions: ((timingMeta.max - timingMeta.min) / 10).round(),
-              suffix: 'ms',
-              onChanged: (v) => onUpdate((c) => c.copyWith(holdMs: v.round())),
+              hint: timingMeta.hint,
+              child: ControlSlider(
+                label: timingMeta.label,
+                value: config.holdMs.toDouble(),
+                min: timingMeta.min.toDouble(),
+                max: timingMeta.max.toDouble(),
+                divisions: ((timingMeta.max - timingMeta.min) / 10).round(),
+                suffix: 'ms',
+                onChanged: (v) => onUpdate((c) => c.copyWith(holdMs: v.round())),
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
-  }
-
-  Widget _divider() {
-    return Container(height: 1, color: AppColors.muted);
   }
 }

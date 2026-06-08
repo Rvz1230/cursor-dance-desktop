@@ -276,6 +276,8 @@ class AnimationDriver {
     private var texts: [TextRecord] = []
     private var ripples: [RippleRecord] = []
     private var cursors: [CursorRecord] = []
+    private var animations: [AnimationRecord] = []
+    private var images: [ImageRecord] = []
 
     var isRunning: Bool { sourceTimer != nil }
 
@@ -309,16 +311,22 @@ class AnimationDriver {
         for t in texts { t.layer.removeFromSuperlayer() }
         for r in ripples { r.layer.removeFromSuperlayer() }
         for c in cursors { c.layer.removeFromSuperlayer() }
+        for a in animations { a.layer.removeFromSuperlayer() }
+        for i in images { i.layer.removeFromSuperlayer() }
         particles.removeAll()
         texts.removeAll()
         ripples.removeAll()
         cursors.removeAll()
+        animations.removeAll()
+        images.removeAll()
     }
 
     func addParticle(_ record: ParticleRecord) { particles.append(record) }
     func addText(_ record: TextRecord) { texts.append(record) }
     func addRipple(_ record: RippleRecord) { ripples.append(record) }
     func addCursor(_ record: CursorRecord) { cursors.append(record) }
+    func addAnimation(_ record: AnimationRecord) { animations.append(record) }
+    func addImage(_ record: ImageRecord) { images.append(record) }
 
     /// Update all records and clean up finished ones.
     func advance(by dt: CFTimeInterval) {
@@ -326,6 +334,8 @@ class AnimationDriver {
         for t in texts { t.advance(by: dt) }
         for r in ripples { r.advance(by: dt) }
         for c in cursors { c.advance(by: dt) }
+        for a in animations { a.advance(by: dt) }
+        for i in images { i.advance(by: dt) }
 
         for p in particles where p.finished { p.layer.removeFromSuperlayer() }
         particles.removeAll { $0.finished }
@@ -338,5 +348,11 @@ class AnimationDriver {
 
         for c in cursors where c.finished { c.layer.removeFromSuperlayer() }
         cursors.removeAll { $0.finished }
+
+        for a in animations where a.finished { a.layer.removeFromSuperlayer() }
+        animations.removeAll { $0.finished }
+
+        for i in images where i.finished { i.layer.removeFromSuperlayer() }
+        images.removeAll { $0.finished }
     }
 }

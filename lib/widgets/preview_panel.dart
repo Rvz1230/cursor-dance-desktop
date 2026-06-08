@@ -8,6 +8,7 @@ import '../../models/action_config.dart';
 import '../../models/action_config_presets.dart';
 import '../../theme/app_tokens.dart';
 import 'controls/scale_tap.dart';
+import 'interactive_timeline.dart';
 
 class PreviewPanel extends StatefulWidget {
   final String actionId;
@@ -140,6 +141,13 @@ class _PreviewPanelState extends State<PreviewPanel> {
         children: [
           _buildHeader(actionLabel, hasEffects),
           Expanded(child: _buildStage(hasEffects, actionLabel, cfg)),
+          if (hasEffects)
+            SizedBox(
+              height: 135,
+              child: SingleChildScrollView(
+                child: InteractiveTimeline(config: cfg),
+              ),
+            ),
         ],
       ),
     );

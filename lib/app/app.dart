@@ -13,7 +13,7 @@ class CursorDanceApp extends StatelessWidget {
       title: 'CursorDance',
       theme: appTheme,
       darkTheme: darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: false,
       home: const ConfigPage(),
     );

@@ -11,6 +11,8 @@ class PreviewRenderer: NSView {
     private let textFX = OverlayTextFX()
     private let rippleFX = OverlayRippleFX()
     private let cursorFX = OverlayCursorFX()
+    private let animationFX = OverlayAnimationFX()
+    private let imageFX = OverlayImageFX()
     private let driver = AnimationDriver()
 
     override init(frame frameRect: NSRect) {
@@ -46,6 +48,12 @@ class PreviewRenderer: NSView {
         }
         if config.ripple == true {
             rippleFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
+        }
+        if config.animationEnabled == true {
+            animationFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
+        }
+        if config.imageEnabled == true {
+            imageFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
         }
         cursorFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
     }

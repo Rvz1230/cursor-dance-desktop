@@ -158,6 +158,8 @@ class OverlayManager {
     private let textFX = OverlayTextFX()
     private let rippleFX = OverlayRippleFX()
     private let cursorFX = OverlayCursorFX()
+    private let animationFX = OverlayAnimationFX()
+    private let imageFX = OverlayImageFX()
 
     private var currentConfig: ActionConfig?
     /// Per-action combo counters for text feedback
@@ -291,6 +293,12 @@ class OverlayManager {
         }
         if c.ripple == true {
             rippleFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
+        }
+        if c.animationEnabled == true {
+            animationFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
+        }
+        if c.imageEnabled == true {
+            imageFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
         }
         cursorFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
     }
