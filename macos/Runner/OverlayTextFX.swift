@@ -1,10 +1,9 @@
 import Cocoa
 
 /// Mirrors EffectsEngine._spawnText in lib/effects/effects_engine.dart.
+/// Creates CATextLayer and registers TextRecord with AnimationDriver.
 class OverlayTextFX {
-    func clear() {}
-
-    func spawn(at point: NSPoint, config: ActionConfig.ConfigData, parent: CALayer) {
+    func spawn(at point: NSPoint, config: ActionConfig.ConfigData, parent: CALayer, driver: AnimationDriver) {
         let content: String
         if let textContent = config.textContent, !textContent.isEmpty {
             content = textContent
@@ -49,7 +48,6 @@ class OverlayTextFX {
         // Outline (stroke)
         let outlineWidth = CGFloat(config.textOutlineWidth ?? 0)
         if outlineWidth > 0 {
-            // Emulate stroke via a shadow-like approach: rasterize to preserve crispness
             textLayer.shouldRasterize = true
             textLayer.rasterizationScale = NSScreen.main?.backingScaleFactor ?? 2.0
         }
@@ -74,41 +72,18 @@ class OverlayTextFX {
 
         parent.addSublayer(textLayer)
 
-        // Animate Y (float-up) and X (if offsetX != 0)
-        var animations: [CAAnimation] = []
+        // Capture start position (center of frame) for manual animation
+        let startPos = textLayer.position
 
-        let moveY = CABasicAnimation(keyPath: "position.y")
-        // In bottom-left coords, positive byValue = moves UP on screen.
-        // Config offsetY is negative = "float upward" in top-left mental model.
-        moveY.byValue = floatDistance
-        moveY.duration = duration
-        moveY.timingFunction = timingFunction(from: config.textEasing)
-        animations.append(moveY)
-
-        if offsetX != 0 {
-            let moveX = CABasicAnimation(keyPath: "position.x")
-            moveX.byValue = offsetX
-            moveX.duration = duration
-            moveX.timingFunction = timingFunction(from: config.textEasing)
-            animations.append(moveX)
-        }
-
-        let fadeOut = CABasicAnimation(keyPath: "opacity")
-        fadeOut.fromValue = Float(opacity)
-        fadeOut.toValue = 0.0
-        fadeOut.duration = duration
-        animations.append(fadeOut)
-
-        let group = CAAnimationGroup()
-        group.animations = animations
-        group.duration = duration
-        group.isRemovedOnCompletion = false
-        group.fillMode = .forwards
-
-        textLayer.add(group, forKey: "text-float")
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.05) {
-            textLayer.removeFromSuperlayer()
-        }
+        let record = TextRecord(
+            layer: textLayer,
+            startX: startPos.x, startY: startPos.y,
+            offsetX: offsetX,
+            floatDistance: floatDistance,
+            startOpacity: Float(opacity),
+            duration: duration,
+            easing: config.textEasing ?? "缓出"
+        )
+        driver.addText(record)
     }
 }

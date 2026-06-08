@@ -5,22 +5,29 @@ import FlutterMacOS
 
 /// NSView that hosts preview effects. Transparent background,
 /// receives trigger commands via MethodChannel set up by the factory.
-/// Reuses the same OverlayParticleFX / RippleFX / TextFX as the full-screen overlay.
+/// Uses AnimationDriver for manual frame-driven animation on every NSView layout.
 class PreviewRenderer: NSView {
     private let particleFX = OverlayParticleFX()
     private let textFX = OverlayTextFX()
     private let rippleFX = OverlayRippleFX()
+    private let driver = AnimationDriver()
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         self.wantsLayer = true
         self.layer?.backgroundColor = NSColor.clear.cgColor
+        driver.start()
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.wantsLayer = true
         self.layer?.backgroundColor = NSColor.clear.cgColor
+        driver.start()
+    }
+
+    deinit {
+        driver.stop()
     }
 
     /// Trigger effects at the given point (in view coordinates).
@@ -29,15 +36,14 @@ class PreviewRenderer: NSView {
         guard let layer = self.layer else { return }
         let adjusted = NSPoint(x: point.x, y: bounds.height - point.y)
 
-        // Same call pattern as OverlayManager.handleClick
         if config.textEnabled == true {
-            textFX.spawn(at: adjusted, config: config, parent: layer)
+            textFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
         }
         if config.particle == true {
-            particleFX.spawn(at: adjusted, config: config, parent: layer)
+            particleFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
         }
         if config.ripple == true {
-            rippleFX.spawn(at: adjusted, config: config, parent: layer)
+            rippleFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
         }
     }
 }

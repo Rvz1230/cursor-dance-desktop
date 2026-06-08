@@ -1,9 +1,10 @@
 import Cocoa
 
+/// Mirrors EffectsEngine._spawnParticles / _angleForDirection in
+/// lib/effects/effects_engine.dart. Creates CAShapeLayers and registers
+/// ParticleRecord with AnimationDriver instead of CAAnimation.
 class OverlayParticleFX {
-    func clear() {}
-
-    func spawn(at point: NSPoint, config: ActionConfig.ConfigData, parent: CALayer) {
+    func spawn(at point: NSPoint, config: ActionConfig.ConfigData, parent: CALayer, driver: AnimationDriver) {
         let count = min(config.particleCount ?? 16, 60)
         let size = CGFloat(config.particleSize ?? 12)
         let durationValue = config.particleDuration ?? 780
@@ -11,22 +12,48 @@ class OverlayParticleFX {
         let opacity = CGFloat(config.particleOpacity ?? 88) / 100.0
         let palette = config.particlePalette ?? ["#F59E0B"]
         let baseColor = hexColor(palette.first)
+        let style = config.particleStyle ?? "点状粒子"
+
+        // ── Orbital motion ──
+        if config.particleMotionMode == "orbital" {
+            let radius = CGFloat(config.orbitalRadius ?? 32)
+            let orbits = CGFloat(config.orbitalSpeed ?? 3)
+
+            for i in 0..<count {
+                let shapeLayer = CAShapeLayer()
+                let particleSize = size * CGFloat.random(in: 0.5...1.0)
+                shapeLayer.path = pathForStyle(style, size: particleSize)
+                shapeLayer.fillColor = baseColor.withAlphaComponent(opacity).cgColor
+                shapeLayer.position = point
+                shapeLayer.opacity = Float(opacity)
+                parent.addSublayer(shapeLayer)
+
+                let startAngle = (2 * .pi / CGFloat(count)) * CGFloat(i)
+                let record = ParticleRecord(
+                    layer: shapeLayer,
+                    startX: point.x, startY: point.y,
+                    deltaX: 0, deltaY: 0,
+                    startOpacity: Float(opacity),
+                    duration: duration,
+                    easing: "缓出",
+                    isOrbital: true,
+                    orbitalRadius: radius,
+                    orbitalSpeed: orbits,
+                    startAngle: startAngle
+                )
+                driver.addParticle(record)
+            }
+            return
+        }
+
+        // ── Burst / directional ──
         let spread = CGFloat(config.particleSpread ?? 60)
         let direction = config.particleDirection ?? "四周扩散"
         let gravity = CGFloat(config.particleGravity ?? 0)
         let wind = CGFloat(config.particleWind ?? 0)
+        let hasTrail = config.particleTrail == true
 
         for i in 0..<count {
-            let shapeLayer = CAShapeLayer()
-            let particleSize = size * CGFloat.random(in: 0.5...1.0)
-            shapeLayer.path = pathForStyle(config.particleStyle ?? "点状粒子", size: particleSize)
-            shapeLayer.fillColor = baseColor.withAlphaComponent(opacity).cgColor
-            shapeLayer.position = point
-            shapeLayer.opacity = Float(opacity)
-
-            parent.addSublayer(shapeLayer)
-
-            // Angle and distance
             let angle: CGFloat
             switch direction {
             case "向上喷发":
@@ -39,40 +66,63 @@ class OverlayParticleFX {
             }
 
             let dist = CGFloat.random(in: 0.4...1.0) * spread
-            let endX = cos(angle) * dist
-            let endY = sin(angle) * dist
+            let endX = cos(angle) * dist + wind * dist * 0.02
+            let endY = sin(angle) * dist + gravity * dist * 0.03
+            let particleSize = size * CGFloat.random(in: 0.5...1.0)
 
-            // Apply gravity & wind as adjustments to endpoint
-            let finalX = endX + wind * dist * 0.02
-            let finalY = endY + gravity * dist * 0.03
+            // Main particle
+            let shapeLayer = makeParticleLayer(style: style, size: particleSize,
+                                                color: baseColor, opacity: opacity,
+                                                point: point)
+            parent.addSublayer(shapeLayer)
 
-            let moveX = CABasicAnimation(keyPath: "position.x")
-            moveX.byValue = finalX
-            moveX.duration = duration
-            moveX.timingFunction = timingFunction(from: "缓出")
+            let record = ParticleRecord(
+                layer: shapeLayer,
+                startX: point.x, startY: point.y,
+                deltaX: endX, deltaY: endY,
+                startOpacity: Float(opacity),
+                duration: duration,
+                easing: "缓出"
+            )
+            driver.addParticle(record)
 
-            let moveY = CABasicAnimation(keyPath: "position.y")
-            moveY.byValue = finalY
-            moveY.duration = duration
-            moveY.timingFunction = timingFunction(from: "缓出")
+            // Trail ghosts
+            if hasTrail {
+                let ghostCount = 3
+                for g in 0..<ghostCount {
+                    let ghostOpacity = opacity * CGFloat(1.0 - Double(g) * 0.25)
+                    let ghostSize = particleSize * CGFloat(1.0 - Double(g) * 0.12)
+                    let ghostLayer = makeParticleLayer(style: style, size: ghostSize,
+                                                        color: baseColor, opacity: ghostOpacity,
+                                                        point: point)
+                    parent.addSublayer(ghostLayer)
 
-            let fadeOut = CABasicAnimation(keyPath: "opacity")
-            fadeOut.fromValue = Float(opacity)
-            fadeOut.toValue = 0.0
-            fadeOut.duration = duration
-
-            let group = CAAnimationGroup()
-            group.animations = [moveX, moveY, fadeOut]
-            group.duration = duration
-            group.isRemovedOnCompletion = false
-            group.fillMode = .forwards
-
-            shapeLayer.add(group, forKey: "particle-\(i)")
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + duration + 0.05) {
-                shapeLayer.removeFromSuperlayer()
+                    let trailDelay = Double(g) * duration * 0.08
+                    let ghostRecord = ParticleRecord(
+                        layer: ghostLayer,
+                        startX: point.x, startY: point.y,
+                        deltaX: endX, deltaY: endY,
+                        startOpacity: Float(ghostOpacity),
+                        duration: duration,
+                        easing: "缓出",
+                        startDelay: trailDelay
+                    )
+                    driver.addParticle(ghostRecord)
+                }
             }
         }
+    }
+
+    // MARK: - Helpers
+
+    private func makeParticleLayer(style: String, size: CGFloat, color: NSColor,
+                                    opacity: CGFloat, point: NSPoint) -> CAShapeLayer {
+        let layer = CAShapeLayer()
+        layer.path = pathForStyle(style, size: size)
+        layer.fillColor = color.withAlphaComponent(opacity).cgColor
+        layer.position = point
+        layer.opacity = Float(opacity)
+        return layer
     }
 
     private func pathForStyle(_ style: String, size: CGFloat) -> CGPath {
@@ -94,7 +144,7 @@ class OverlayParticleFX {
             spark.addLine(to: CGPoint(x: -size / 3, y: size / 3))
             spark.closeSubpath()
             return spark
-        default: // 点状粒子, 星光, 心形 etc → circle
+        default:
             return CGPath(ellipseIn: CGRect(x: -size / 2, y: -size / 2, width: size, height: size), transform: nil)
         }
     }

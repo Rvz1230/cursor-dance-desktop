@@ -73,7 +73,7 @@ struct ActionConfig: Decodable {
     }
 }
 
-// MARK: - Easing mapping
+// MARK: - Easing mapping (kept for compatibility; AnimationDriver uses its own ease())
 
 func timingFunction(from easing: String?) -> CAMediaTimingFunction {
     switch easing {
@@ -104,6 +104,7 @@ class OverlayManager {
     private var eventMonitor: Any?
     private var channel: FlutterMethodChannel?
     private var spaceObserver: Any?
+    private let driver = AnimationDriver()
 
     private let particleFX = OverlayParticleFX()
     private let textFX = OverlayTextFX()
@@ -184,6 +185,8 @@ class OverlayManager {
 
         overlayWindow = window
 
+        driver.start()
+
         eventMonitor = NSEvent.addGlobalMonitorForEvents(
             matching: .leftMouseDown
         ) { [weak self] _ in
@@ -198,10 +201,10 @@ class OverlayManager {
             NSEvent.removeMonitor(monitor)
             eventMonitor = nil
         }
-        textFX.clear()
-        rippleFX.clear()
-        particleFX.clear()
-        overlayWindow?.contentView?.layer?.sublayers?.forEach { $0.removeFromSuperlayer() }
+
+        driver.clear()
+        driver.stop()
+
         overlayWindow?.orderOut(nil)
         overlayWindow = nil
 
@@ -218,13 +221,13 @@ class OverlayManager {
         let localPoint = contentView.convert(point, from: nil)
 
         if c.textEnabled == true {
-            textFX.spawn(at: localPoint, config: c, parent: layer)
+            textFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
         }
         if c.particle == true {
-            particleFX.spawn(at: localPoint, config: c, parent: layer)
+            particleFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
         }
         if c.ripple == true {
-            rippleFX.spawn(at: localPoint, config: c, parent: layer)
+            rippleFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
         }
     }
 }
