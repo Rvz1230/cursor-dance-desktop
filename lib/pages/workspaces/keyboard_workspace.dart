@@ -1,0 +1,246 @@
+import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+
+import '../../models/key_feedback_config.dart';
+import '../../state/workbench_state.dart';
+import '../../theme/app_tokens.dart';
+import '../../widgets/panels/key_feedback_card.dart';
+
+class KeyboardWorkspace extends StatelessWidget {
+  final WorkbenchState state;
+
+  const KeyboardWorkspace({super.key, required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final config = state.keyFeedbackConfig;
+    final cs = ShadTheme.of(context).colorScheme;
+
+    return Column(
+      children: [
+        _buildHeader(cs),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildStatusBanner(cs, config),
+                const SizedBox(height: 16),
+                _buildStylePickerCard(cs, config, state),
+                const SizedBox(height: 16),
+                KeyFeedbackCard(
+                  config: config,
+                  onUpdate: (fn) {
+                    state.updateKeyFeedbackConfig(fn(config));
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeader(ShadColorScheme cs) {
+    return Container(
+      height: 52,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: cs.card,
+        border: const Border(
+          bottom: BorderSide(color: AppColors.border),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE0E7FF),
+              borderRadius: BorderRadius.circular(RadiusTokens.md),
+            ),
+            child: const Icon(
+              LucideIcons.keyboard,
+              size: 16,
+              color: Color(0xFF4F46E5),
+            ),
+          ),
+          const SizedBox(width: 10),
+          const Text(
+            '键盘动效配置',
+            style: TextStyle(
+              fontSize: FontSizes.base,
+              fontWeight: FontWeight.w600,
+              color: AppColors.foreground,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusBanner(ShadColorScheme cs, KeyFeedbackConfig config) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: config.enabled ? const Color(0xFFECFDF5) : cs.muted,
+        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+        border: Border.all(
+          color: config.enabled ? const Color(0xFF6EE7B7) : cs.border,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color:
+                  config.enabled ? AppColors.success : AppColors.mutedForeground,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            config.enabled ? '键盘动效已启用 — 按下任意键查看效果' : '键盘动效已停用',
+            style: TextStyle(
+              fontSize: FontSizes.small,
+              fontWeight: FontWeight.w500,
+              color: config.enabled ? const Color(0xFF065F46) : cs.mutedForeground,
+            ),
+          ),
+          const Spacer(),
+          ShadSwitch(
+            value: config.enabled,
+            onChanged: (v) =>
+                state.updateKeyFeedbackConfig(config.copyWith(enabled: v)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStylePickerCard(
+      ShadColorScheme cs, KeyFeedbackConfig config, WorkbenchState state) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cs.card,
+        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+        border: Border.all(color: cs.border.withAlpha(204)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '动画风格',
+            style: TextStyle(
+              fontSize: FontSizes.base,
+              fontWeight: FontWeight.w600,
+              color: AppColors.foreground,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '选择按键后字符在屏幕上的动画表现方式',
+            style: TextStyle(
+              fontSize: FontSizes.small,
+              color: cs.mutedForeground,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              _styleCard(
+                cs: cs,
+                icon: LucideIcons.snail,
+                label: '弹跳',
+                description: 'Q弹弹簧物理曲线',
+                selected: config.animationStyle == 'bounce',
+                onTap: () {
+                  if (config.animationStyle != 'bounce') {
+                    state.updateKeyFeedbackConfig(
+                        config.copyWith(animationStyle: 'bounce'));
+                  }
+                },
+              ),
+              const SizedBox(width: 12),
+              _styleCard(
+                cs: cs,
+                icon: LucideIcons.cloudRain,
+                label: '雨滴',
+                description: '从顶部落下带重力感',
+                selected: config.animationStyle == 'raindrop',
+                onTap: () {
+                  if (config.animationStyle != 'raindrop') {
+                    state.updateKeyFeedbackConfig(
+                        config.copyWith(animationStyle: 'raindrop'));
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _styleCard({
+    required ShadColorScheme cs,
+    required IconData icon,
+    required String label,
+    required String description,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color:
+                selected ? AppColors.primary.withValues(alpha: 0.06) : cs.muted,
+            borderRadius: BorderRadius.circular(RadiusTokens.xl),
+            border: Border.all(
+              color: selected ? AppColors.primary : cs.border,
+              width: selected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                size: 28,
+                color: selected ? AppColors.primary : cs.mutedForeground,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: FontSizes.base,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                  color: selected ? AppColors.primary : cs.foreground,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: FontSizes.caption,
+                  color: cs.mutedForeground,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

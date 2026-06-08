@@ -268,6 +268,100 @@ class CursorRecord {
 // even when the process is backgrounded (behind full-screen app).
 // ═══════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════
+// AnimationDriver — DispatchSourceTimer-backed manual animation engine
+// Uses GCD timer (not RunLoop Timer) so animation fires reliably
+// even when the process is backgrounded (behind full-screen app).
+// ═══════════════════════════════════════════════════════════════
+
+class KeyRecord {
+    let layer: CALayer
+    let startX: CGFloat
+    let startY: CGFloat
+    let endY: CGFloat
+    let startOpacity: Float
+    let duration: CFTimeInterval
+    let startDelay: CFTimeInterval
+    let easing: String
+    let animationStyle: String
+    let gravity: Double
+    let fontSize: CGFloat
+    var elapsed: CFTimeInterval = 0
+    var finished = false
+
+    init(layer: CALayer,
+         startX: CGFloat, startY: CGFloat, endY: CGFloat,
+         startOpacity: Float,
+         duration: CFTimeInterval,
+         easing: String,
+         animationStyle: String,
+         gravity: Double = 0.3,
+         fontSize: CGFloat = 48,
+         startDelay: CFTimeInterval = 0)
+    {
+        self.layer = layer
+        self.startX = startX; self.startY = startY; self.endY = endY
+        self.startOpacity = startOpacity
+        self.duration = duration
+        self.easing = easing
+        self.animationStyle = animationStyle
+        self.gravity = gravity
+        self.fontSize = fontSize
+        self.startDelay = startDelay
+        layer.actions = ["position": NSNull(), "opacity": NSNull(), "transform": NSNull()]
+    }
+
+    func advance(by dt: CFTimeInterval) {
+        elapsed += dt
+        let effective = elapsed - startDelay
+        guard effective > 0 else { return }
+        let t = min(effective / duration, 1.0)
+        let e = CGFloat(ease(easing, t))
+
+        switch animationStyle {
+        case "raindrop":
+            let gravityE = e + (1 - e) * CGFloat(gravity) * (1 - t)
+            layer.position = CGPoint(
+                x: startX,
+                y: startY - (startY - endY) * gravityE
+            )
+            if t < 0.2 {
+                layer.opacity = startOpacity * Float(t / 0.2)
+            } else if t > 0.7 {
+                layer.opacity = startOpacity * Float((1.0 - t) / 0.3)
+            } else {
+                layer.opacity = startOpacity
+            }
+            let wobble = sin(t * .pi * 3) * 3.0 * (1 - t)
+            var pos = layer.position
+            pos.x += wobble
+            layer.position = pos
+
+        default: // bounce
+            layer.position = CGPoint(
+                x: startX,
+                y: endY + (startY - endY) * (1 - e)
+            )
+            let scale: CGFloat
+            if e < 0.7 {
+                scale = 0.3 + (1.15 - 0.3) * (e / 0.7)
+            } else {
+                scale = 1.15 - (1.15 - 1.0) * ((e - 0.7) / 0.3)
+            }
+            layer.transform = CATransform3DMakeScale(scale, scale, 1)
+            if t < 0.1 {
+                layer.opacity = startOpacity * Float(t / 0.1)
+            } else if t > 0.8 {
+                layer.opacity = startOpacity * Float((1.0 - t) / 0.2)
+            } else {
+                layer.opacity = startOpacity
+            }
+        }
+
+        if t >= 1.0 { finished = true }
+    }
+}
+
 class AnimationDriver {
     private var sourceTimer: DispatchSourceTimer?
     private var lastTimestamp: CFTimeInterval = 0
@@ -278,6 +372,7 @@ class AnimationDriver {
     private var cursors: [CursorRecord] = []
     private var animations: [AnimationRecord] = []
     private var images: [ImageRecord] = []
+    private var keys: [KeyRecord] = []
 
     var isRunning: Bool { sourceTimer != nil }
 
@@ -313,12 +408,14 @@ class AnimationDriver {
         for c in cursors { c.layer.removeFromSuperlayer() }
         for a in animations { a.layer.removeFromSuperlayer() }
         for i in images { i.layer.removeFromSuperlayer() }
+        for k in keys { k.layer.removeFromSuperlayer() }
         particles.removeAll()
         texts.removeAll()
         ripples.removeAll()
         cursors.removeAll()
         animations.removeAll()
         images.removeAll()
+        keys.removeAll()
     }
 
     func addParticle(_ record: ParticleRecord) { particles.append(record) }
@@ -327,6 +424,7 @@ class AnimationDriver {
     func addCursor(_ record: CursorRecord) { cursors.append(record) }
     func addAnimation(_ record: AnimationRecord) { animations.append(record) }
     func addImage(_ record: ImageRecord) { images.append(record) }
+    func addKey(_ record: KeyRecord) { keys.append(record) }
 
     /// Update all records and clean up finished ones.
     func advance(by dt: CFTimeInterval) {
@@ -336,6 +434,7 @@ class AnimationDriver {
         for c in cursors { c.advance(by: dt) }
         for a in animations { a.advance(by: dt) }
         for i in images { i.advance(by: dt) }
+        for k in keys { k.advance(by: dt) }
 
         for p in particles where p.finished { p.layer.removeFromSuperlayer() }
         particles.removeAll { $0.finished }
@@ -354,5 +453,8 @@ class AnimationDriver {
 
         for i in images where i.finished { i.layer.removeFromSuperlayer() }
         images.removeAll { $0.finished }
+
+        for k in keys where k.finished { k.layer.removeFromSuperlayer() }
+        keys.removeAll { $0.finished }
     }
 }

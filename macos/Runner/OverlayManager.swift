@@ -115,6 +115,38 @@ struct ActionConfig: Decodable {
     }
 }
 
+// MARK: - KeyFeedbackConfigData (decoded from Flutter JSON)
+
+struct KeyFeedbackConfigData: Decodable {
+    let enabled: Bool?
+    let animationStyle: String?
+    let originEdge: String?
+    let originMapping: String?
+    let globalOffsetX: Double?
+    let globalOffsetY: Double?
+    let fontSize: Int?
+    let fontWeight: String?
+    let fontFamily: String?
+    let color: String?
+    let opacity: Int?
+    let uppercase: Bool?
+    let duration: Int?
+    let easing: String?
+    let scale: Double?
+    let bounceHeight: Int?
+    let gravity: Double?
+    let wind: Double?
+    let glow: Bool?
+    let glowColor: String?
+    let glowRadius: Double?
+    let trail: Bool?
+    let trailLength: Int?
+    let splash: Bool?
+    let cooldownMs: Int?
+    let maxSimultaneous: Int?
+    let delay: Int?
+}
+
 // MARK: - Easing mapping — AnimationDriver uses its own ease()
 
 func hexColor(_ hex: String?) -> NSColor {
@@ -150,6 +182,7 @@ func hexColor(_ hex: String?) -> NSColor {
 class OverlayManager {
     private var overlayWindow: NSWindow?
     private var eventMonitor: Any?
+    private var keyEventMonitor: Any?
     private var channel: FlutterMethodChannel?
     private var spaceObserver: Any?
     private let driver = AnimationDriver()
@@ -160,11 +193,15 @@ class OverlayManager {
     private let cursorFX = OverlayCursorFX()
     private let animationFX = OverlayAnimationFX()
     private let imageFX = OverlayImageFX()
+    private let keyFeedbackFX = OverlayKeyFeedbackFX()
 
     private var currentConfig: ActionConfig?
+    private var keyFeedbackConfig: KeyFeedbackConfigData?
     /// Per-action combo counters for text feedback
     private var comboCounters: [String: Int] = [:]
     private let comboLock = NSLock()
+    /// Cooldown tracker for keyboard feedback
+    private var lastKeyPressTime: CFTimeInterval = 0
 
     var isRunning: Bool { overlayWindow != nil }
 
@@ -191,6 +228,9 @@ class OverlayManager {
             case "updateConfig":
                 self?.applyArgs(call.arguments)
                 result(nil)
+            case "updateKeyFeedbackConfig":
+                self?.applyKeyFeedbackArgs(call.arguments)
+                result(nil)
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -212,6 +252,13 @@ class OverlayManager {
               let jsonString = dict["config"] as? String,
               let data = jsonString.data(using: .utf8) else { return }
         currentConfig = try? JSONDecoder().decode(ActionConfig.self, from: data)
+    }
+
+    private func applyKeyFeedbackArgs(_ args: Any?) {
+        guard let dict = args as? [String: Any],
+              let jsonString = dict["config"] as? String,
+              let data = jsonString.data(using: .utf8) else { return }
+        keyFeedbackConfig = try? JSONDecoder().decode(KeyFeedbackConfigData.self, from: data)
     }
 
     func start() {
@@ -247,6 +294,12 @@ class OverlayManager {
             self?.handleClick()
         }
 
+        keyEventMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: .keyDown
+        ) { [weak self] event in
+            self?.handleKeyPress(event)
+        }
+
         channel?.invokeMethod("overlayStateChanged", arguments: ["enabled": true])
     }
 
@@ -258,6 +311,11 @@ class OverlayManager {
         if let monitor = eventMonitor {
             NSEvent.removeMonitor(monitor)
             eventMonitor = nil
+        }
+
+        if let monitor = keyEventMonitor {
+            NSEvent.removeMonitor(monitor)
+            keyEventMonitor = nil
         }
 
         driver.clear()
@@ -301,6 +359,54 @@ class OverlayManager {
             imageFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
         }
         cursorFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
+    }
+
+    private func handleKeyPress(_ event: NSEvent) {
+        guard let config = keyFeedbackConfig, config.enabled == true else { return }
+        guard let contentView = overlayWindow?.contentView,
+              let layer = contentView.layer else { return }
+
+        let keyCode = Int(event.keyCode)
+
+        // Skip modifier-only keys — no visible character to display
+        if isModifierKey(keyCode) { return }
+
+        // Use the actual character from the event (respects Shift modifiers).
+        // If characters is empty we're in IME composition mode → skip.
+        let rawChars = event.characters ?? ""
+        let character: String
+        if rawChars.isEmpty {
+            // Fallback for keys that produce no NSEvent characters (e.g. F1-F12, arrows)
+            let fallback = keyDisplayCharacter(keyCode)
+            if fallback == "?" { return }  // unmapped key, skip
+            character = fallback
+        } else {
+            // Take only the first grapheme to avoid multi-char sequences from IME
+            character = String(rawChars.first!)
+        }
+
+        // Cooldown
+        let now = CACurrentMediaTime()
+        let cooldownSec = Double(config.cooldownMs ?? 50) / 1000.0
+        if now - lastKeyPressTime < cooldownSec { return }
+        lastKeyPressTime = now
+
+        print("[KeyFeedback] keyCode=\(keyCode) char=\(character) style=\(config.animationStyle ?? "bounce")")
+        keyFeedbackFX.spawn(keyCode: keyCode, character: character, config: config, parent: layer, driver: driver)
+    }
+
+    private func isModifierKey(_ keyCode: Int) -> Bool {
+        switch keyCode {
+        case 0x38, 0x3C,       // Left/Right Shift
+             0x3B, 0x3E,       // Left/Right Control
+             0x3A, 0x3D,       // Left/Right Option
+             0x37, 0x36,       // Left/Right Command
+             0x3F,             // Function (fn)
+             0x39:             // Caps Lock
+            return true
+        default:
+            return false
+        }
     }
 }
 

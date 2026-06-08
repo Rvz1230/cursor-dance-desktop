@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/action_config.dart';
 import '../models/action_config_presets.dart';
+import '../models/key_feedback_config.dart';
 import '../models/theme.dart';
 import '../models/theme_draft.dart';
 
@@ -36,11 +37,15 @@ class WorkbenchState extends ChangeNotifier {
   String _saveError = '';
   final Map<String, bool> _dirtyThemes = {};
 
+  // ── Keyboard Feedback ──
+  KeyFeedbackConfig _keyFeedbackConfig = const KeyFeedbackConfig();
+
   bool get enabled => _enabled;
   bool get unsaved => _unsaved;
   bool get isSaving => _isSaving;
   String get saveError => _saveError;
   Map<String, bool> get dirtyThemes => Map.unmodifiable(_dirtyThemes);
+  KeyFeedbackConfig get keyFeedbackConfig => _keyFeedbackConfig;
 
   // ── Derived ──
   ThemeItem get activeTheme =>
@@ -302,6 +307,7 @@ class WorkbenchState extends ChangeNotifier {
     return {
       'enabled': _enabled,
       'activeThemeId': _selectedThemeId,
+      'keyFeedbackConfig': _keyFeedbackConfig.toJson(),
       'themeLibrary': _themeLibrary.map((t) => {
         'id': t.id,
         'name': t.name,
@@ -332,6 +338,11 @@ class WorkbenchState extends ChangeNotifier {
   Future<void> _deserialize(Map<String, dynamic> data) async {
     _enabled = data['enabled'] as bool? ?? true;
     _selectedThemeId = data['activeThemeId'] as String? ?? _themeLibrary.first.id;
+
+    final kfcData = data['keyFeedbackConfig'] as Map<String, dynamic>?;
+    if (kfcData != null) {
+      _keyFeedbackConfig = KeyFeedbackConfig.fromJson(kfcData);
+    }
 
     final libraryData = data['themeLibrary'] as List<dynamic>?;
     if (libraryData != null && libraryData.isNotEmpty) {
@@ -413,6 +424,11 @@ class WorkbenchState extends ChangeNotifier {
 
   void setEnabled(bool value) {
     _enabled = value;
+    notifyListeners();
+  }
+
+  void updateKeyFeedbackConfig(KeyFeedbackConfig config) {
+    _keyFeedbackConfig = config;
     notifyListeners();
   }
 }

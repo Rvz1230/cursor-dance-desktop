@@ -8,7 +8,7 @@ import '../state/workbench_state.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/workbench_header.dart';
 import '../widgets/workbench_sidebar.dart';
-import 'workspaces/diagnostics_workspace.dart';
+import 'workspaces/keyboard_workspace.dart';
 import 'workspaces/states_workspace.dart';
 import 'workspaces/workbench_workspace.dart';
 
@@ -23,6 +23,7 @@ class ConfigPageState extends State<ConfigPage> {
   final WorkbenchState _state = WorkbenchState();
   final OverlayBridge _bridge = OverlayBridge();
   String _lastConfigJson = '';
+  String _lastKeyConfigJson = '';
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class ConfigPageState extends State<ConfigPage> {
     _state.loadSavedConfig().then((_) {
       if (_state.enabled) {
         _bridge.start(_buildConfigPayload());
+        _sendKeyFeedbackConfig();
       }
     });
   }
@@ -53,6 +55,7 @@ class ConfigPageState extends State<ConfigPage> {
         _lastConfigJson = newJson;
         _bridge.updateConfig(_buildConfigPayload());
       }
+      _sendKeyFeedbackConfig();
     }
     setState(() {});
   }
@@ -62,6 +65,14 @@ class ConfigPageState extends State<ConfigPage> {
       'actionId': _state.selectedActionId,
       'config': _state.currentActionConfig.toJson(),
     };
+  }
+
+  void _sendKeyFeedbackConfig() {
+    final newKeyJson = jsonEncode(_state.keyFeedbackConfig.toJson());
+    if (newKeyJson != _lastKeyConfigJson) {
+      _lastKeyConfigJson = newKeyJson;
+      _bridge.updateKeyFeedbackConfig(_state.keyFeedbackConfig.toJson());
+    }
   }
 
   Future<void> _toggleEnabled() async {
@@ -142,8 +153,8 @@ class ConfigPageState extends State<ConfigPage> {
     switch (_state.workspaceId) {
       case 'states':
         return const StatesWorkspace();
-      case 'diagnostics':
-        return const DiagnosticsWorkspace();
+      case 'keyboard':
+        return KeyboardWorkspace(state: _state);
       default:
         return WorkbenchWorkspace(state: _state);
     }

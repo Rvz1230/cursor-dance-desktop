@@ -15,7 +15,7 @@ flutter pub upgrade --major-versions  # Upgrade dependencies
 
 ## Project Architecture
 
-**CursorDance Desktop** — Flutter 桌面特效应用。配置窗口编辑特效参数，macOS 全屏覆盖层渲染鼠标点击反馈（粒子/涟漪/飘字）。
+**CursorDance Desktop** — Flutter 桌面特效应用。配置窗口编辑特效参数，macOS 全屏覆盖层渲染鼠标点击反馈（粒子/涟漪/飘字）+ 键盘键入动效（字符弹跳/雨滴）。
 
 ### Layered Architecture
 
@@ -26,16 +26,16 @@ lib/
 ├── pages/config_page.dart          # 三栏布局 orchestration（侧栏 | 内容 | 底部状态栏）
 │   └── workspaces/
 │       ├── workbench_workspace.dart # 主工作台
-│       ├── states_workspace.dart    # 光标状态管理
-│       └── diagnostics_workspace.dart# 诊断面板
-├── state/workbench_state.dart      # ChangeNotifier — 全局状态（主题/动作/配置/持久化）
+│       └── states_workspace.dart    # 光标状态管理
+├── state/workbench_state.dart      # ChangeNotifier — 全局状态（主题/动作/配置/持久化 + KeyFeedbackConfig）
 ├── models/
 │   ├── theme.dart                  # ThemeItem（内置主题列表）
 │   ├── theme_draft.dart            # ThemeDraft（主题完整配置 + AtmosphereConfig）
 │   ├── action_config.dart          # ActionConfig（~85 字段平铺，8 大类效果配置）
-│   └── action_config_presets.dart  # 各主题的默认动作预设
+│   ├── action_config_presets.dart  # 各主题的默认动作预设
+│   └── key_feedback_config.dart    # KeyFeedbackConfig（键盘键入动效独立配置）
 ├── widgets/
-│   ├── workbench_header.dart       # 顶栏（Logo/动作Tabs/AI/启用/保存）
+│   ├── workbench_header.dart       # 顶栏（Logo/Workspace Tabs/启用/保存）
 │   ├── workbench_sidebar.dart      # 主题库侧栏（搜索/卡片/新建/导入导出）
 │   ├── config_panel.dart           # 中间配置栏
 │   ├── preview_panel.dart          # 预览面板
@@ -57,14 +57,17 @@ lib/
 ├── effects/
 │   └── effects_engine.dart         # EffectsEngine（粒子/涟漪/文字动画 + EffectsPainter）
 └── bridge/
-    └── overlay_bridge.dart         # MethodChannel 桥接（start/stop/updateConfig）
+    └── overlay_bridge.dart         # MethodChannel 桥接（start/stop/updateConfig/updateKeyFeedbackConfig）
 
 macos/
 └── Runner/
-    ├── OverlayManager.swift         # NSWindow 覆盖层 + 事件捕获
+    ├── OverlayManager.swift         # NSWindow 覆盖层 + 鼠标/键盘事件捕获
     ├── OverlayParticleFX.swift      # CAAnimation 粒子特效
     ├── OverlayRippleFX.swift        # CAAnimation 涟漪特效
     ├── OverlayTextFX.swift          # CAAnimation 飘字特效
+    ├── OverlayKeyFeedbackFX.swift   # 键盘键入字符块动画（bounce/raindrop）
+    ├── KeyLayoutMap.swift           # macOS keyCode → 归一化水平位置映射表
+    ├── AnimationDriver.swift        # 手动动画引擎（含 KeyRecord）
     └── MainFlutterWindow.swift      # Flutter 配置窗口入口
 ```
 
@@ -89,9 +92,22 @@ macos/
           OverlayManager (Swift) → 解析 JSON → CAAnimation 更新
 
 点击事件流:
-          CGEventTap → OverlayManager.handleClick()
+          NSEvent.addGlobalMonitorForEvents(.leftMouseDown)
+                      ↓
+          OverlayManager.handleClick()
                       ↓
           particleFX / textFX / rippleFX → CALayer 动画
+
+键盘事件流:
+          NSEvent.addGlobalMonitorForEvents(.keyDown)
+                      ↓
+          OverlayManager.handleKeyPress()
+                      ↓
+          KeyLayoutMap 查表 → 归一化 X 坐标
+                      ↓
+          OverlayKeyFeedbackFX.spawn() → CATextLayer + KeyRecord
+                      ↓
+          AnimationDriver.advance() → bounce/raindrop 逐帧动画
 ```
 
 ### State Shape
@@ -101,4 +117,5 @@ macos/
 - `themeLibrary: List<ThemeItem>` — 主题列表
 - `draftsByTheme: Map<String, ThemeDraft>` — 每个主题的编辑草稿
 - `currentActionConfig` — 当前选中动作的配置（派生）
+- `keyFeedbackConfig: KeyFeedbackConfig` — 键盘键入动效独立配置（独立于 ActionConfig）
 - 持久化：`~/.cursordance/config.json`

@@ -48,4 +48,14 @@ class OverlayBridge {
       debugPrint('OverlayBridge.updateConfig error: $e');
     }
   }
+
+  Future<void> updateKeyFeedbackConfig(Map<String, dynamic> config) async {
+    try {
+      await _channel.invokeMethod('updateKeyFeedbackConfig', {
+        'config': jsonEncode(config),
+      });
+    } catch (e) {
+      debugPrint('OverlayBridge.updateKeyFeedbackConfig error: $e');
+    }
+  }
 }
