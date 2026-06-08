@@ -199,18 +199,18 @@ class RippleRecord {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AnimationDriver — CADisplayLink-backed manual animation engine
+// AnimationDriver — Timer-backed manual animation engine
 // ═══════════════════════════════════════════════════════════════
 
 class AnimationDriver {
-    private var displayLink: CADisplayLink?
+    private var timer: Timer?
     private var lastTimestamp: CFTimeInterval = 0
 
     private var particles: [ParticleRecord] = []
     private var texts: [TextRecord] = []
     private var ripples: [RippleRecord] = []
 
-    var isRunning: Bool { displayLink != nil }
+    var isRunning: Bool { timer != nil }
 
     deinit {
         stop()
@@ -218,14 +218,20 @@ class AnimationDriver {
 
     func start() {
         guard !isRunning else { return }
-        displayLink = CADisplayLink(target: self, selector: #selector(tick))
-        displayLink?.add(to: .main, forMode: .common)
         lastTimestamp = 0
+        timer = Timer.scheduledTimer(
+            timeInterval: 1.0 / 60.0,
+            target: self,
+            selector: #selector(onTimer),
+            userInfo: nil,
+            repeats: true
+        )
+        RunLoop.current.add(timer!, forMode: .common)
     }
 
     func stop() {
-        displayLink?.invalidate()
-        displayLink = nil
+        timer?.invalidate()
+        timer = nil
         lastTimestamp = 0
     }
 
@@ -242,22 +248,20 @@ class AnimationDriver {
     func addText(_ record: TextRecord) { texts.append(record) }
     func addRipple(_ record: RippleRecord) { ripples.append(record) }
 
-    @objc private func tick(_ link: CADisplayLink) {
-        // First frame: skip with dt=0 so first frame renders at t=0
-        let dt = lastTimestamp > 0 ? link.timestamp - lastTimestamp : 0
-        lastTimestamp = link.timestamp
+    @objc private func onTimer() {
+        let now = CACurrentMediaTime()
+        let dt = lastTimestamp > 0 ? now - lastTimestamp : 0
+        lastTimestamp = now
         advance(by: dt)
     }
 
     /// Update all records and clean up finished ones.
-    /// Public so both caller can drive manually or via display link.
+    /// Public so callers can drive manually if desired.
     func advance(by dt: CFTimeInterval) {
-        // Advance all
         for p in particles { p.advance(by: dt) }
         for t in texts { t.advance(by: dt) }
         for r in ripples { r.advance(by: dt) }
 
-        // Clean finished (remove from superlayer, remove from array)
         for p in particles where p.finished { p.layer.removeFromSuperlayer() }
         particles.removeAll { $0.finished }
 
