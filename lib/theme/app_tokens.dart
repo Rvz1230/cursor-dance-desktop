@@ -161,3 +161,15 @@ class AppDarkColors {
   static const Color toneCursorBg = Color(0xFF334155);
   static const Color toneCursorFg = Color(0xFFE2E8F0);
 }
+
+/// 主题色调 → 预览色板
+const kToneColors = <String, Color>{
+  'amber': Color(0xFFF59E0B),
+  'teal': Color(0xFF14B8A6),
+  'slate': Color(0xFF64748B),
+  'rose': Color(0xFFF43F5E),
+  'sky': Color(0xFF0EA5E9),
+};
+
+Color resolveToneColor(String tone) =>
+    kToneColors[tone] ?? kToneColors['teal']!;
