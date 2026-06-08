@@ -212,6 +212,10 @@ class AnimationDriver {
 
     var isRunning: Bool { displayLink != nil }
 
+    deinit {
+        stop()
+    }
+
     func start() {
         guard !isRunning else { return }
         displayLink = CADisplayLink(target: self, selector: #selector(tick))
