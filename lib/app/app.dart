@@ -12,7 +12,8 @@ class CursorDanceApp extends StatelessWidget {
     return ShadApp(
       title: 'CursorDance',
       theme: appTheme,
-      themeMode: ThemeMode.light,
+      darkTheme: darkTheme,
+      themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       home: const ConfigPage(),
     );

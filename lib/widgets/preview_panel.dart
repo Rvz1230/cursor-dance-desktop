@@ -2,12 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
 import '../../models/action_config_presets.dart';
 import '../../theme/app_tokens.dart';
+import 'controls/scale_tap.dart';
 
 class PreviewPanel extends StatefulWidget {
   final String actionId;
@@ -28,6 +28,7 @@ class _PreviewPanelState extends State<PreviewPanel> {
   Timer? _autoTimer;
   bool _autoPlay = true;
   double _triggerInterval = 1200;
+  int _runIndex = 0;
 
   @override
   void initState() {
@@ -38,6 +39,7 @@ class _PreviewPanelState extends State<PreviewPanel> {
   @override
   void didUpdateWidget(PreviewPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.actionId != widget.actionId) _runIndex = 0;
     if (_autoPlay) _restartAutoPlay();
   }
 
@@ -92,6 +94,7 @@ class _PreviewPanelState extends State<PreviewPanel> {
   }
 
   void _sendTrigger(double x, double y) {
+    _runIndex++;
     final cfg = widget.config;
     final json = cfg.toJson();
 
@@ -105,6 +108,7 @@ class _PreviewPanelState extends State<PreviewPanel> {
       'x': x,
       'y': y,
       'config': json,
+      'runIndex': _runIndex,
     });
   }
 
@@ -213,17 +217,19 @@ class _PreviewPanelState extends State<PreviewPanel> {
       triggerMode: TooltipTriggerMode.tap,
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            color: active ? AppColors.primary : AppColors.muted,
-            borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          ),
-          child: Icon(
-            icon,
-            size: IconSizes.sm,
-            color: active ? AppColors.primaryForeground : AppColors.mutedForeground,
+        child: ScaleTap(
+          child: Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: active ? AppColors.primary : AppColors.muted,
+              borderRadius: BorderRadius.circular(RadiusTokens.sm),
+            ),
+            child: Icon(
+              icon,
+              size: IconSizes.sm,
+              color: active ? AppColors.primaryForeground : AppColors.mutedForeground,
+            ),
           ),
         ),
       ),

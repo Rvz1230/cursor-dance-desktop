@@ -69,4 +69,35 @@ class PanelMetaRegistry {
     bg: AppColors.toneCursorBg,
     fg: AppColors.toneCursorFg,
   );
+
+  /// 深色模式的色调映射
+  static final Map<IconData, Color> _darkBg = {
+    LucideIcons.mousePointer2: AppDarkColors.toneTriggerBg,
+    LucideIcons.type: AppDarkColors.toneTextBg,
+    LucideIcons.waves: AppDarkColors.toneParticleBg,
+    LucideIcons.circleDashed: AppDarkColors.toneRippleBg,
+    LucideIcons.volume2: AppDarkColors.toneAudioBg,
+    LucideIcons.sparkles: AppDarkColors.toneAnimationBg,
+    LucideIcons.imagePlus: AppDarkColors.toneImageBg,
+    LucideIcons.settings2: AppDarkColors.toneCursorBg,
+  };
+
+  static final Map<IconData, Color> _darkFg = {
+    LucideIcons.mousePointer2: AppDarkColors.toneTriggerFg,
+    LucideIcons.type: AppDarkColors.toneTextFg,
+    LucideIcons.waves: AppDarkColors.toneParticleFg,
+    LucideIcons.circleDashed: AppDarkColors.toneRippleFg,
+    LucideIcons.volume2: AppDarkColors.toneAudioFg,
+    LucideIcons.sparkles: AppDarkColors.toneAnimationFg,
+    LucideIcons.imagePlus: AppDarkColors.toneImageFg,
+    LucideIcons.settings2: AppDarkColors.toneCursorFg,
+  };
+
+  static PanelMeta darkVariant(PanelMeta light) {
+    return PanelMeta(
+      icon: light.icon,
+      bg: _darkBg[light.icon] ?? light.bg,
+      fg: _darkFg[light.icon] ?? light.fg,
+    );
+  }
 }

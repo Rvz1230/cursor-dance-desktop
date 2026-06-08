@@ -9,6 +9,7 @@ import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
 import '../controls/small_select.dart';
 import '../controls/config_section.dart';
+import '../controls/wip_badge.dart';
 import '../panels/panel_card.dart';
 import '../panels/panel_meta.dart';
 
@@ -26,25 +27,6 @@ class AnimationFeedbackCard extends StatelessWidget {
     return '${config.animationStyle} · ${config.animationDuration}ms';
   }
 
-  Widget _wipBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-      decoration: BoxDecoration(
-        color: AppColors.warning.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
-      ),
-      child: const Text(
-        '开发中',
-        style: TextStyle(
-          fontSize: FontSizes.caption,
-          color: AppColors.warning,
-          height: 1.2,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return PanelCard(
@@ -52,7 +34,7 @@ class AnimationFeedbackCard extends StatelessWidget {
       title: '动效反馈',
       meta: PanelMetaRegistry.animation,
       summary: _buildSummary(),
-      badge: _wipBadge(),
+      badge: const WipBadge(),
       collapsible: true,
       defaultOpen: false,
       enabled: true,
@@ -167,6 +149,6 @@ class AnimationFeedbackCard extends StatelessWidget {
   }
 
   Widget _divider() {
-    return Container(height: 1, color: const Color(0xFFF1F5F9));
+    return Container(height: 1, color: AppColors.muted);
   }
 }

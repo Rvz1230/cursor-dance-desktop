@@ -3,16 +3,60 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'app_tokens.dart';
 
-/// CursorDance Application Theme
-///
-/// Soft-Minimal Linear 浅色主题，使用 slate 单色系 + 语义功能色。
-/// 匹配插件版 DESIGN.md 规范。
+/// 浅色主题 — Soft-Minimal Linear
 final appTheme = ShadThemeData(
   brightness: Brightness.light,
   radius: BorderRadius.all(Radius.circular(RadiusTokens.xl)),
   colorScheme: _appColorScheme,
   textTheme: _appTextTheme,
 );
+
+/// 深色主题 — 反转亮度层级，保持相同色调映射
+final darkTheme = ShadThemeData(
+  brightness: Brightness.dark,
+  radius: BorderRadius.all(Radius.circular(RadiusTokens.xl)),
+  colorScheme: _darkColorScheme,
+  textTheme: _appTextTheme.copyWith(
+    h2: const TextStyle(
+      fontSize: FontSizes.h2,
+      fontWeight: FontWeight.w700,
+      height: 1.3,
+      color: AppDarkColors.foreground,
+    ),
+    h3: const TextStyle(
+      fontSize: FontSizes.h3,
+      fontWeight: FontWeight.w600,
+      height: 1.4,
+      color: AppDarkColors.foreground,
+    ),
+    h4: const TextStyle(
+      fontSize: FontSizes.h4,
+      fontWeight: FontWeight.w600,
+      height: 1.4,
+      color: AppDarkColors.foreground,
+    ),
+    p: const TextStyle(
+      fontSize: FontSizes.body,
+      fontWeight: FontWeight.w400,
+      height: 1.5,
+      color: AppDarkColors.foreground,
+    ),
+    small: const TextStyle(
+      fontSize: FontSizes.small,
+      fontWeight: FontWeight.w400,
+      height: 1.4,
+      color: AppDarkColors.foreground,
+    ),
+    muted: const TextStyle(
+      fontSize: FontSizes.small,
+      fontWeight: FontWeight.w400,
+      color: AppDarkColors.mutedForeground,
+      height: 1.4,
+    ),
+  ),
+);
+
+// ── 浅色配色 ──
 
 final _appColorScheme = ShadColorScheme(
   background: AppColors.background,
@@ -40,6 +84,37 @@ final _appColorScheme = ShadColorScheme(
     'warning': AppColors.warning,
   },
 );
+
+// ── 深色配色 ──
+
+final _darkColorScheme = ShadColorScheme(
+  background: AppDarkColors.background,
+  foreground: AppDarkColors.foreground,
+  card: AppDarkColors.card,
+  cardForeground: AppDarkColors.cardForeground,
+  popover: AppDarkColors.popover,
+  popoverForeground: AppDarkColors.popoverForeground,
+  primary: AppDarkColors.primary,
+  primaryForeground: AppDarkColors.primaryForeground,
+  secondary: AppDarkColors.secondary,
+  secondaryForeground: AppDarkColors.secondaryForeground,
+  muted: AppDarkColors.muted,
+  mutedForeground: AppDarkColors.mutedForeground,
+  accent: AppDarkColors.accent,
+  accentForeground: AppDarkColors.accentForeground,
+  destructive: AppDarkColors.destructive,
+  destructiveForeground: AppDarkColors.destructiveForeground,
+  border: AppDarkColors.border,
+  input: AppDarkColors.input,
+  ring: AppDarkColors.ring,
+  selection: AppDarkColors.selection,
+  custom: const {
+    'success': AppDarkColors.success,
+    'warning': AppDarkColors.warning,
+  },
+);
+
+// ── 共享文本主题 ──
 
 final _appTextTheme = ShadTextTheme(
   h2: const TextStyle(

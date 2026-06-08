@@ -3,6 +3,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
 import '../../models/action_config_presets.dart';
+import '../../theme/app_tokens.dart';
 import '../controls/color_options.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
@@ -137,6 +138,6 @@ class RippleFeedbackCard extends StatelessWidget {
   }
 
   Widget _divider() {
-    return Container(height: 1, color: const Color(0xFFF1F5F9));
+    return Container(height: 1, color: AppColors.muted);
   }
 }

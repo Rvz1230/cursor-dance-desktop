@@ -97,7 +97,7 @@ class AppColors {
   static const Color selection = Color(0xFFDBEAFE);
   static const Color ring = Color(0xFF94A3B8);
 
-  // ── 效果卡片图标色调 (与插件版 PANEL_META 一致) ──
+  // ── 效果卡片图标色调 (浅色) ──
   static const Color toneTriggerBg = Color(0xFFD1FAE5); // emerald-100
   static const Color toneTriggerFg = Color(0xFF047857); // emerald-700
   static const Color toneTextBg = Color(0xFFFEF3C7); // amber-100
@@ -114,4 +114,50 @@ class AppColors {
   static const Color toneImageFg = Color(0xFFA21CAF); // fuchsia-700
   static const Color toneCursorBg = Color(0xFFF1F5F9); // slate-100
   static const Color toneCursorFg = Color(0xFF334155); // slate-700
+}
+
+/// 深色模式颜色常量
+class AppDarkColors {
+  AppDarkColors._();
+
+  static const Color background = Color(0xFF0F172A); // slate-950
+  static const Color foreground = Color(0xFFF1F5F9); // slate-100
+  static const Color card = Color(0xFF1E293B);       // slate-900
+  static const Color cardForeground = Color(0xFFF1F5F9);
+  static const Color popover = Color(0xFF1E293B);
+  static const Color popoverForeground = Color(0xFFF1F5F9);
+  static const Color muted = Color(0xFF334155);       // slate-800
+  static const Color mutedForeground = Color(0xFF94A3B8); // slate-400
+  static const Color border = Color(0xFF334155);       // slate-800
+  static const Color input = Color(0xFF475569);        // slate-700
+  static const Color primary = Color(0xFFF1F5F9);
+  static const Color primaryForeground = Color(0xFF1E293B);
+  static const Color secondary = Color(0xFF334155);
+  static const Color secondaryForeground = Color(0xFFE2E8F0);
+  static const Color accent = Color(0xFF334155);
+  static const Color accentForeground = Color(0xFFE2E8F0);
+  static const Color destructive = Color(0xFFF43F5E);  // rose-500
+  static const Color destructiveForeground = Color(0xFFFFFFFF);
+  static const Color success = Color(0xFF34D399);       // emerald-400
+  static const Color warning = Color(0xFFFBBF24);       // amber-400
+  static const Color selection = Color(0xFF1E40AF);
+  static const Color ring = Color(0xFF64748B);          // slate-500
+
+  // ── 效果卡片图标色调 (深色) ──
+  static const Color toneTriggerBg = Color(0xFF064E3B);
+  static const Color toneTriggerFg = Color(0xFF6EE7B7);
+  static const Color toneTextBg = Color(0xFF78350F);
+  static const Color toneTextFg = Color(0xFFFCD34D);
+  static const Color toneParticleBg = Color(0xFF075985);
+  static const Color toneParticleFg = Color(0xFF7DD3FC);
+  static const Color toneRippleBg = Color(0xFF134E4A);
+  static const Color toneRippleFg = Color(0xFF5EEAD4);
+  static const Color toneAudioBg = Color(0xFF881337);
+  static const Color toneAudioFg = Color(0xFFFDA4AF);
+  static const Color toneAnimationBg = Color(0xFF164E63);
+  static const Color toneAnimationFg = Color(0xFF67E8F9);
+  static const Color toneImageBg = Color(0xFF4A044E);
+  static const Color toneImageFg = Color(0xFFF0ABFC);
+  static const Color toneCursorBg = Color(0xFF334155);
+  static const Color toneCursorFg = Color(0xFFE2E8F0);
 }
