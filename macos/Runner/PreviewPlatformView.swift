@@ -28,6 +28,7 @@ class PreviewRenderer: NSView {
     }
 
     deinit {
+        driver.clear()
         driver.stop()
     }
 

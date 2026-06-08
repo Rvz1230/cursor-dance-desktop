@@ -34,6 +34,7 @@
 			AAA00003 /* OverlayRippleFX.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00003 /* OverlayRippleFX.swift */; };
 			AAA00004 /* PreviewPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00004 /* PreviewPlatformView.swift */; };
 			AAA00005 /* AnimationDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00005 /* AnimationDriver.swift */; };
+			AAA00006 /* OverlayCursorFX.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00006 /* OverlayCursorFX.swift */; };
 		9A125C06F5AC9BED351665AC /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EC16B9F5335337E1F6AAD49 /* Pods_RunnerTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -87,6 +88,7 @@
 			BBB00003 /* OverlayRippleFX.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayRippleFX.swift; sourceTree = "<group>"; };
 			BBB00004 /* PreviewPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewPlatformView.swift; sourceTree = "<group>"; };
 			BBB00005 /* AnimationDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationDriver.swift; sourceTree = "<group>"; };
+			BBB00006 /* OverlayCursorFX.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayCursorFX.swift; sourceTree = "<group>"; };
 		33CEB47222A05771004F2AC0 /* Flutter-Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Flutter-Debug.xcconfig"; sourceTree = "<group>"; };
 		33CEB47422A05771004F2AC0 /* Flutter-Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Flutter-Release.xcconfig"; sourceTree = "<group>"; };
 		33CEB47722A0578A004F2AC0 /* Flutter-Generated.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Flutter-Generated.xcconfig"; path = "ephemeral/Flutter-Generated.xcconfig"; sourceTree = "<group>"; };
@@ -194,6 +196,7 @@
 				BBB00003 /* OverlayRippleFX.swift */,
 				BBB00004 /* PreviewPlatformView.swift */,
 				BBB00005 /* AnimationDriver.swift */,
+				BBB00006 /* OverlayCursorFX.swift */,
 				33CC11122044BFA00003C045 /* MainFlutterWindow.swift */,
 				33E51913231747F40026EE4D /* DebugProfile.entitlements */,
 				33E51914231749380026EE4D /* Release.entitlements */,
@@ -444,6 +447,7 @@
 				AAA00003 /* OverlayRippleFX.swift in Sources */,
 				AAA00004 /* PreviewPlatformView.swift in Sources */,
 				AAA00005 /* AnimationDriver.swift in Sources */,
+				AAA00006 /* OverlayCursorFX.swift in Sources */,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
 			);

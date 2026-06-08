@@ -107,8 +107,8 @@ class WorkbenchState extends ChangeNotifier {
   }
 
   void updateActionConfigs(Map<String, ActionConfig Function(ActionConfig)> updaters) {
-    var draft = _draftsByTheme[_selectedThemeId] ?? ThemeDraft.create(_selectedThemeId);
-    var actionConfigs = Map<String, ActionConfig>.from(draft.actionConfigs);
+    final draft = _draftsByTheme[_selectedThemeId] ?? ThemeDraft.create(_selectedThemeId);
+    final actionConfigs = Map<String, ActionConfig>.from(draft.actionConfigs);
     for (final entry in updaters.entries) {
       actionConfigs[entry.key] = entry.value(actionConfigs[entry.key] ?? ActionConfig());
     }
@@ -233,6 +233,10 @@ class WorkbenchState extends ChangeNotifier {
         (key, value) => MapEntry(key, value.toJson()),
       ),
       'cursorModes': draft.cursorModes,
+      'cursorStateActions': draft.cursorStateActions,
+      'cursorStateAssets': draft.cursorStateAssets.map(
+        (k, v) => MapEntry(k, v.toJson()),
+      ),
       'atmosphere': {'mode': draft.atmosphere.mode},
     };
     return const JsonEncoder.withIndent('  ').convert(exportData);
@@ -262,9 +266,19 @@ class WorkbenchState extends ChangeNotifier {
         icon: icon,
       );
       _themeLibrary = [..._themeLibrary, newItem];
+
+      final rawCursorModes = data['cursorModes'] as Map<String, dynamic>?;
+      final rawCursorActions = data['cursorStateActions'] as Map<String, dynamic>?;
+      final rawCursorAssets = data['cursorStateAssets'] as Map<String, dynamic>?;
+
       _draftsByTheme[id] = ThemeDraft(
         actionConfigs: actionConfigs,
         atmosphere: const AtmosphereConfig(),
+        cursorModes: rawCursorModes?.map((k, v) => MapEntry(k, v as String)) ?? const {},
+        cursorStateActions: rawCursorActions?.map((k, v) => MapEntry(k, v as String)) ?? const {},
+        cursorStateAssets: rawCursorAssets?.map(
+          (k, v) => MapEntry(k, CursorStateAsset.fromJson(v as Map<String, dynamic>)),
+        ) ?? const {},
       );
       _selectedThemeId = id;
       _unsaved = true;
@@ -293,6 +307,8 @@ class WorkbenchState extends ChangeNotifier {
         'name': t.name,
         'kind': t.kind,
         'icon': t.icon,
+        'summary': t.summary,
+        'description': t.description,
       }).toList(),
       'draftsByTheme': _draftsByTheme.map(
         (key, draft) => MapEntry(
@@ -302,6 +318,11 @@ class WorkbenchState extends ChangeNotifier {
               (k, v) => MapEntry(k, v.toJson()),
             ),
             'atmosphere': {'mode': draft.atmosphere.mode},
+            'cursorModes': draft.cursorModes,
+            'cursorStateActions': draft.cursorStateActions,
+            'cursorStateAssets': draft.cursorStateAssets.map(
+              (k, v) => MapEntry(k, v.toJson()),
+            ),
           },
         ),
       ),
@@ -343,6 +364,12 @@ class WorkbenchState extends ChangeNotifier {
           atmosphere: AtmosphereConfig(
             mode: (d['atmosphere'] as Map<String, dynamic>?)?['mode'] as String? ?? 'none',
           ),
+          cursorModes: (d['cursorModes'] as Map<String, dynamic>?)
+              ?.map((k, v) => MapEntry(k, v as String)) ?? const {},
+          cursorStateActions: (d['cursorStateActions'] as Map<String, dynamic>?)
+              ?.map((k, v) => MapEntry(k, v as String)) ?? const {},
+          cursorStateAssets: (d['cursorStateAssets'] as Map<String, dynamic>?)
+              ?.map((k, v) => MapEntry(k, CursorStateAsset.fromJson(v as Map<String, dynamic>))) ?? const {},
         );
       }
     }

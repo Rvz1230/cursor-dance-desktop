@@ -141,9 +141,9 @@ class ConfigPageState extends State<ConfigPage> {
   Widget _buildWorkspaceContent() {
     switch (_state.workspaceId) {
       case 'states':
-        return StatesWorkspace(state: _state);
+        return const StatesWorkspace();
       case 'diagnostics':
-        return DiagnosticsWorkspace(state: _state);
+        return const DiagnosticsWorkspace();
       default:
         return WorkbenchWorkspace(state: _state);
     }

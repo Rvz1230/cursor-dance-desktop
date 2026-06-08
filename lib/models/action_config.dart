@@ -589,9 +589,131 @@ class ActionConfig {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ActionConfig &&
-          runtimeType == other.runtimeType &&
-          toJson().toString() == other.toJson().toString();
+          triggerTiming == other.triggerTiming &&
+          triggerZone == other.triggerZone &&
+          holdMs == other.holdMs &&
+          textEnabled == other.textEnabled &&
+          textKind == other.textKind &&
+          textStyle == other.textStyle &&
+          textMode == other.textMode &&
+          textTemplate == other.textTemplate &&
+          textContent == other.textContent &&
+          _listEquals(textTags, other.textTags) &&
+          textTagPlayMode == other.textTagPlayMode &&
+          textColor == other.textColor &&
+          textDuration == other.textDuration &&
+          textEasing == other.textEasing &&
+          textOpacity == other.textOpacity &&
+          textFontFamily == other.textFontFamily &&
+          textWeight == other.textWeight &&
+          textOutlineWidth == other.textOutlineWidth &&
+          textShadow == other.textShadow &&
+          comboEnabled == other.comboEnabled &&
+          comboWindowMs == other.comboWindowMs &&
+          textOffsetX == other.textOffsetX &&
+          textOffsetY == other.textOffsetY &&
+          fontSize == other.fontSize &&
+          textGradient == other.textGradient &&
+          textGradientStart == other.textGradientStart &&
+          textGradientEnd == other.textGradientEnd &&
+          textDelay == other.textDelay &&
+          particle == other.particle &&
+          particleCount == other.particleCount &&
+          particleSpread == other.particleSpread &&
+          particleStyle == other.particleStyle &&
+          particleDirection == other.particleDirection &&
+          particleColorMode == other.particleColorMode &&
+          particleDuration == other.particleDuration &&
+          particleSize == other.particleSize &&
+          particleOpacity == other.particleOpacity &&
+          _listEquals(particlePalette, other.particlePalette) &&
+          particleGravity == other.particleGravity &&
+          particleWind == other.particleWind &&
+          particleBounce == other.particleBounce &&
+          particleTrail == other.particleTrail &&
+          particleDelay == other.particleDelay &&
+          particleMotionMode == other.particleMotionMode &&
+          orbitalCount == other.orbitalCount &&
+          orbitalRadius == other.orbitalRadius &&
+          orbitalSpeed == other.orbitalSpeed &&
+          ripple == other.ripple &&
+          rippleSize == other.rippleSize &&
+          rippleDuration == other.rippleDuration &&
+          rippleStyle == other.rippleStyle &&
+          rippleEasing == other.rippleEasing &&
+          rippleLineWidth == other.rippleLineWidth &&
+          rippleOpacity == other.rippleOpacity &&
+          rippleColor == other.rippleColor &&
+          rippleDelay == other.rippleDelay &&
+          sound == other.sound &&
+          soundFile == other.soundFile &&
+          volume == other.volume &&
+          playbackRate == other.playbackRate &&
+          soundDelay == other.soundDelay &&
+          soundFadeOut == other.soundFadeOut &&
+          soundTriggerMode == other.soundTriggerMode &&
+          soundBlendMode == other.soundBlendMode &&
+          animationEnabled == other.animationEnabled &&
+          animationStyle == other.animationStyle &&
+          animationDuration == other.animationDuration &&
+          animationEasing == other.animationEasing &&
+          animationScale == other.animationScale &&
+          animationOpacity == other.animationOpacity &&
+          animationOffsetX == other.animationOffsetX &&
+          animationOffsetY == other.animationOffsetY &&
+          animationColor == other.animationColor &&
+          animationGlow == other.animationGlow &&
+          animationDelay == other.animationDelay &&
+          imageEnabled == other.imageEnabled &&
+          imageDataUrl == other.imageDataUrl &&
+          imageDuration == other.imageDuration &&
+          imageSize == other.imageSize &&
+          imageOpacity == other.imageOpacity &&
+          imageOffsetX == other.imageOffsetX &&
+          imageOffsetY == other.imageOffsetY &&
+          imageDelay == other.imageDelay &&
+          shake == other.shake &&
+          cursorOverride == other.cursorOverride &&
+          cursorSize == other.cursorSize &&
+          cursorTrailEnabled == other.cursorTrailEnabled &&
+          cursorTrailCount == other.cursorTrailCount &&
+          cursorTrailOpacity == other.cursorTrailOpacity &&
+          cursorGlowColor == other.cursorGlowColor;
 
   @override
-  int get hashCode => toJson().toString().hashCode;
+  int get hashCode => Object.hashAll([
+    triggerTiming, triggerZone, holdMs,
+    textEnabled, textKind, textStyle, textMode, textTemplate, textContent,
+    Object.hashAll(textTags),
+    textTagPlayMode, textColor, textDuration, textEasing, textOpacity,
+    textFontFamily, textWeight, textOutlineWidth, textShadow,
+    comboEnabled, comboWindowMs, textOffsetX, textOffsetY, fontSize,
+    textGradient, textGradientStart, textGradientEnd, textDelay,
+    particle, particleCount, particleSpread, particleStyle, particleDirection,
+    particleColorMode, particleDuration, particleSize, particleOpacity,
+    Object.hashAll(particlePalette),
+    particleGravity, particleWind, particleBounce, particleTrail, particleDelay,
+    particleMotionMode, orbitalCount, orbitalRadius, orbitalSpeed,
+    ripple, rippleSize, rippleDuration, rippleStyle, rippleEasing,
+    rippleLineWidth, rippleOpacity, rippleColor, rippleDelay,
+    sound, soundFile, volume, playbackRate, soundDelay, soundFadeOut,
+    soundTriggerMode, soundBlendMode,
+    animationEnabled, animationStyle, animationDuration, animationEasing,
+    animationScale, animationOpacity, animationOffsetX, animationOffsetY,
+    animationColor, animationGlow, animationDelay,
+    imageEnabled, imageDataUrl, imageDuration, imageSize, imageOpacity,
+    imageOffsetX, imageOffsetY, imageDelay,
+    shake, cursorOverride, cursorSize, cursorTrailEnabled, cursorTrailCount,
+    cursorTrailOpacity, cursorGlowColor,
+  ]);
+
+  static bool _listEquals<T>(List<T>? a, List<T>? b) {
+    if (a == null) return b == null;
+    if (b == null) return false;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 }

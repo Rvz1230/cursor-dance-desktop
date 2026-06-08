@@ -9,6 +9,14 @@ class AtmosphereConfig {
   AtmosphereConfig copyWith({String? mode}) {
     return AtmosphereConfig(mode: mode ?? this.mode);
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AtmosphereConfig && mode == other.mode;
+
+  @override
+  int get hashCode => mode.hashCode;
 }
 
 class CursorStateAsset {
@@ -37,6 +45,34 @@ class CursorStateAsset {
       size: size ?? this.size,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'imageDataUrl': imageDataUrl,
+    'hotspotX': hotspotX,
+    'hotspotY': hotspotY,
+    'size': size,
+  };
+
+  factory CursorStateAsset.fromJson(Map<String, dynamic> json) {
+    return CursorStateAsset(
+      imageDataUrl: json['imageDataUrl'] as String? ?? '',
+      hotspotX: json['hotspotX'] as int? ?? 16,
+      hotspotY: json['hotspotY'] as int? ?? 32,
+      size: json['size'] as int? ?? 48,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CursorStateAsset &&
+          imageDataUrl == other.imageDataUrl &&
+          hotspotX == other.hotspotX &&
+          hotspotY == other.hotspotY &&
+          size == other.size;
+
+  @override
+  int get hashCode => Object.hash(imageDataUrl, hotspotX, hotspotY, size);
 }
 
 class ThemeDraft {

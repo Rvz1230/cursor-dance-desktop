@@ -35,6 +35,14 @@ class _AppIconButtonState extends State<AppIconButton> {
   bool _hovered = false;
 
   @override
+  void didUpdateWidget(AppIconButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.disabled && _hovered) {
+      _hovered = false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = ShadTheme.of(context);
     final effectiveSize = widget.size ?? 28.0;

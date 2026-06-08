@@ -38,6 +38,21 @@ class ThemeItem {
       icon: icon ?? this.icon,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ThemeItem &&
+          id == other.id &&
+          name == other.name &&
+          kind == other.kind &&
+          summary == other.summary &&
+          description == other.description &&
+          tone == other.tone &&
+          icon == other.icon;
+
+  @override
+  int get hashCode => Object.hash(id, name, kind, summary, description, tone, icon);
 }
 
 const kThemeTones = ['amber', 'teal', 'sky', 'rose', 'slate'];
