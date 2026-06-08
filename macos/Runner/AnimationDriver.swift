@@ -199,18 +199,20 @@ class RippleRecord {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AnimationDriver — Timer-backed manual animation engine
+// AnimationDriver — DispatchSourceTimer-backed manual animation engine
+// Uses GCD timer (not RunLoop Timer) so animation fires reliably
+// even when the process is backgrounded (behind full-screen app).
 // ═══════════════════════════════════════════════════════════════
 
 class AnimationDriver {
-    private var timer: Timer?
+    private var sourceTimer: DispatchSourceTimer?
     private var lastTimestamp: CFTimeInterval = 0
 
     private var particles: [ParticleRecord] = []
     private var texts: [TextRecord] = []
     private var ripples: [RippleRecord] = []
 
-    var isRunning: Bool { timer != nil }
+    var isRunning: Bool { sourceTimer != nil }
 
     deinit {
         stop()
@@ -219,19 +221,21 @@ class AnimationDriver {
     func start() {
         guard !isRunning else { return }
         lastTimestamp = 0
-        timer = Timer.scheduledTimer(
-            timeInterval: 1.0 / 60.0,
-            target: self,
-            selector: #selector(onTimer),
-            userInfo: nil,
-            repeats: true
-        )
-        RunLoop.current.add(timer!, forMode: .common)
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now(), repeating: .milliseconds(16), leeway: .milliseconds(1))
+        timer.setEventHandler { [weak self] in
+            let now = CACurrentMediaTime()
+            let dt = (self?.lastTimestamp ?? 0) > 0 ? now - (self?.lastTimestamp ?? now) : 0
+            self?.lastTimestamp = now
+            self?.advance(by: dt)
+        }
+        timer.resume()
+        sourceTimer = timer
     }
 
     func stop() {
-        timer?.invalidate()
-        timer = nil
+        sourceTimer?.cancel()
+        sourceTimer = nil
         lastTimestamp = 0
     }
 
@@ -248,15 +252,7 @@ class AnimationDriver {
     func addText(_ record: TextRecord) { texts.append(record) }
     func addRipple(_ record: RippleRecord) { ripples.append(record) }
 
-    @objc private func onTimer() {
-        let now = CACurrentMediaTime()
-        let dt = lastTimestamp > 0 ? now - lastTimestamp : 0
-        lastTimestamp = now
-        advance(by: dt)
-    }
-
     /// Update all records and clean up finished ones.
-    /// Public so callers can drive manually if desired.
     func advance(by dt: CFTimeInterval) {
         for p in particles { p.advance(by: dt) }
         for t in texts { t.advance(by: dt) }
