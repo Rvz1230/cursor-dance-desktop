@@ -14,6 +14,7 @@ class OverlayRippleFX {
         let layers = rippleLayers(for: style, size: size, opacity: opacity,
                                   lineWidth: lineWidth, color: color)
 
+        let baseDelay: TimeInterval = TimeInterval(config.rippleDelay ?? 0) / 1000.0
         let stagger: TimeInterval = 0.08
         for (index, layer) in layers.enumerated() {
             layer.position = point
@@ -21,7 +22,7 @@ class OverlayRippleFX {
 
             let record = RippleRecord(
                 layer: layer,
-                startDelay: Double(index) * stagger,
+                startDelay: baseDelay + Double(index) * stagger,
                 duration: duration,
                 easing: config.rippleEasing ?? "缓出",
                 startOpacity: Float(opacity)

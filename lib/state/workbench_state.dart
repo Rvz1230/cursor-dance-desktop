@@ -34,11 +34,13 @@ class WorkbenchState extends ChangeNotifier {
   bool _unsaved = false;
   bool _isSaving = false;
   String _saveError = '';
+  final Map<String, bool> _dirtyThemes = {};
 
   bool get enabled => _enabled;
   bool get unsaved => _unsaved;
   bool get isSaving => _isSaving;
   String get saveError => _saveError;
+  Map<String, bool> get dirtyThemes => Map.unmodifiable(_dirtyThemes);
 
   // ── Derived ──
   ThemeItem get activeTheme =>
@@ -100,6 +102,7 @@ class WorkbenchState extends ChangeNotifier {
     actionConfigs[_selectedActionId] = updater(actionConfigs[_selectedActionId] ?? ActionConfig());
     _draftsByTheme[_selectedThemeId] = draft.copyWith(actionConfigs: actionConfigs);
     _unsaved = true;
+    _dirtyThemes[_selectedThemeId] = true;
     notifyListeners();
   }
 
@@ -111,6 +114,7 @@ class WorkbenchState extends ChangeNotifier {
     }
     _draftsByTheme[_selectedThemeId] = draft.copyWith(actionConfigs: actionConfigs);
     _unsaved = true;
+    _dirtyThemes[_selectedThemeId] = true;
     notifyListeners();
   }
 
@@ -123,17 +127,20 @@ class WorkbenchState extends ChangeNotifier {
     );
     _draftsByTheme[_selectedThemeId] = updated;
     _unsaved = true;
+    _dirtyThemes[_selectedThemeId] = true;
     notifyListeners();
   }
 
   void resetCurrentTheme() {
     _draftsByTheme[_selectedThemeId] = ThemeDraft.create(_selectedThemeId);
     _unsaved = true;
+    _dirtyThemes[_selectedThemeId] = true;
     notifyListeners();
   }
 
   void discardThemeChanges(String themeId) {
     _draftsByTheme[themeId] = ThemeDraft.create(themeId);
+    _dirtyThemes.remove(themeId);
     notifyListeners();
   }
 
@@ -155,6 +162,7 @@ class WorkbenchState extends ChangeNotifier {
     _draftsByTheme[id] = baseDraft.copyWith();
     _selectedThemeId = id;
     _unsaved = true;
+    _dirtyThemes[id] = true;
     notifyListeners();
   }
 
@@ -174,6 +182,7 @@ class WorkbenchState extends ChangeNotifier {
     _draftsByTheme[id] = baseDraft.copyWith();
     _selectedThemeId = id;
     _unsaved = true;
+    _dirtyThemes[id] = true;
     notifyListeners();
   }
 
@@ -181,6 +190,7 @@ class WorkbenchState extends ChangeNotifier {
     if (_themeLibrary.length <= 1) return;
     _themeLibrary = _themeLibrary.where((t) => t.id != themeId).toList();
     _draftsByTheme.remove(themeId);
+    _dirtyThemes.remove(themeId);
     if (_selectedThemeId == themeId) {
       _selectedThemeId = _themeLibrary.first.id;
     }
@@ -194,6 +204,7 @@ class WorkbenchState extends ChangeNotifier {
       return t.copyWith(name: name);
     }).toList();
     _unsaved = true;
+    _dirtyThemes[themeId] = true;
     notifyListeners();
   }
 
@@ -203,6 +214,7 @@ class WorkbenchState extends ChangeNotifier {
       return t.copyWith(icon: icon);
     }).toList();
     _unsaved = true;
+    _dirtyThemes[themeId] = true;
     notifyListeners();
   }
 
@@ -256,6 +268,7 @@ class WorkbenchState extends ChangeNotifier {
       );
       _selectedThemeId = id;
       _unsaved = true;
+      _dirtyThemes[id] = true;
       notifyListeners();
     } catch (e) {
       debugPrint('导入主题失败: $e');
@@ -347,6 +360,7 @@ class WorkbenchState extends ChangeNotifier {
         const JsonEncoder.withIndent('  ').convert(_serialize()),
       );
       _unsaved = false;
+      _dirtyThemes.clear();
     } catch (e) {
       _saveError = e.toString();
       debugPrint('保存配置失败: $e');

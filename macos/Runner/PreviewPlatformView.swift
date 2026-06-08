@@ -10,6 +10,7 @@ class PreviewRenderer: NSView {
     private let particleFX = OverlayParticleFX()
     private let textFX = OverlayTextFX()
     private let rippleFX = OverlayRippleFX()
+    private let cursorFX = OverlayCursorFX()
     private let driver = AnimationDriver()
 
     override init(frame frameRect: NSRect) {
@@ -32,12 +33,12 @@ class PreviewRenderer: NSView {
 
     /// Trigger effects at the given point (in view coordinates).
     /// point.y comes from Flutter (top-left origin), convert to NSView (bottom-left).
-    func trigger(at point: NSPoint, config: ActionConfig.ConfigData) {
+    func trigger(at point: NSPoint, config: ActionConfig.ConfigData, runIndex: Int = 1) {
         guard let layer = self.layer else { return }
         let adjusted = NSPoint(x: point.x, y: bounds.height - point.y)
 
         if config.textEnabled == true {
-            textFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
+            textFX.spawn(at: adjusted, config: config, parent: layer, driver: driver, runIndex: runIndex)
         }
         if config.particle == true {
             particleFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
@@ -45,6 +46,7 @@ class PreviewRenderer: NSView {
         if config.ripple == true {
             rippleFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
         }
+        cursorFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
     }
 }
 
@@ -79,7 +81,8 @@ class PreviewPlatformViewFactory: NSObject, FlutterPlatformViewFactory {
                     result(FlutterError(code: "INVALID_ARGS", message: nil, details: nil))
                     return
                 }
-                renderer.trigger(at: NSPoint(x: x, y: y), config: configData)
+                let runIndex = dict["runIndex"] as? Int ?? 1
+                renderer.trigger(at: NSPoint(x: x, y: y), config: configData, runIndex: runIndex)
                 result(nil)
 
             default:

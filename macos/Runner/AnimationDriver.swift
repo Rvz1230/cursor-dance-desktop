@@ -114,23 +114,25 @@ class ParticleRecord {
 }
 
 class TextRecord {
-    let layer: CATextLayer
+    let layer: CALayer
     let startX: CGFloat
     let startY: CGFloat
-    let offsetX: CGFloat      // horizontal shift
-    let floatDistance: CGFloat // upward movement in bottom-left coords
+    let offsetX: CGFloat
+    let floatDistance: CGFloat
     let startOpacity: Float
     let duration: CFTimeInterval
+    let startDelay: CFTimeInterval
     let easing: String
     var elapsed: CFTimeInterval = 0
     var finished = false
 
-    init(layer: CATextLayer,
+    init(layer: CALayer,
          startX: CGFloat, startY: CGFloat,
          offsetX: CGFloat, floatDistance: CGFloat,
          startOpacity: Float,
          duration: CFTimeInterval,
-         easing: String)
+         easing: String,
+         startDelay: CFTimeInterval = 0)
     {
         self.layer = layer
         self.startX = startX; self.startY = startY
@@ -139,12 +141,15 @@ class TextRecord {
         self.startOpacity = startOpacity
         self.duration = duration
         self.easing = easing
+        self.startDelay = startDelay
         layer.actions = ["position": NSNull(), "opacity": NSNull()]
     }
 
     func advance(by dt: CFTimeInterval) {
         elapsed += dt
-        let t = min(elapsed / duration, 1.0)
+        let effective = elapsed - startDelay
+        guard effective > 0 else { return }
+        let t = min(effective / duration, 1.0)
         let e = CGFloat(ease(easing, t))
 
         layer.position = CGPoint(
@@ -198,6 +203,65 @@ class RippleRecord {
     }
 }
 
+class CursorRecord {
+    let layer: CALayer
+    let startX: CGFloat
+    let startY: CGFloat
+    let shake: CGFloat
+    let startOpacity: Float
+    let duration: CFTimeInterval
+    var elapsed: CFTimeInterval = 0
+    var finished = false
+
+    init(layer: CALayer,
+         startX: CGFloat, startY: CGFloat,
+         shake: CGFloat,
+         startOpacity: Float,
+         duration: CFTimeInterval)
+    {
+        self.layer = layer
+        self.startX = startX; self.startY = startY
+        self.shake = shake
+        self.startOpacity = startOpacity
+        self.duration = duration
+        layer.actions = ["position": NSNull(), "opacity": NSNull(), "transform": NSNull()]
+    }
+
+    func advance(by dt: CFTimeInterval) {
+        elapsed += dt
+        let t = min(elapsed / duration, 1.0)
+        let e = CGFloat(ease("缓出", t))
+
+        // Shake: random offset decaying over time
+        let shakeDecay = shake * (1.0 - t)
+        let shakeX = CGFloat.random(in: -shakeDecay...shakeDecay)
+        let shakeY = CGFloat.random(in: -shakeDecay...shakeDecay)
+
+        layer.position = CGPoint(
+            x: startX + shakeX,
+            y: startY + shakeY
+        )
+
+        // Scale: 0.86 → 1.0 → 0.9
+        let scale: CGFloat
+        if t < 0.2 {
+            scale = 0.86 + (1.0 - 0.86) * (e / 0.2)
+        } else if t < 0.5 {
+            scale = 1.0
+        } else {
+            scale = 1.0 - (1.0 - 0.9) * ((t - 0.5) / 0.5)
+        }
+        layer.transform = CATransform3DMakeScale(scale, scale, 1)
+
+        // Opacity: fade out in second half
+        if t > 0.5 {
+            layer.opacity = startOpacity * Float(1.0 - (t - 0.5) / 0.5)
+        }
+
+        if t >= 1.0 { finished = true }
+    }
+}
+
 // ═══════════════════════════════════════════════════════════════
 // AnimationDriver — DispatchSourceTimer-backed manual animation engine
 // Uses GCD timer (not RunLoop Timer) so animation fires reliably
@@ -211,6 +275,7 @@ class AnimationDriver {
     private var particles: [ParticleRecord] = []
     private var texts: [TextRecord] = []
     private var ripples: [RippleRecord] = []
+    private var cursors: [CursorRecord] = []
 
     var isRunning: Bool { sourceTimer != nil }
 
@@ -243,20 +308,24 @@ class AnimationDriver {
         for p in particles { p.layer.removeFromSuperlayer() }
         for t in texts { t.layer.removeFromSuperlayer() }
         for r in ripples { r.layer.removeFromSuperlayer() }
+        for c in cursors { c.layer.removeFromSuperlayer() }
         particles.removeAll()
         texts.removeAll()
         ripples.removeAll()
+        cursors.removeAll()
     }
 
     func addParticle(_ record: ParticleRecord) { particles.append(record) }
     func addText(_ record: TextRecord) { texts.append(record) }
     func addRipple(_ record: RippleRecord) { ripples.append(record) }
+    func addCursor(_ record: CursorRecord) { cursors.append(record) }
 
     /// Update all records and clean up finished ones.
     func advance(by dt: CFTimeInterval) {
         for p in particles { p.advance(by: dt) }
         for t in texts { t.advance(by: dt) }
         for r in ripples { r.advance(by: dt) }
+        for c in cursors { c.advance(by: dt) }
 
         for p in particles where p.finished { p.layer.removeFromSuperlayer() }
         particles.removeAll { $0.finished }
@@ -266,5 +335,8 @@ class AnimationDriver {
 
         for r in ripples where r.finished { r.layer.removeFromSuperlayer() }
         ripples.removeAll { $0.finished }
+
+        for c in cursors where c.finished { c.layer.removeFromSuperlayer() }
+        cursors.removeAll { $0.finished }
     }
 }
