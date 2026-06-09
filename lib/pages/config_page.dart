@@ -1,11 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import '../bridge/overlay_bridge.dart';
 import '../state/workbench_state.dart';
 import '../theme/app_tokens.dart';
+import '../services/overlay_sync_service.dart';
 import '../widgets/workbench_header.dart';
 import '../widgets/workbench_sidebar.dart';
 import 'workspaces/keyboard_workspace.dart';
@@ -21,21 +19,22 @@ class ConfigPage extends StatefulWidget {
 
 class ConfigPageState extends State<ConfigPage> {
   final WorkbenchState _state = WorkbenchState();
-  final OverlayBridge _bridge = OverlayBridge();
-  String _lastConfigJson = '';
-  String _lastKeyConfigJson = '';
+  final OverlaySyncService _overlaySync = OverlaySyncService();
 
   @override
   void initState() {
     super.initState();
-    _bridge.onOverlayStateChanged = (enabled) {
+    _overlaySync.setOverlayStateChangedHandler((enabled) {
       _state.setEnabled(enabled);
-    };
+      if (enabled) {
+        // 失焦任何文本字段，防止中文 IME 候选框弹出在覆盖层上
+        FocusManager.instance.primaryFocus?.unfocus();
+      }
+    });
     _state.addListener(_onStateChanged);
     _state.loadSavedConfig().then((_) {
       if (_state.enabled) {
-        _bridge.start(_buildConfigPayload());
-        _sendKeyFeedbackConfig();
+        _overlaySync.start(_state);
       }
     });
   }
@@ -49,41 +48,17 @@ class ConfigPageState extends State<ConfigPage> {
 
   void _onStateChanged() {
     if (!mounted) return;
-    if (_state.enabled) {
-      final newJson = jsonEncode(_state.currentActionConfig.toJson());
-      if (newJson != _lastConfigJson) {
-        _lastConfigJson = newJson;
-        _bridge.updateConfig(_buildConfigPayload());
-      }
-      _sendKeyFeedbackConfig();
-    }
+    _overlaySync.syncIfNeeded(_state);
     setState(() {});
-  }
-
-  Map<String, dynamic> _buildConfigPayload() {
-    return {
-      'actionId': _state.selectedActionId,
-      'config': _state.currentActionConfig.toJson(),
-    };
-  }
-
-  void _sendKeyFeedbackConfig() {
-    final newKeyJson = jsonEncode(_state.keyFeedbackConfig.toJson());
-    if (newKeyJson != _lastKeyConfigJson) {
-      _lastKeyConfigJson = newKeyJson;
-      _bridge.updateKeyFeedbackConfig(_state.keyFeedbackConfig.toJson());
-    }
   }
 
   Future<void> _toggleEnabled() async {
     if (_state.enabled) {
-      await _bridge.stop();
+      await _overlaySync.stop();
       _state.setEnabled(false);
     } else {
       _state.setEnabled(true);
-      final payload = _buildConfigPayload();
-      _lastConfigJson = jsonEncode(_state.currentActionConfig.toJson());
-      await _bridge.start(payload);
+      await _overlaySync.start(_state);
     }
   }
 
@@ -91,7 +66,10 @@ class ConfigPageState extends State<ConfigPage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        WorkbenchHeader(state: _state),
+        WorkbenchHeader(
+          state: _state,
+          onGlobalToggle: (_) => _toggleEnabled(),
+        ),
         Expanded(
           child: Row(
             children: [

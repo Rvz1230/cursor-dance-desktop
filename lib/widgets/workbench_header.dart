@@ -6,8 +6,13 @@ import '../../theme/app_tokens.dart';
 
 class WorkbenchHeader extends StatelessWidget {
   final WorkbenchState state;
+  final ValueChanged<bool>? onGlobalToggle;
 
-  const WorkbenchHeader({super.key, required this.state});
+  const WorkbenchHeader({
+    super.key,
+    required this.state,
+    this.onGlobalToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +89,7 @@ class WorkbenchHeader extends StatelessWidget {
                   const SizedBox(width: 6),
                   ShadSwitch(
                     value: state.enabled,
-                    onChanged: (v) => state.setEnabled(v),
+                    onChanged: onGlobalToggle ?? (v) => state.setEnabled(v),
                   ),
                 ],
               ),

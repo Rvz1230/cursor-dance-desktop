@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 
@@ -8,8 +7,14 @@ import '../models/action_config_presets.dart';
 import '../models/key_feedback_config.dart';
 import '../models/theme.dart';
 import '../models/theme_draft.dart';
+import '../services/workbench_persistence_service.dart';
 
 class WorkbenchState extends ChangeNotifier {
+  final WorkbenchPersistenceService _persistenceService;
+
+  WorkbenchState({WorkbenchPersistenceService? persistenceService})
+      : _persistenceService = persistenceService ?? WorkbenchPersistenceService();
+
   // ── Workspace ──
   String _workspaceId = 'workbench';
   String get workspaceId => _workspaceId;
@@ -63,6 +68,8 @@ class WorkbenchState extends ChangeNotifier {
       conflictsForAction(_selectedActionId, currentDraft.actionConfigs);
 
   bool get isWorkbench => _workspaceId == 'workbench';
+  String get currentActionConfigJson => jsonEncode(currentActionConfig.toJson());
+  String get keyFeedbackConfigJson => jsonEncode(_keyFeedbackConfig.toJson());
 
   // ═══════════════════════════════════════════════
   // Workspace
@@ -71,7 +78,6 @@ class WorkbenchState extends ChangeNotifier {
   void setWorkspaceId(String id) {
     if (_workspaceId == id) return;
     _workspaceId = id;
-    _unsaved = true;
     notifyListeners();
   }
 
@@ -294,48 +300,77 @@ class WorkbenchState extends ChangeNotifier {
     }
   }
 
-  // ═══════════════════════════════════════════════
-  // Save / Load / Persistence
-  // ═══════════════════════════════════════════════
-
-  String get _configPath {
-    final home = Platform.environment['HOME'] ?? '.';
-    return '$home/.cursordance/config.json';
+  void setEnabled(bool value) {
+    _enabled = value;
+    notifyListeners();
   }
 
-  Map<String, dynamic> _serialize() {
+  void updateKeyFeedbackConfig(KeyFeedbackConfig config) {
+    _keyFeedbackConfig = config;
+    notifyListeners();
+  }
+
+  Map<String, dynamic> buildOverlayPayload() {
+    return {
+      'actionId': _selectedActionId,
+      'config': currentActionConfig.toJson(),
+    };
+  }
+
+  void replaceFromPersistence({
+    bool? enabled,
+    String? activeThemeId,
+    KeyFeedbackConfig? keyFeedbackConfig,
+    List<ThemeItem>? themeLibrary,
+    Map<String, ThemeDraft>? draftsByTheme,
+  }) {
+    _enabled = enabled ?? _enabled;
+    _selectedThemeId = activeThemeId ?? _selectedThemeId;
+    if (keyFeedbackConfig != null) {
+      _keyFeedbackConfig = keyFeedbackConfig;
+    }
+    if (themeLibrary != null && themeLibrary.isNotEmpty) {
+      _themeLibrary = themeLibrary;
+    }
+    if (draftsByTheme != null && draftsByTheme.isNotEmpty) {
+      _draftsByTheme
+        ..clear()
+        ..addAll(draftsByTheme);
+    }
+  }
+
+  Map<String, dynamic> toPersistenceJson() {
     return {
       'enabled': _enabled,
       'activeThemeId': _selectedThemeId,
       'keyFeedbackConfig': _keyFeedbackConfig.toJson(),
-      'themeLibrary': _themeLibrary.map((t) => {
-        'id': t.id,
-        'name': t.name,
-        'kind': t.kind,
-        'icon': t.icon,
-        'summary': t.summary,
-        'description': t.description,
-      }).toList(),
+      'themeLibrary': _themeLibrary
+          .map((t) => {
+                'id': t.id,
+                'name': t.name,
+                'kind': t.kind,
+                'icon': t.icon,
+                'summary': t.summary,
+                'description': t.description,
+              })
+          .toList(),
       'draftsByTheme': _draftsByTheme.map(
-        (key, draft) => MapEntry(
-          key,
-          {
-            'actionConfigs': draft.actionConfigs.map(
-              (k, v) => MapEntry(k, v.toJson()),
-            ),
-            'atmosphere': {'mode': draft.atmosphere.mode},
-            'cursorModes': draft.cursorModes,
-            'cursorStateActions': draft.cursorStateActions,
-            'cursorStateAssets': draft.cursorStateAssets.map(
-              (k, v) => MapEntry(k, v.toJson()),
-            ),
-          },
-        ),
+        (key, draft) => MapEntry(key, {
+          'actionConfigs': draft.actionConfigs.map(
+            (k, v) => MapEntry(k, v.toJson()),
+          ),
+          'atmosphere': {'mode': draft.atmosphere.mode},
+          'cursorModes': draft.cursorModes,
+          'cursorStateActions': draft.cursorStateActions,
+          'cursorStateAssets': draft.cursorStateAssets.map(
+            (k, v) => MapEntry(k, v.toJson()),
+          ),
+        }),
       ),
     };
   }
 
-  Future<void> _deserialize(Map<String, dynamic> data) async {
+  void applyPersistenceJson(Map<String, dynamic> data) {
     _enabled = data['enabled'] as bool? ?? true;
     _selectedThemeId = data['activeThemeId'] as String? ?? _themeLibrary.first.id;
 
@@ -359,6 +394,7 @@ class WorkbenchState extends ChangeNotifier {
 
     final draftsData = data['draftsByTheme'] as Map<String, dynamic>?;
     if (draftsData != null) {
+      _draftsByTheme.clear();
       for (final entry in draftsData.entries) {
         final d = entry.value as Map<String, dynamic>;
         final rawConfigs = d['actionConfigs'] as Map<String, dynamic>?;
@@ -376,11 +412,14 @@ class WorkbenchState extends ChangeNotifier {
             mode: (d['atmosphere'] as Map<String, dynamic>?)?['mode'] as String? ?? 'none',
           ),
           cursorModes: (d['cursorModes'] as Map<String, dynamic>?)
-              ?.map((k, v) => MapEntry(k, v as String)) ?? const {},
+                  ?.map((k, v) => MapEntry(k, v as String)) ??
+              const {},
           cursorStateActions: (d['cursorStateActions'] as Map<String, dynamic>?)
-              ?.map((k, v) => MapEntry(k, v as String)) ?? const {},
+                  ?.map((k, v) => MapEntry(k, v as String)) ??
+              const {},
           cursorStateAssets: (d['cursorStateAssets'] as Map<String, dynamic>?)
-              ?.map((k, v) => MapEntry(k, CursorStateAsset.fromJson(v as Map<String, dynamic>))) ?? const {},
+                  ?.map((k, v) => MapEntry(k, CursorStateAsset.fromJson(v as Map<String, dynamic>))) ??
+              const {},
         );
       }
     }
@@ -392,11 +431,7 @@ class WorkbenchState extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final file = File(_configPath);
-      await file.parent.create(recursive: true);
-      await file.writeAsString(
-        const JsonEncoder.withIndent('  ').convert(_serialize()),
-      );
+      await _persistenceService.save(toPersistenceJson());
       _unsaved = false;
       _dirtyThemes.clear();
     } catch (e) {
@@ -410,25 +445,13 @@ class WorkbenchState extends ChangeNotifier {
 
   Future<void> loadSavedConfig() async {
     try {
-      final file = File(_configPath);
-      if (await file.exists()) {
-        final text = await file.readAsString();
-        final data = jsonDecode(text) as Map<String, dynamic>;
-        await _deserialize(data);
+      final data = await _persistenceService.load();
+      if (data != null) {
+        applyPersistenceJson(data);
       }
     } catch (e) {
       debugPrint('加载配置失败，使用默认值: $e');
     }
-    notifyListeners();
-  }
-
-  void setEnabled(bool value) {
-    _enabled = value;
-    notifyListeners();
-  }
-
-  void updateKeyFeedbackConfig(KeyFeedbackConfig config) {
-    _keyFeedbackConfig = config;
     notifyListeners();
   }
 }

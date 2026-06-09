@@ -47,44 +47,44 @@ class ParticleFeedbackCard extends StatelessWidget {
       collapsible: true,
       defaultOpen: enabled,
       enabled: enabled,
-      child: Opacity(
-        opacity: enabled ? 1.0 : 0.5,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SectionTitle(title: '发射'),
-            FieldRow(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SectionTitle(title: '发射'),
+          FieldRow(
+            label: '运动模式',
+            child: SmallSelect(
               label: '运动模式',
-              child: SmallSelect(
-                label: '运动模式',
-                value: config.particleMotionMode,
-                options: kParticleMotionModeOptions.map((m) => m['value'] as String).toList(),
-                onChanged: (v) => onUpdate((c) => c.copyWith(particleMotionMode: v)),
-              ),
+              value: config.particleMotionMode,
+              options: kParticleMotionModeOptions.map((m) => m['value'] as String).toList(),
+              onChanged: (v) => onUpdate((c) => c.copyWith(particleMotionMode: v)),
             ),
-            _divider(),
-            FieldRow(
+          ),
+          _divider(),
+          FieldRow(
+            label: '粒子样式',
+            child: SmallSelect(
               label: '粒子样式',
-              child: SmallSelect(
-                label: '粒子样式',
-                value: config.particleStyle,
-                options: kParticleStyleOptions,
-                onChanged: (v) => onUpdate((c) => c.copyWith(particleStyle: v)),
-              ),
+              value: config.particleStyle,
+              options: kParticleStyleOptions,
+              onChanged: (v) => onUpdate((c) => c.copyWith(particleStyle: v)),
             ),
+          ),
+          _divider(),
+          FieldRow(
+            label: '粒子数量',
+            child: ControlSlider(
+              label: '粒子数量',
+              value: config.particleCount.toDouble(),
+              min: 2,
+              max: 60,
+              divisions: 29,
+              onChanged: (v) => onUpdate((c) => c.copyWith(particleCount: v.round())),
+            ),
+          ),
+          if (!_isOrbital) ...[
             _divider(),
             FieldRow(
-              label: '粒子数量',
-              child: ControlSlider(
-                label: '粒子数量',
-                value: config.particleCount.toDouble(),
-                min: 2,
-                max: 60,
-                divisions: 29,
-                onChanged: (v) => onUpdate((c) => c.copyWith(particleCount: v.round())),
-              ),
-            ),
-            if (!_isOrbital) ...[_divider(), FieldRow(
               label: '扩散范围',
               child: ControlSlider(
                 label: '扩散范围',
@@ -95,8 +95,11 @@ class ParticleFeedbackCard extends StatelessWidget {
                 suffix: 'px',
                 onChanged: (v) => onUpdate((c) => c.copyWith(particleSpread: v.round())),
               ),
-            )],
-            if (!_isOrbital) ...[_divider(), FieldRow(
+            ),
+          ],
+          if (!_isOrbital) ...[
+            _divider(),
+            FieldRow(
               label: '扩散方向',
               child: SmallSelect(
                 label: '扩散方向',
@@ -104,8 +107,11 @@ class ParticleFeedbackCard extends StatelessWidget {
                 options: kParticleDirectionOptions,
                 onChanged: (v) => onUpdate((c) => c.copyWith(particleDirection: v)),
               ),
-            )],
-            if (_isOrbital) ...[_divider(), FieldRow(
+            ),
+          ],
+          if (_isOrbital) ...[
+            _divider(),
+            FieldRow(
               label: '轨道数量',
               child: ControlSlider(
                 label: '轨道数量',
@@ -115,8 +121,11 @@ class ParticleFeedbackCard extends StatelessWidget {
                 divisions: 11,
                 onChanged: (v) => onUpdate((c) => c.copyWith(orbitalCount: v.round())),
               ),
-            )],
-            if (_isOrbital) ...[_divider(), FieldRow(
+            ),
+          ],
+          if (_isOrbital) ...[
+            _divider(),
+            FieldRow(
               label: '轨道半径',
               child: ControlSlider(
                 label: '轨道半径',
@@ -127,8 +136,11 @@ class ParticleFeedbackCard extends StatelessWidget {
                 suffix: 'px',
                 onChanged: (v) => onUpdate((c) => c.copyWith(orbitalRadius: v.round())),
               ),
-            )],
-            if (_isOrbital) ...[_divider(), FieldRow(
+            ),
+          ],
+          if (_isOrbital) ...[
+            _divider(),
+            FieldRow(
               label: '轨道速度',
               child: ControlSlider(
                 label: '轨道速度',
@@ -138,126 +150,125 @@ class ParticleFeedbackCard extends StatelessWidget {
                 divisions: 9,
                 onChanged: (v) => onUpdate((c) => c.copyWith(orbitalSpeed: v.round())),
               ),
-            )],
-
-            const SizedBox(height: 20),
-            const SectionTitle(title: '样式'),
-            FieldRow(
-              label: '粒子大小',
-              child: ControlSlider(
-                label: '粒子大小',
-                value: config.particleSize.toDouble(),
-                min: 4,
-                max: 32,
-                divisions: 14,
-                suffix: 'px',
-                onChanged: (v) => onUpdate((c) => c.copyWith(particleSize: v.round())),
-              ),
             ),
-            _divider(),
-            if (!_isOrbital) ...[
-              FieldRow(
-                label: '持续时长',
-                child: ControlSlider(
-                  label: '持续时长',
-                  value: config.particleDuration.toDouble(),
-                  min: 200,
-                  max: 2000,
-                  divisions: 18,
-                  suffix: 'ms',
-                  onChanged: (v) => onUpdate((c) => c.copyWith(particleDuration: v.round())),
-                ),
-              ),
-              _divider(),
-            ],
-            FieldRow(
-              label: '透明度',
-              child: ControlSlider(
-                label: '透明度',
-                value: config.particleOpacity.toDouble(),
-                min: 10,
-                max: 100,
-                divisions: 9,
-                suffix: '%',
-                onChanged: (v) => onUpdate((c) => c.copyWith(particleOpacity: v.round())),
-              ),
-            ),
-            _divider(),
-            FieldRow(
-              label: '颜色模式',
-              child: SmallSelect(
-                label: '颜色模式',
-                value: config.particleColorMode,
-                options: kParticleColorModeOptions,
-                onChanged: (v) => onUpdate((c) => c.copyWith(particleColorMode: v)),
-              ),
-            ),
-            _divider(),
-            FieldRow(
-              label: '色板',
-              child: ColorOptions(
-                value: config.particlePalette.isNotEmpty ? config.particlePalette.first : '#FBBF24',
-                swatches: ['#FBBF24', '#14B8A6', '#A78BFA', '#334155', '#F97316', '#F43F5E'],
-                onChanged: (v) => onUpdate((c) {
-                  final palette = c.particlePalette;
-                  if (palette.isEmpty) return c.copyWith(particlePalette: [v]);
-                  final updated = [v, ...palette.skip(1)];
-                  return c.copyWith(particlePalette: updated);
-                }),
-              ),
-            ),
-            if (!_isOrbital) ...[
-              const SizedBox(height: 20),
-              const SectionTitle(title: '物理'),
-              FieldRow(
-                label: '重力',
-                child: ControlSlider(
-                  label: '重力',
-                  value: config.particleGravity.toDouble(),
-                  min: -20,
-                  max: 40,
-                  divisions: 15,
-                  suffix: '%',
-                  onChanged: (v) => onUpdate((c) => c.copyWith(particleGravity: v.round())),
-                ),
-              ),
-              _divider(),
-              FieldRow(
-                label: '风力',
-                child: ControlSlider(
-                  label: '风力',
-                  value: config.particleWind.toDouble(),
-                  min: 0,
-                  max: 40,
-                  divisions: 10,
-                  suffix: '%',
-                  onChanged: (v) => onUpdate((c) => c.copyWith(particleWind: v.round())),
-                ),
-              ),
-              _divider(),
-              FieldRow(
-                label: '弹跳',
-                child: ControlSlider(
-                  label: '弹跳',
-                  value: config.particleBounce.toDouble(),
-                  min: 0,
-                  max: 50,
-                  divisions: 10,
-                  suffix: '%',
-                  onChanged: (v) => onUpdate((c) => c.copyWith(particleBounce: v.round())),
-                ),
-              ),
-              _divider(),
-              FieldRow(
-                label: '拖尾',
-                child: ShadSwitch(
-                  value: config.particleTrail,
-                  onChanged: (v) => onUpdate((c) => c.copyWith(particleTrail: v)),
-                ),
-              ),
-            ],
           ],
-        ),
+          const SizedBox(height: 20),
+          const SectionTitle(title: '样式'),
+          FieldRow(
+            label: '粒子大小',
+            child: ControlSlider(
+              label: '粒子大小',
+              value: config.particleSize.toDouble(),
+              min: 4,
+              max: 32,
+              divisions: 14,
+              suffix: 'px',
+              onChanged: (v) => onUpdate((c) => c.copyWith(particleSize: v.round())),
+            ),
+          ),
+          _divider(),
+          if (!_isOrbital) ...[
+            FieldRow(
+              label: '持续时长',
+              child: ControlSlider(
+                label: '持续时长',
+                value: config.particleDuration.toDouble(),
+                min: 200,
+                max: 2000,
+                divisions: 18,
+                suffix: 'ms',
+                onChanged: (v) => onUpdate((c) => c.copyWith(particleDuration: v.round())),
+              ),
+            ),
+            _divider(),
+          ],
+          FieldRow(
+            label: '透明度',
+            child: ControlSlider(
+              label: '透明度',
+              value: config.particleOpacity.toDouble(),
+              min: 10,
+              max: 100,
+              divisions: 9,
+              suffix: '%',
+              onChanged: (v) => onUpdate((c) => c.copyWith(particleOpacity: v.round())),
+            ),
+          ),
+          _divider(),
+          FieldRow(
+            label: '颜色模式',
+            child: SmallSelect(
+              label: '颜色模式',
+              value: config.particleColorMode,
+              options: kParticleColorModeOptions,
+              onChanged: (v) => onUpdate((c) => c.copyWith(particleColorMode: v)),
+            ),
+          ),
+          _divider(),
+          FieldRow(
+            label: '色板',
+            child: ColorOptions(
+              value: config.particlePalette.isNotEmpty ? config.particlePalette.first : '#FBBF24',
+              swatches: ['#FBBF24', '#14B8A6', '#A78BFA', '#334155', '#F97316', '#F43F5E'],
+              onChanged: (v) => onUpdate((c) {
+                final palette = c.particlePalette;
+                if (palette.isEmpty) return c.copyWith(particlePalette: [v]);
+                final updated = [v, ...palette.skip(1)];
+                return c.copyWith(particlePalette: updated);
+              }),
+            ),
+          ),
+          if (!_isOrbital) ...[
+            const SizedBox(height: 20),
+            const SectionTitle(title: '物理'),
+            FieldRow(
+              label: '重力',
+              child: ControlSlider(
+                label: '重力',
+                value: config.particleGravity.toDouble(),
+                min: -20,
+                max: 40,
+                divisions: 15,
+                suffix: '%',
+                onChanged: (v) => onUpdate((c) => c.copyWith(particleGravity: v.round())),
+              ),
+            ),
+            _divider(),
+            FieldRow(
+              label: '风力',
+              child: ControlSlider(
+                label: '风力',
+                value: config.particleWind.toDouble(),
+                min: 0,
+                max: 40,
+                divisions: 10,
+                suffix: '%',
+                onChanged: (v) => onUpdate((c) => c.copyWith(particleWind: v.round())),
+              ),
+            ),
+            _divider(),
+            FieldRow(
+              label: '弹跳',
+              child: ControlSlider(
+                label: '弹跳',
+                value: config.particleBounce.toDouble(),
+                min: 0,
+                max: 50,
+                divisions: 10,
+                suffix: '%',
+                onChanged: (v) => onUpdate((c) => c.copyWith(particleBounce: v.round())),
+              ),
+            ),
+            _divider(),
+            FieldRow(
+              label: '拖尾',
+              child: ShadSwitch(
+                value: config.particleTrail,
+                onChanged: (v) => onUpdate((c) => c.copyWith(particleTrail: v)),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
