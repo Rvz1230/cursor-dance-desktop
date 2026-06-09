@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 
 import '../models/action_config.dart';
@@ -70,8 +68,6 @@ class WorkbenchState extends ChangeNotifier {
       conflictsForAction(_selectedActionId, currentDraft.actionConfigs);
 
   bool get isWorkbench => _workspaceId == 'workbench';
-  String get currentActionConfigJson => jsonEncode(currentActionConfig.toJson());
-  String get keyFeedbackConfigJson => jsonEncode(_keyFeedbackConfig.toJson());
 
   // ═══════════════════════════════════════════════
   // Workspace

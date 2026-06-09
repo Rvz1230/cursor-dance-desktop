@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
@@ -20,8 +21,8 @@ class OverlaySyncService {
 
   Future<void> start(WorkbenchState state) async {
     final payload = state.buildOverlayPayload();
-    _lastConfigJson = state.currentActionConfigJson;
-    _lastKeyConfigJson = state.keyFeedbackConfigJson;
+    _lastConfigJson = jsonEncode(state.currentActionConfig.toJson());
+    _lastKeyConfigJson = jsonEncode(state.keyFeedbackConfig.toJson());
     await _bridge.start(payload);
     await _bridge.updateKeyFeedbackConfig(state.keyFeedbackConfig.toJson());
   }
@@ -31,13 +32,13 @@ class OverlaySyncService {
   Future<void> sync(WorkbenchState state) async {
     if (!state.enabled) return;
 
-    final newConfigJson = state.currentActionConfigJson;
+    final newConfigJson = jsonEncode(state.currentActionConfig.toJson());
     if (newConfigJson != _lastConfigJson) {
       _lastConfigJson = newConfigJson;
       await _bridge.updateConfig(state.buildOverlayPayload());
     }
 
-    final newKeyJson = state.keyFeedbackConfigJson;
+    final newKeyJson = jsonEncode(state.keyFeedbackConfig.toJson());
     if (newKeyJson != _lastKeyConfigJson) {
       _lastKeyConfigJson = newKeyJson;
       await _bridge.updateKeyFeedbackConfig(state.keyFeedbackConfig.toJson());

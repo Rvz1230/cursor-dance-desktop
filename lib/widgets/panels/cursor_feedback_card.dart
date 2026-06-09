@@ -6,7 +6,7 @@ import '../../models/action_config_presets.dart';
 import '../../theme/app_tokens.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
-import '../controls/panel_divider.dart';
+import 'panel_utils.dart';
 import '../controls/small_select.dart';
 import '../panels/panel_card.dart';
 import '../panels/panel_meta.dart';
