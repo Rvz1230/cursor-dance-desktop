@@ -1,5 +1,5 @@
 import 'action_config.dart';
-import 'action_config_presets.dart';
+import '../services/preset_loader.dart';
 
 class AtmosphereConfig {
   final String mode; // "none", "subtle", "medium", "intense"
@@ -108,7 +108,7 @@ class ThemeDraft {
 
   factory ThemeDraft.create(String themeId) {
     return ThemeDraft(
-      actionConfigs: defaultActionConfigs(themeId),
+      actionConfigs: PresetRepository.instance.defaultActionConfigs(themeId),
       cursorModes: {
         'default': '源',
         'pointer': '继承',
