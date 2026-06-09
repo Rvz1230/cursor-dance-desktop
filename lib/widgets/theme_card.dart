@@ -484,3 +484,4 @@ class _ThemeCardState extends State<ThemeCard> {
       ),
     );
   }
+}

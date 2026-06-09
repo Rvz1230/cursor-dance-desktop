@@ -62,33 +62,45 @@ class ColorOptions extends StatelessWidget {
   void _showPicker(BuildContext context) async {
     final swatchColors = swatches.map((h) => _parseHex(h)).toList();
 
-    final customSwatches = <String, ColorSwatch<dynamic>>{};
+    final customSwatches = <ColorSwatch<Object>, String>{};
     if (swatchColors.isNotEmpty) {
-      final shadeMap = <dynamic, Color>{};
-      for (int i = 0; i < swatchColors.length; i++) {
-        shadeMap[i] = swatchColors[i];
-      }
-      customSwatches['预设'] = ColorSwatch<dynamic>(
-        swatchColors.first.value,
-        shadeMap,
-      );
+      customSwatches[ColorSwatch(swatchColors.first.value, {
+        for (int i = 0; i < swatchColors.length; i++) i: swatchColors[i],
+      })] = '预设';
     }
 
-    final picked = await showColorPickerDialog(
-      context,
-      _parseHex(value),
-      title: const Text('选择颜色'),
-      width: 320,
-      pickersEnabled: const {
-        ColorPickerType.primary: true,
-        ColorPickerType.hex: true,
-        ColorPickerType.wheel: true,
-      },
-      customColorSwatchesAndNames: customSwatches,
+    Color color = _parseHex(value);
+
+    final result = await showDialog<Color>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        contentPadding: const EdgeInsets.all(20),
+        content: ColorPicker(
+          color: color,
+          onColorChanged: (c) => color = c,
+          pickersEnabled: const <ColorPickerType, bool>{
+            ColorPickerType.primary: true,
+            ColorPickerType.hex: true,
+            ColorPickerType.wheel: true,
+          },
+          customColorSwatchesAndNames: customSwatches,
+          width: 320,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(color),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
     );
 
-    if (picked != null && mounted) {
-      onChanged(_formatColor(picked));
+    if (result != null && context.mounted) {
+      onChanged(_formatColor(result));
     }
   }
 }
