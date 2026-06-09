@@ -56,4 +56,9 @@ class OverlaySyncService {
       debugPrint('OverlaySyncService.sync 失败: $e');
     }
   }
+
+  void dispose() {
+    _bridge.stop();
+    _bridge.dispose();
+  }
 }

@@ -43,6 +43,7 @@ class ConfigPageState extends State<ConfigPage> {
   void dispose() {
     _state.removeListener(_onStateChanged);
     _state.dispose();
+    _overlaySync.dispose();
     super.dispose();
   }
 

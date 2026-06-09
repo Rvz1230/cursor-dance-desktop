@@ -58,4 +58,9 @@ class OverlayBridge {
       debugPrint('OverlayBridge.updateKeyFeedbackConfig error: $e');
     }
   }
+
+  void dispose() {
+    _channel.setMethodCallHandler(null);
+    onOverlayStateChanged = null;
+  }
 }
