@@ -87,7 +87,7 @@ class OverlayKeyFeedbackFX {
             fontSize: fontSize * scale,
             startDelay: startDelay
         )
-        driver.addKey(record)
+        driver.add(record)
 
         // Decrement count after duration (driver handles layer removal)
         DispatchQueue.main.asyncAfter(deadline: .now() + duration + startDelay + 0.1) { [weak self] in

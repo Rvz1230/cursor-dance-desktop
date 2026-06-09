@@ -5,7 +5,6 @@ import '../models/action_config_presets.dart';
 import '../models/key_feedback_config.dart';
 import '../models/theme.dart';
 import '../models/theme_draft.dart';
-import '../services/state_codec.dart';
 import '../services/theme_io_service.dart';
 import '../services/workbench_persistence_service.dart';
 
@@ -145,7 +144,7 @@ class WorkbenchState extends ChangeNotifier {
   // ═══════════════════════════════════════════════
 
   void createTheme(String name, {String? basedOnThemeId}) {
-    final id = 'theme-${DateTime.now().millisecondsSinceEpoch}';
+    final id = 'theme-${DateTime.now().microsecondsSinceEpoch}';
     final baseId = basedOnThemeId ?? _selectedThemeId;
     final baseDraft = _draftsByTheme[baseId] ?? ThemeDraft.create(baseId);
     final newItem = ThemeItem(
@@ -167,7 +166,7 @@ class WorkbenchState extends ChangeNotifier {
       (t) => t.id == themeId,
       orElse: () => _themeLibrary.first,
     );
-    final id = 'theme-${DateTime.now().millisecondsSinceEpoch}';
+    final id = 'theme-${DateTime.now().microsecondsSinceEpoch}';
     final baseDraft = _draftsByTheme[themeId] ?? ThemeDraft.create(themeId);
     final newItem = source.copyWith(
       id: id,
@@ -267,29 +266,88 @@ class WorkbenchState extends ChangeNotifier {
   }
 
   Map<String, dynamic> toPersistenceJson() {
-    return encodePersistenceState(
-      enabled: _enabled,
-      activeThemeId: _selectedThemeId,
-      keyFeedbackConfig: _keyFeedbackConfig,
-      themeLibrary: _themeLibrary,
-      draftsByTheme: _draftsByTheme,
-    );
+    return {
+      'enabled': _enabled,
+      'activeThemeId': _selectedThemeId,
+      'keyFeedbackConfig': _keyFeedbackConfig.toJson(),
+      'themeLibrary': _themeLibrary
+          .map((t) => {
+                'id': t.id,
+                'name': t.name,
+                'kind': t.kind,
+                'icon': t.icon,
+                'summary': t.summary,
+                'description': t.description,
+              })
+          .toList(),
+      'draftsByTheme': _draftsByTheme.map(
+        (key, draft) => MapEntry(key, {
+          'actionConfigs': draft.actionConfigs.map(
+            (k, v) => MapEntry(k, v.toJson()),
+          ),
+          'atmosphere': {'mode': draft.atmosphere.mode},
+          'cursorModes': draft.cursorModes,
+          'cursorStateActions': draft.cursorStateActions,
+          'cursorStateAssets': draft.cursorStateAssets.map(
+            (k, v) => MapEntry(k, v.toJson()),
+          ),
+        }),
+      ),
+    };
   }
 
   void applyPersistenceJson(Map<String, dynamic> data) {
-    final snap = decodePersistenceState(data);
-    _enabled = snap.enabled;
-    if (snap.activeThemeId.isNotEmpty) {
-      _selectedThemeId = snap.activeThemeId;
+    _enabled = data['enabled'] as bool? ?? true;
+    final themeId = data['activeThemeId'] as String?;
+    if (themeId != null && themeId.isNotEmpty) {
+      _selectedThemeId = themeId;
     }
-    _keyFeedbackConfig = snap.keyFeedbackConfig;
-    if (snap.themeLibrary.isNotEmpty) {
-      _themeLibrary = snap.themeLibrary;
+    if (data['keyFeedbackConfig'] != null) {
+      _keyFeedbackConfig = KeyFeedbackConfig.fromJson(
+        data['keyFeedbackConfig'] as Map<String, dynamic>,
+      );
     }
-    if (snap.draftsByTheme.isNotEmpty) {
-      _draftsByTheme
-        ..clear()
-        ..addAll(snap.draftsByTheme);
+    final libraryData = data['themeLibrary'] as List<dynamic>?;
+    if (libraryData != null && libraryData.isNotEmpty) {
+      _themeLibrary = libraryData
+          .map((item) => ThemeItem.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    final draftsData = data['draftsByTheme'] as Map<String, dynamic>?;
+    if (draftsData != null) {
+      _draftsByTheme.clear();
+      for (final entry in draftsData.entries) {
+        final d = entry.value as Map<String, dynamic>;
+        final rawConfigs = d['actionConfigs'] as Map<String, dynamic>?;
+        final actionConfigs = <String, ActionConfig>{};
+        if (rawConfigs != null) {
+          for (final ce in rawConfigs.entries) {
+            actionConfigs[ce.key] = ActionConfig.fromJson(
+              ce.value as Map<String, dynamic>,
+            );
+          }
+        }
+        _draftsByTheme[entry.key] = ThemeDraft(
+          actionConfigs: actionConfigs,
+          atmosphere: d['atmosphere'] != null
+              ? AtmosphereConfig.fromJson(
+                  d['atmosphere'] as Map<String, dynamic>)
+              : const AtmosphereConfig(),
+          cursorModes: (d['cursorModes'] as Map<String, dynamic>?)
+                  ?.map((k, v) => MapEntry(k, v as String)) ??
+              const {},
+          cursorStateActions: (d['cursorStateActions'] as Map<String, dynamic>?)
+                  ?.map((k, v) => MapEntry(k, v as String)) ??
+              const {},
+          cursorStateAssets:
+              (d['cursorStateAssets'] as Map<String, dynamic>?)
+                      ?.map((k, v) => MapEntry(
+                          k,
+                          CursorStateAsset.fromJson(
+                              v as Map<String, dynamic>))) ??
+                  const {},
+        );
+      }
     }
   }
 

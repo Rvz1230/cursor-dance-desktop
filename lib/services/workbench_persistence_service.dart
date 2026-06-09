@@ -1,14 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path_provider/path_provider.dart';
+
 class WorkbenchPersistenceService {
-  String get configPath {
-    final home = Platform.environment['HOME'] ?? '.';
-    return '$home/.cursordance/config.json';
+  Future<String> get _configPath async {
+    final dir = await getApplicationSupportDirectory();
+    return '${dir.path}/config.json';
   }
 
   Future<void> save(Map<String, dynamic> data) async {
-    final file = File(configPath);
+    final path = await _configPath;
+    final file = File(path);
     await file.parent.create(recursive: true);
     await file.writeAsString(
       const JsonEncoder.withIndent('  ').convert(data),
@@ -16,7 +19,8 @@ class WorkbenchPersistenceService {
   }
 
   Future<Map<String, dynamic>?> load() async {
-    final file = File(configPath);
+    final path = await _configPath;
+    final file = File(path);
     if (!await file.exists()) return null;
 
     final text = await file.readAsString();

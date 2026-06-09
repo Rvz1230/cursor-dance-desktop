@@ -1,6 +1,17 @@
 import Cocoa
 
 // ═══════════════════════════════════════════════════════════════
+// AnimatableRecord protocol — shared lifecycle for all effects
+// ═══════════════════════════════════════════════════════════════
+
+protocol AnimatableRecord: AnyObject {
+    var layer: CALayer { get }
+    var elapsed: CFTimeInterval { get set }
+    var finished: Bool { get set }
+    func advance(by dt: CFTimeInterval)
+}
+
+// ═══════════════════════════════════════════════════════════════
 // Easing — mirrors lib/effects/effects_engine.dart
 // ═══════════════════════════════════════════════════════════════
 
@@ -45,7 +56,7 @@ func ease(_ name: String, _ t: Double) -> Double {
 // Animation Record classes
 // ═══════════════════════════════════════════════════════════════
 
-class ParticleRecord {
+class ParticleRecord: AnimatableRecord {
     let layer: CAShapeLayer
     let startX: CGFloat
     let startY: CGFloat
@@ -113,7 +124,7 @@ class ParticleRecord {
     }
 }
 
-class TextRecord {
+class TextRecord: AnimatableRecord {
     let layer: CALayer
     let startX: CGFloat
     let startY: CGFloat
@@ -162,7 +173,7 @@ class TextRecord {
     }
 }
 
-class RippleRecord {
+class RippleRecord: AnimatableRecord {
     let layer: CAShapeLayer
     let startDelay: CFTimeInterval
     let duration: CFTimeInterval
@@ -203,7 +214,7 @@ class RippleRecord {
     }
 }
 
-class CursorRecord {
+class CursorRecord: AnimatableRecord {
     let layer: CALayer
     let startX: CGFloat
     let startY: CGFloat
@@ -263,18 +274,10 @@ class CursorRecord {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AnimationDriver — DispatchSourceTimer-backed manual animation engine
-// Uses GCD timer (not RunLoop Timer) so animation fires reliably
-// even when the process is backgrounded (behind full-screen app).
+// KeyRecord
 // ═══════════════════════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════════════════════
-// AnimationDriver — DispatchSourceTimer-backed manual animation engine
-// Uses GCD timer (not RunLoop Timer) so animation fires reliably
-// even when the process is backgrounded (behind full-screen app).
-// ═══════════════════════════════════════════════════════════════
-
-class KeyRecord {
+class KeyRecord: AnimatableRecord {
     let layer: CALayer
     let startX: CGFloat
     let startY: CGFloat
@@ -362,17 +365,17 @@ class KeyRecord {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// AnimationDriver — DispatchSourceTimer-backed manual animation engine
+// Uses GCD timer (not RunLoop Timer) so animation fires reliably
+// even when the process is backgrounded (behind full-screen app).
+// ═══════════════════════════════════════════════════════════════
+
 class AnimationDriver {
     private var sourceTimer: DispatchSourceTimer?
     private var lastTimestamp: CFTimeInterval = 0
 
-    private var particles: [ParticleRecord] = []
-    private var texts: [TextRecord] = []
-    private var ripples: [RippleRecord] = []
-    private var cursors: [CursorRecord] = []
-    private var animations: [AnimationRecord] = []
-    private var images: [ImageRecord] = []
-    private var keys: [KeyRecord] = []
+    private var records: [AnimatableRecord] = []
 
     var isRunning: Bool { sourceTimer != nil }
 
@@ -402,59 +405,20 @@ class AnimationDriver {
     }
 
     func clear() {
-        for p in particles { p.layer.removeFromSuperlayer() }
-        for t in texts { t.layer.removeFromSuperlayer() }
-        for r in ripples { r.layer.removeFromSuperlayer() }
-        for c in cursors { c.layer.removeFromSuperlayer() }
-        for a in animations { a.layer.removeFromSuperlayer() }
-        for i in images { i.layer.removeFromSuperlayer() }
-        for k in keys { k.layer.removeFromSuperlayer() }
-        particles.removeAll()
-        texts.removeAll()
-        ripples.removeAll()
-        cursors.removeAll()
-        animations.removeAll()
-        images.removeAll()
-        keys.removeAll()
+        for r in records { r.layer.removeFromSuperlayer() }
+        records.removeAll()
     }
 
-    func addParticle(_ record: ParticleRecord) { particles.append(record) }
-    func addText(_ record: TextRecord) { texts.append(record) }
-    func addRipple(_ record: RippleRecord) { ripples.append(record) }
-    func addCursor(_ record: CursorRecord) { cursors.append(record) }
-    func addAnimation(_ record: AnimationRecord) { animations.append(record) }
-    func addImage(_ record: ImageRecord) { images.append(record) }
-    func addKey(_ record: KeyRecord) { keys.append(record) }
+    func add(_ record: AnimatableRecord) {
+        records.append(record)
+    }
 
     /// Update all records and clean up finished ones.
     func advance(by dt: CFTimeInterval) {
-        for p in particles { p.advance(by: dt) }
-        for t in texts { t.advance(by: dt) }
-        for r in ripples { r.advance(by: dt) }
-        for c in cursors { c.advance(by: dt) }
-        for a in animations { a.advance(by: dt) }
-        for i in images { i.advance(by: dt) }
-        for k in keys { k.advance(by: dt) }
-
-        for p in particles where p.finished { p.layer.removeFromSuperlayer() }
-        particles.removeAll { $0.finished }
-
-        for t in texts where t.finished { t.layer.removeFromSuperlayer() }
-        texts.removeAll { $0.finished }
-
-        for r in ripples where r.finished { r.layer.removeFromSuperlayer() }
-        ripples.removeAll { $0.finished }
-
-        for c in cursors where c.finished { c.layer.removeFromSuperlayer() }
-        cursors.removeAll { $0.finished }
-
-        for a in animations where a.finished { a.layer.removeFromSuperlayer() }
-        animations.removeAll { $0.finished }
-
-        for i in images where i.finished { i.layer.removeFromSuperlayer() }
-        images.removeAll { $0.finished }
-
-        for k in keys where k.finished { k.layer.removeFromSuperlayer() }
-        keys.removeAll { $0.finished }
+        for r in records { r.advance(by: dt) }
+        records.removeAll { r in
+            if r.finished { r.layer.removeFromSuperlayer(); return true }
+            return false
+        }
     }
 }

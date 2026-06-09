@@ -30,7 +30,7 @@ class OverlayCursorFX {
             startOpacity: startOpacity,
             duration: duration
         )
-        driver.addCursor(record)
+        driver.add(record)
 
         // ── Trail ghosts ──
         if hasTrail {
@@ -51,7 +51,7 @@ class OverlayCursorFX {
                     startOpacity: Float(trailOpacity),
                     duration: ghostDuration
                 )
-                driver.addCursor(ghostRecord)
+                driver.add(ghostRecord)
             }
         }
     }

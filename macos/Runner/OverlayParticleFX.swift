@@ -43,7 +43,7 @@ class OverlayParticleFX {
                     orbitalSpeed: orbits,
                     startAngle: startAngle
                 )
-                driver.addParticle(record)
+                driver.add(record)
             }
             return
         }
@@ -93,7 +93,7 @@ class OverlayParticleFX {
                 easing: "缓出",
                 startDelay: baseDelay
             )
-            driver.addParticle(record)
+            driver.add(record)
 
             // Trail ghosts
             if hasTrail {
@@ -116,7 +116,7 @@ class OverlayParticleFX {
                         easing: "缓出",
                         startDelay: trailDelay
                     )
-                    driver.addParticle(ghostRecord)
+                    driver.add(ghostRecord)
                 }
             }
         }

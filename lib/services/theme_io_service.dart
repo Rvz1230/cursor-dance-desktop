@@ -53,7 +53,7 @@ class ThemeIoService {
       final data = jsonDecode(text) as Map<String, dynamic>;
       final name = (data['name'] as String?) ?? fileName.replaceAll('.json', '');
       final icon = (data['icon'] as String?) ?? 'Wand2';
-      final id = 'theme-${DateTime.now().millisecondsSinceEpoch}';
+      final id = 'theme-${DateTime.now().microsecondsSinceEpoch}';
 
       final rawConfigs = data['actionConfigs'] as Map<String, dynamic>?;
       final actionConfigs = <String, ActionConfig>{};

@@ -90,7 +90,7 @@ class OverlayTextFX {
             easing: config.textEasing ?? "缓出",
             startDelay: startDelay
         )
-        driver.addText(record)
+        driver.add(record)
     }
 
     // MARK: - Text content computation

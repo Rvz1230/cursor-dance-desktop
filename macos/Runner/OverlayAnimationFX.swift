@@ -2,7 +2,7 @@ import Cocoa
 
 // MARK: - AnimationRecord
 
-class AnimationRecord {
+class AnimationRecord: AnimatableRecord {
     let layer: CALayer
     let style: String
     let startX: CGFloat
@@ -184,7 +184,7 @@ class OverlayAnimationFX {
                 startDelay: baseDelay,
                 color: animColor, glow: glow
             )
-            driver.addAnimation(record)
+            driver.add(record)
 
         case "斜切闪片":
             let width: CGFloat = 120
@@ -204,7 +204,7 @@ class OverlayAnimationFX {
                 offsetX: width, offsetY: 0,
                 color: animColor
             )
-            driver.addAnimation(record)
+            driver.add(record)
 
         case "弹跳徽记":
             let size: CGFloat = 48 * scaleFactor
@@ -230,7 +230,7 @@ class OverlayAnimationFX {
                 startDelay: baseDelay,
                 color: animColor, glow: glow
             )
-            driver.addAnimation(record)
+            driver.add(record)
 
         case "漩涡旋转":
             let count = 8
@@ -252,7 +252,7 @@ class OverlayAnimationFX {
                     offsetX: radius, offsetY: 0,
                     color: animColor
                 )
-                driver.addAnimation(record)
+                driver.add(record)
             }
 
         case "星光闪耀":
@@ -277,7 +277,7 @@ class OverlayAnimationFX {
                 startDelay: baseDelay,
                 color: animColor, glow: glow
             )
-            driver.addAnimation(record)
+            driver.add(record)
 
         case "轨道环绕":
             let orbitRadius: CGFloat = 40 * scaleFactor
@@ -303,7 +303,7 @@ class OverlayAnimationFX {
                     offsetX: orbitRadius, offsetY: 0,
                     color: animColor
                 )
-                driver.addAnimation(record)
+                driver.add(record)
             }
 
         case "螺旋上升":
@@ -327,7 +327,7 @@ class OverlayAnimationFX {
                     offsetX: spread, offsetY: -riseDistance,
                     color: animColor
                 )
-                driver.addAnimation(record)
+                driver.add(record)
             }
 
         default:

@@ -27,7 +27,7 @@ class OverlayRippleFX {
                 easing: config.rippleEasing ?? "缓出",
                 startOpacity: Float(opacity)
             )
-            driver.addRipple(record)
+            driver.add(record)
         }
     }
 

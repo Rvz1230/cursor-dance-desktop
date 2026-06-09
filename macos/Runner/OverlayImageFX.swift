@@ -2,7 +2,7 @@ import Cocoa
 
 // MARK: - ImageRecord
 
-class ImageRecord {
+class ImageRecord: AnimatableRecord {
     let layer: CALayer
     let startX: CGFloat
     let startY: CGFloat
@@ -101,7 +101,7 @@ class OverlayImageFX {
             duration: duration,
             startDelay: baseDelay
         )
-        driver.addImage(record)
+        driver.add(record)
     }
 
     private func decodeImage(from dataUrl: String) -> CGImage? {
