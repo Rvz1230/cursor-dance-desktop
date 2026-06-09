@@ -20,36 +20,18 @@ class ScaleTap extends StatefulWidget {
   State<ScaleTap> createState() => _ScaleTapState();
 }
 
-class _ScaleTapState extends State<ScaleTap>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(duration: widget.duration, vsync: this);
-    _animation = Tween<double>(begin: 1.0, end: widget.scaleAmount)
-        .animate(_controller);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+class _ScaleTapState extends State<ScaleTap> {
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
     return Listener(
-      onPointerDown: (_) => _controller.forward(),
-      onPointerUp: (_) => _controller.reverse(),
-      onPointerCancel: (_) => _controller.reverse(),
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          return Transform.scale(scale: _animation.value, child: child);
-        },
+      onPointerDown: (_) => setState(() => _pressed = true),
+      onPointerUp: (_) => setState(() => _pressed = false),
+      onPointerCancel: (_) => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? widget.scaleAmount : 1.0,
+        duration: widget.duration,
         child: widget.child,
       ),
     );

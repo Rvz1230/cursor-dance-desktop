@@ -105,31 +105,33 @@ class _ControlSliderState extends State<ControlSlider> {
             ),
           ),
           const SizedBox(width: 4),
-          // Editable value — fixed width to prevent overflow
-          SizedBox(
-            width: 56,
-            child: Material(
-              type: MaterialType.transparency,
-              child: TextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                textAlign: TextAlign.right,
-                style: const TextStyle(
-                  fontSize: FontSizes.base,
-                  fontWeight: FontWeight.w600,
-                  fontFeatures: [FontFeature.tabularFigures()],
-                  color: AppColors.foreground,
-                  height: 1.2,
+          // Editable value — flexible width to prevent overflow
+          Flexible(
+            child: SizedBox(
+              width: 56,
+              child: Material(
+                type: MaterialType.transparency,
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    fontSize: FontSizes.base,
+                    fontWeight: FontWeight.w600,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                    color: AppColors.foreground,
+                    height: 1.2,
+                  ),
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                  ),
+                  keyboardType: TextInputType.number,
+                  onSubmitted: _onSubmitted,
                 ),
-                decoration: const InputDecoration(
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                ),
-                keyboardType: TextInputType.number,
-                onSubmitted: _onSubmitted,
               ),
             ),
           ),

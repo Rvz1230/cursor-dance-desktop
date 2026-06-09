@@ -7,6 +7,7 @@ import '../../theme/app_tokens.dart';
 import '../controls/color_options.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
+import '../controls/panel_divider.dart';
 import '../controls/small_select.dart';
 import '../controls/config_section.dart';
 import '../panels/panel_card.dart';
@@ -42,7 +43,6 @@ class RippleFeedbackCard extends StatelessWidget {
       ),
       collapsible: true,
       defaultOpen: enabled,
-      enabled: enabled,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -56,7 +56,7 @@ class RippleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(rippleStyle: v)),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '颜色',
             child: ColorOptions(
@@ -65,7 +65,7 @@ class RippleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(rippleColor: v)),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '波纹大小',
             child: ControlSlider(
@@ -78,7 +78,7 @@ class RippleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(rippleSize: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '线宽',
             child: ControlSlider(
@@ -105,7 +105,7 @@ class RippleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(rippleDuration: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '缓动',
             child: SmallSelect(
@@ -115,7 +115,7 @@ class RippleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(rippleEasing: v)),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '不透明度',
             child: ControlSlider(
@@ -131,9 +131,5 @@ class RippleFeedbackCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Widget _divider() {
-    return Container(height: 1, color: AppColors.muted);
   }
 }

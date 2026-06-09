@@ -6,6 +6,7 @@ import '../../theme/app_tokens.dart';
 import '../controls/color_options.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
+import '../controls/panel_divider.dart';
 import '../controls/small_select.dart';
 import '../controls/config_section.dart';
 import '../panels/panel_card.dart';
@@ -56,7 +57,6 @@ class KeyFeedbackCard extends StatelessWidget {
       ),
       collapsible: true,
       defaultOpen: enabled,
-      enabled: enabled,
       child: Opacity(
         opacity: enabled ? 1.0 : 0.5,
         child: Column(
@@ -94,7 +94,7 @@ class KeyFeedbackCard extends StatelessWidget {
                     onUpdate((c) => c.copyWith(duration: v.round())),
               ),
             ),
-            _divider(),
+            panelDivider,
             FieldRow(
               label: '缓动曲线',
               child: SmallSelect(
@@ -104,7 +104,7 @@ class KeyFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(easing: v)),
               ),
             ),
-            _divider(),
+            panelDivider,
             FieldRow(
               label: '字号大小',
               child: ControlSlider(
@@ -118,7 +118,7 @@ class KeyFeedbackCard extends StatelessWidget {
                     onUpdate((c) => c.copyWith(fontSize: v.round())),
               ),
             ),
-            _divider(),
+            panelDivider,
             FieldRow(
               label: '缩放倍率',
               child: ControlSlider(
@@ -132,7 +132,7 @@ class KeyFeedbackCard extends StatelessWidget {
                     onUpdate((c) => c.copyWith(scale: v / 10)),
               ),
             ),
-            _divider(),
+            panelDivider,
             FieldRow(
               label: '不透明度',
               child: ControlSlider(
@@ -180,7 +180,7 @@ class KeyFeedbackCard extends StatelessWidget {
                       onUpdate((c) => c.copyWith(gravity: v / 10)),
                 ),
               ),
-              _divider(),
+              panelDivider,
               FieldRow(
                 label: '水平风力',
                 child: ControlSlider(
@@ -208,7 +208,7 @@ class KeyFeedbackCard extends StatelessWidget {
                     onUpdate((c) => c.copyWith(originEdge: v)),
               ),
             ),
-            _divider(),
+            panelDivider,
             FieldRow(
               label: '水平定位',
               child: SmallSelect(
@@ -220,7 +220,7 @@ class KeyFeedbackCard extends StatelessWidget {
               ),
             ),
             if (config.originMapping == 'center') ...[
-              _divider(),
+              panelDivider,
               FieldRow(
                 label: '水平偏移',
                 child: ControlSlider(
@@ -254,7 +254,7 @@ class KeyFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(color: v)),
               ),
             ),
-            _divider(),
+            panelDivider,
             FieldRow(
               label: '字体粗细',
               child: SmallSelect(
@@ -265,7 +265,7 @@ class KeyFeedbackCard extends StatelessWidget {
                     onUpdate((c) => c.copyWith(fontWeight: v)),
               ),
             ),
-            _divider(),
+            panelDivider,
             FieldRow(
               label: '字体',
               child: SmallSelect(
@@ -276,7 +276,7 @@ class KeyFeedbackCard extends StatelessWidget {
                     onUpdate((c) => c.copyWith(fontFamily: v)),
               ),
             ),
-            _divider(),
+            panelDivider,
             FieldRow(
               label: '强制大写',
               child: ShadSwitch(
@@ -298,7 +298,7 @@ class KeyFeedbackCard extends StatelessWidget {
               ),
             ),
             if (config.glow) ...[
-              _divider(),
+              panelDivider,
               FieldRow(
                 label: '发光颜色',
                 child: ColorOptions(
@@ -315,7 +315,7 @@ class KeyFeedbackCard extends StatelessWidget {
                       onUpdate((c) => c.copyWith(glowColor: v)),
                 ),
               ),
-              _divider(),
+              panelDivider,
               FieldRow(
                 label: '发光半径',
                 child: ControlSlider(
@@ -347,7 +347,7 @@ class KeyFeedbackCard extends StatelessWidget {
                     onUpdate((c) => c.copyWith(cooldownMs: v.round())),
               ),
             ),
-            _divider(),
+            panelDivider,
             FieldRow(
               label: '最大同显',
               child: ControlSlider(
@@ -364,10 +364,6 @@ class KeyFeedbackCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Widget _divider() {
-    return Container(height: 1, color: AppColors.muted);
   }
 }
 

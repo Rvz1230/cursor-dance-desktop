@@ -25,7 +25,6 @@ class PanelCard extends StatefulWidget {
   final Widget child;
   final bool collapsible;
   final bool defaultOpen;
-  final bool enabled;
 
   const PanelCard({
     super.key,
@@ -38,15 +37,13 @@ class PanelCard extends StatefulWidget {
     required this.child,
     this.collapsible = true,
     this.defaultOpen = false,
-    this.enabled = true,
   });
 
   @override
   State<PanelCard> createState() => _PanelCardState();
 }
 
-class _PanelCardState extends State<PanelCard>
-    with SingleTickerProviderStateMixin {
+class _PanelCardState extends State<PanelCard> {
   late bool _isOpen;
 
   @override

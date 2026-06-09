@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
@@ -6,6 +7,7 @@ import '../../theme/app_tokens.dart';
 import '../controls/config_section.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
+import '../controls/panel_divider.dart';
 import '../controls/wip_badge.dart';
 import '../panels/panel_card.dart';
 import '../panels/panel_meta.dart';
@@ -41,7 +43,6 @@ class ImageFeedbackCard extends StatelessWidget {
       ),
       collapsible: true,
       defaultOpen: enabled,
-      enabled: enabled,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -82,7 +83,7 @@ class ImageFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(imageDuration: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '尺寸',
             child: ControlSlider(
@@ -95,7 +96,7 @@ class ImageFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(imageSize: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '透明度',
             child: ControlSlider(
@@ -108,7 +109,7 @@ class ImageFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(imageOpacity: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '偏移 X',
             child: ControlSlider(
@@ -121,7 +122,7 @@ class ImageFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(imageOffsetX: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '偏移 Y',
             child: ControlSlider(
@@ -137,9 +138,5 @@ class ImageFeedbackCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Widget _divider() {
-    return Container(height: 1, color: AppColors.muted);
   }
 }

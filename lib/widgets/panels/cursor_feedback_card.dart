@@ -6,6 +6,7 @@ import '../../models/action_config_presets.dart';
 import '../../theme/app_tokens.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
+import '../controls/panel_divider.dart';
 import '../controls/small_select.dart';
 import '../panels/panel_card.dart';
 import '../panels/panel_meta.dart';
@@ -44,7 +45,7 @@ class CursorFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(cursorOverride: v)),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '光标尺寸',
             child: SmallSelect(
@@ -59,7 +60,7 @@ class CursorFeedbackCard extends StatelessWidget {
               },
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '启用拖尾',
             child: ShadSwitch(
@@ -68,7 +69,7 @@ class CursorFeedbackCard extends StatelessWidget {
             ),
           ),
           if (config.cursorTrailEnabled) ...[
-            _divider(),
+            panelDivider,
             FieldRow(
               label: '拖尾数量',
               child: ControlSlider(
@@ -80,7 +81,7 @@ class CursorFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(cursorTrailCount: v.round())),
               ),
             ),
-            _divider(),
+            panelDivider,
             FieldRow(
               label: '拖尾透明度',
               child: ControlSlider(
@@ -97,9 +98,5 @@ class CursorFeedbackCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Widget _divider() {
-    return Container(height: 1, color: AppColors.toneCursorBg);
   }
 }

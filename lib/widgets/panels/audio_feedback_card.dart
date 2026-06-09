@@ -5,6 +5,7 @@ import '../../models/action_config_presets.dart';
 import '../../theme/app_tokens.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
+import '../controls/panel_divider.dart';
 import '../controls/small_select.dart';
 import '../controls/config_section.dart';
 import '../controls/wip_badge.dart';
@@ -38,7 +39,6 @@ class AudioFeedbackCard extends StatelessWidget {
       badge: const WipBadge(),
       collapsible: true,
       defaultOpen: enabled,
-      enabled: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -49,10 +49,10 @@ class AudioFeedbackCard extends StatelessWidget {
               label: '音效文件',
               value: config.soundFile,
               options: kSoundFileOptions,
-              onChanged: (v) => onUpdate((c) => c.copyWith(soundFile: v)),
+              onChanged: (v) => onUpdate((c) => c.copyWith(soundFile: v, sound: true)),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '音量',
             child: ControlSlider(
@@ -65,7 +65,7 @@ class AudioFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(volume: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '播放速率',
             child: ControlSlider(
@@ -78,7 +78,7 @@ class AudioFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(playbackRate: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '淡出时长',
             child: ControlSlider(
@@ -91,7 +91,7 @@ class AudioFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(soundFadeOut: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '触发模式',
             child: SmallSelect(
@@ -101,7 +101,7 @@ class AudioFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(soundTriggerMode: v)),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '混音模式',
             child: SmallSelect(
@@ -114,9 +114,5 @@ class AudioFeedbackCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Widget _divider() {
-    return Container(height: 1, color: AppColors.muted);
   }
 }

@@ -43,7 +43,6 @@ class TextFeedbackCard extends StatelessWidget {
       ),
       collapsible: true,
       defaultOpen: enabled,
-      enabled: enabled,
       child: Opacity(
         opacity: enabled ? 1.0 : 0.5,
         child: Column(
@@ -102,7 +101,7 @@ class TextFeedbackCard extends StatelessWidget {
                 hint: '连续触发累加。',
                 child: ShadSwitch(
                   value: config.comboEnabled,
-                  onChanged: (v) => onUpdate((c) => c.copyWith(comboEnabled: v, textEnabled: true)),
+                  onChanged: (v) => onUpdate((c) => c.copyWith(comboEnabled: v)),
                 ),
               ),
               if (config.comboEnabled) ...[

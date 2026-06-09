@@ -32,48 +32,31 @@ class ColorOptions extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => _showPicker(context, currentColor),
-      child: Row(
-        children: [
-          ...swatches.map(
-            (swatch) => Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: GestureDetector(
-                onTap: () => onChanged(swatch),
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: _parse(swatch),
-                    shape: BoxShape.circle,
-                    border: swatch == value
-                        ? Border.all(color: AppColors.foreground, width: 2.5)
-                        : Border.all(color: AppColors.border, width: 1),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => _showPicker(context, currentColor),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      child: ClipRect(
+        child: Row(
+          children: [
+            // Current color indicator
+            Container(
+              width: 20,
+              height: 20,
+              margin: const EdgeInsets.only(right: 6),
               decoration: BoxDecoration(
-                color: currentColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(RadiusTokens.lg),
-                border: Border.all(color: currentColor.withValues(alpha: 0.3)),
-              ),
-              child: Text(
-                value,
-                style: TextStyle(
-                  fontSize: FontSizes.caption,
-                  fontWeight: FontWeight.w500,
-                  color: currentColor,
-                ),
+                color: currentColor,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.border, width: 1),
               ),
             ),
-          ),
-        ],
+            // Hex label
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: FontSizes.caption,
+                fontWeight: FontWeight.w500,
+                color: currentColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

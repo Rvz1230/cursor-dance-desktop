@@ -7,6 +7,7 @@ import '../../theme/app_tokens.dart';
 import '../controls/color_options.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
+import '../controls/panel_divider.dart';
 import '../controls/small_select.dart';
 import '../controls/config_section.dart';
 import '../controls/wip_badge.dart';
@@ -37,7 +38,6 @@ class AnimationFeedbackCard extends StatelessWidget {
       badge: const WipBadge(),
       collapsible: true,
       defaultOpen: false,
-      enabled: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -51,7 +51,7 @@ class AnimationFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(animationStyle: v)),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '持续时长',
             child: ControlSlider(
@@ -64,7 +64,7 @@ class AnimationFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(animationDuration: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '缓动',
             child: SmallSelect(
@@ -74,7 +74,7 @@ class AnimationFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(animationEasing: v)),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '缩放',
             child: ControlSlider(
@@ -87,7 +87,7 @@ class AnimationFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(animationScale: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '透明度',
             child: ControlSlider(
@@ -100,7 +100,7 @@ class AnimationFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(animationOpacity: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '偏移 X',
             child: ControlSlider(
@@ -113,7 +113,7 @@ class AnimationFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(animationOffsetX: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '偏移 Y',
             child: ControlSlider(
@@ -126,7 +126,7 @@ class AnimationFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(animationOffsetY: v.round())),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '颜色',
             child: ColorOptions(
@@ -135,7 +135,7 @@ class AnimationFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(animationColor: v)),
             ),
           ),
-          _divider(),
+          panelDivider,
           FieldRow(
             label: '辉光',
             child: ShadSwitch(
@@ -146,9 +146,5 @@ class AnimationFeedbackCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Widget _divider() {
-    return Container(height: 1, color: AppColors.muted);
   }
 }

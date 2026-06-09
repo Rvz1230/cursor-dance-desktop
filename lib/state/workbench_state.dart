@@ -129,19 +129,6 @@ class WorkbenchState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateAtmosphere(String key, dynamic value) {
-    final draft = _draftsByTheme[_selectedThemeId] ?? ThemeDraft.create(_selectedThemeId);
-    final updated = draft.copyWith(
-      atmosphere: key == 'mode'
-          ? AtmosphereConfig(mode: value as String)
-          : AtmosphereConfig(mode: draft.atmosphere.mode),
-    );
-    _draftsByTheme[_selectedThemeId] = updated;
-    _unsaved = true;
-    _dirtyThemes[_selectedThemeId] = true;
-    notifyListeners();
-  }
-
   void resetCurrentTheme() {
     _draftsByTheme[_selectedThemeId] = ThemeDraft.create(_selectedThemeId);
     _unsaved = true;
@@ -315,28 +302,6 @@ class WorkbenchState extends ChangeNotifier {
       'actionId': _selectedActionId,
       'config': currentActionConfig.toJson(),
     };
-  }
-
-  void replaceFromPersistence({
-    bool? enabled,
-    String? activeThemeId,
-    KeyFeedbackConfig? keyFeedbackConfig,
-    List<ThemeItem>? themeLibrary,
-    Map<String, ThemeDraft>? draftsByTheme,
-  }) {
-    _enabled = enabled ?? _enabled;
-    _selectedThemeId = activeThemeId ?? _selectedThemeId;
-    if (keyFeedbackConfig != null) {
-      _keyFeedbackConfig = keyFeedbackConfig;
-    }
-    if (themeLibrary != null && themeLibrary.isNotEmpty) {
-      _themeLibrary = themeLibrary;
-    }
-    if (draftsByTheme != null && draftsByTheme.isNotEmpty) {
-      _draftsByTheme
-        ..clear()
-        ..addAll(draftsByTheme);
-    }
   }
 
   Map<String, dynamic> toPersistenceJson() {
