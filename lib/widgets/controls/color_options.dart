@@ -80,7 +80,6 @@ class ColorOptions extends StatelessWidget {
           onColorChanged: (c) => color = c,
           pickersEnabled: const <ColorPickerType, bool>{
             ColorPickerType.primary: true,
-            ColorPickerType.hex: true,
             ColorPickerType.wheel: true,
           },
           customColorSwatchesAndNames: customSwatches,
