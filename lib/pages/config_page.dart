@@ -49,7 +49,6 @@ class ConfigPageState extends State<ConfigPage> {
   void _onStateChanged() {
     if (!mounted) return;
     _overlaySync.syncIfNeeded(_state);
-    setState(() {});
   }
 
   Future<void> _toggleEnabled() async {
@@ -66,21 +65,33 @@ class ConfigPageState extends State<ConfigPage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        WorkbenchHeader(
-          state: _state,
-          onGlobalToggle: (_) => _toggleEnabled(),
+        ListenableBuilder(
+          listenable: _state,
+          builder: (context, _) => WorkbenchHeader(
+            state: _state,
+            onGlobalToggle: (_) => _toggleEnabled(),
+          ),
         ),
         Expanded(
           child: Row(
             children: [
-              WorkbenchSidebar(state: _state),
+              ListenableBuilder(
+                listenable: _state,
+                builder: (context, _) => WorkbenchSidebar(state: _state),
+              ),
               Expanded(
-                child: _buildWorkspaceContent(),
+                child: ListenableBuilder(
+                  listenable: _state,
+                  builder: (context, _) => _buildWorkspaceContent(),
+                ),
               ),
             ],
           ),
         ),
-        _buildStatusBar(),
+        ListenableBuilder(
+          listenable: _state,
+          builder: (context, _) => _buildStatusBar(),
+        ),
       ],
     );
   }
