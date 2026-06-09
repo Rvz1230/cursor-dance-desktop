@@ -27,6 +27,14 @@ class _TimelineTrack {
   });
 }
 
+class _TrackDef {
+  final String id;
+  final bool Function(ActionConfig) enabled;
+  final int Function(ActionConfig) delay;
+  final int Function(ActionConfig) duration;
+  const _TrackDef(this.id, this.enabled, this.delay, this.duration);
+}
+
 const _trackColors = {
   'text': Color(0xFFF43F5E),     // rose-500
   'ripple': Color(0xFF14B8A6),   // teal-500
@@ -63,70 +71,31 @@ class InteractiveTimeline extends StatelessWidget {
 
   const InteractiveTimeline({super.key, required this.config});
 
+  static final _trackDefs = [
+    _TrackDef('text', (c) => c.textEnabled, (c) => c.textDelay, (c) => c.textDuration),
+    _TrackDef('ripple', (c) => c.ripple, (c) => c.rippleDelay, (c) => c.rippleDuration),
+    _TrackDef('particle', (c) => c.particle, (c) => c.particleDelay, (c) => c.particleDuration),
+    _TrackDef('animation', (c) => c.animationEnabled, (c) => c.animationDelay, (c) => c.animationDuration),
+    _TrackDef('image', (c) => c.imageEnabled, (c) => c.imageDelay, (c) => c.imageDuration),
+    _TrackDef('audio', (c) => c.sound, (c) => c.soundDelay, (_) => 120),
+  ];
+
   List<_TimelineTrack> _buildTracks() {
-    final tracks = <_TimelineTrack>[];
-    final textDelay = config.textDelay;
-    final rippleDelay = config.rippleDelay;
-    final particleDelay = config.particleDelay;
-    final animationDelay = config.animationDelay;
-    final imageDelay = config.imageDelay;
-    final soundDelay = config.soundDelay;
-    final textDuration = config.textDuration;
-    final rippleDuration = config.rippleDuration;
-    final particleDuration = config.particleDuration;
-    final animationDuration = config.animationDuration;
-    final imageDuration = config.imageDuration;
-
-    if (config.textEnabled) {
-      tracks.add(_TimelineTrack(
-        id: 'text', label: _trackLabels['text']!,
-        color: _trackColors['text']!, bgColor: _trackBgColors['text']!,
-        startMs: textDelay, endMs: textDelay + textDuration,
-        configuredDuration: textDuration,
-      ));
-    }
-    if (config.ripple) {
-      tracks.add(_TimelineTrack(
-        id: 'ripple', label: _trackLabels['ripple']!,
-        color: _trackColors['ripple']!, bgColor: _trackBgColors['ripple']!,
-        startMs: rippleDelay, endMs: rippleDelay + rippleDuration,
-        configuredDuration: rippleDuration,
-      ));
-    }
-    if (config.particle) {
-      tracks.add(_TimelineTrack(
-        id: 'particle', label: _trackLabels['particle']!,
-        color: _trackColors['particle']!, bgColor: _trackBgColors['particle']!,
-        startMs: particleDelay, endMs: particleDelay + particleDuration,
-        configuredDuration: particleDuration,
-      ));
-    }
-    if (config.animationEnabled) {
-      tracks.add(_TimelineTrack(
-        id: 'animation', label: _trackLabels['animation']!,
-        color: _trackColors['animation']!, bgColor: _trackBgColors['animation']!,
-        startMs: animationDelay, endMs: animationDelay + animationDuration,
-        configuredDuration: animationDuration,
-      ));
-    }
-    if (config.imageEnabled) {
-      tracks.add(_TimelineTrack(
-        id: 'image', label: _trackLabels['image']!,
-        color: _trackColors['image']!, bgColor: _trackBgColors['image']!,
-        startMs: imageDelay, endMs: imageDelay + imageDuration,
-        configuredDuration: imageDuration,
-      ));
-    }
-    if (config.sound) {
-      tracks.add(_TimelineTrack(
-        id: 'audio', label: _trackLabels['audio']!,
-        color: _trackColors['audio']!, bgColor: _trackBgColors['audio']!,
-        startMs: soundDelay, endMs: soundDelay + 120,
-        configuredDuration: 120,
-      ));
-    }
-
-    return tracks;
+    return _trackDefs
+        .where((d) => d.enabled(config))
+        .map((d) {
+      final delay = d.delay(config);
+      final duration = d.duration(config);
+      return _TimelineTrack(
+        id: d.id,
+        label: _trackLabels[d.id]!,
+        color: _trackColors[d.id]!,
+        bgColor: _trackBgColors[d.id]!,
+        startMs: delay,
+        endMs: delay + duration,
+        configuredDuration: duration,
+      );
+    }).toList();
   }
 
   @override

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import '../bridge/overlay_bridge.dart';
 import '../state/workbench_state.dart';
 
@@ -44,6 +46,14 @@ class OverlaySyncService {
 
   void syncIfNeeded(WorkbenchState state) {
     if (!state.enabled) return;
-    unawaited(sync(state));
+    unawaited(_syncSafe(state));
+  }
+
+  Future<void> _syncSafe(WorkbenchState state) async {
+    try {
+      await sync(state);
+    } catch (e) {
+      debugPrint('OverlaySyncService.sync 失败: $e');
+    }
   }
 }
