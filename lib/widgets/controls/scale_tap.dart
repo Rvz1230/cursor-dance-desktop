@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 /// 缩放点击反馈 — 插件版 active:scale-[0.97]
-///
-/// 使用 [Listener] 观察指针事件，不参与手势竞争。
-/// 按下缩放到 [scaleAmount]，抬起/取消恢复。
-class ScaleTap extends StatefulWidget {
+class ScaleTap extends HookWidget {
   final Widget child;
   final double scaleAmount;
   final Duration duration;
@@ -17,22 +15,17 @@ class ScaleTap extends StatefulWidget {
   });
 
   @override
-  State<ScaleTap> createState() => _ScaleTapState();
-}
-
-class _ScaleTapState extends State<ScaleTap> {
-  bool _pressed = false;
-
-  @override
   Widget build(BuildContext context) {
+    final pressed = useState(false);
+
     return Listener(
-      onPointerDown: (_) => setState(() => _pressed = true),
-      onPointerUp: (_) => setState(() => _pressed = false),
-      onPointerCancel: (_) => setState(() => _pressed = false),
+      onPointerDown: (_) => pressed.value = true,
+      onPointerUp: (_) => pressed.value = false,
+      onPointerCancel: (_) => pressed.value = false,
       child: AnimatedScale(
-        scale: _pressed ? widget.scaleAmount : 1.0,
-        duration: widget.duration,
-        child: widget.child,
+        scale: pressed.value ? scaleAmount : 1.0,
+        duration: duration,
+        child: child,
       ),
     );
   }

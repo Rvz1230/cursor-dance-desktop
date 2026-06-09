@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../theme/app_tokens.dart';
 
 /// 统一的图标按钮组件。
-///
-/// 所有 GestureDetector + icon 的手写伪按钮都应替换为此组件。
-/// 内置 hover/focus/active 状态、tooltip、Semantics。
-class AppIconButton extends StatefulWidget {
+class AppIconButton extends HookWidget {
   const AppIconButton({
     super.key,
     required this.icon,
@@ -28,56 +26,49 @@ class AppIconButton extends StatefulWidget {
   final double? size;
 
   @override
-  State<AppIconButton> createState() => _AppIconButtonState();
-}
-
-class _AppIconButtonState extends State<AppIconButton> {
-  bool _hovered = false;
-
-  @override
-  void didUpdateWidget(AppIconButton oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.disabled && _hovered) {
-      _hovered = false;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final hovered = useState(false);
     final theme = ShadTheme.of(context);
-    final effectiveSize = widget.size ?? 28.0;
+    final effectiveSize = size ?? 28.0;
+
+    useEffect(() {
+      if (disabled && hovered.value) {
+        hovered.value = false;
+      }
+      return null;
+    }, [disabled]);
 
     final button = Semantics(
       button: true,
-      enabled: !widget.disabled,
-      label: widget.tooltip ?? '',
+      enabled: !disabled,
+      label: tooltip ?? '',
       child: MouseRegion(
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        cursor: widget.disabled ? SystemMouseCursors.forbidden : SystemMouseCursors.click,
+        onEnter: (_) => hovered.value = true,
+        onExit: (_) => hovered.value = false,
+        cursor: disabled ? SystemMouseCursors.forbidden : SystemMouseCursors.click,
         child: GestureDetector(
-          onTap: widget.disabled ? null : widget.onTap,
+          onTap: disabled ? null : onTap,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 120),
             width: effectiveSize,
             height: effectiveSize,
             decoration: BoxDecoration(
-              color: widget.selected
+              color: selected
                   ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                  : _hovered
+                  : hovered.value
                       ? theme.colorScheme.muted
                       : Colors.transparent,
               borderRadius: BorderRadius.circular(RadiusTokens.sm),
-              border: widget.selected
+              border: selected
                   ? Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3))
                   : null,
             ),
             child: Icon(
-              widget.icon,
-              size: widget.iconSize,
-              color: widget.disabled
+              icon,
+              size: iconSize,
+              color: disabled
                   ? theme.colorScheme.mutedForeground.withValues(alpha: 0.4)
-                  : widget.selected
+                  : selected
                       ? theme.colorScheme.primary
                       : theme.colorScheme.mutedForeground,
             ),
@@ -86,9 +77,9 @@ class _AppIconButtonState extends State<AppIconButton> {
       ),
     );
 
-    if (widget.tooltip != null) {
+    if (tooltip != null) {
       return Tooltip(
-        message: widget.tooltip!,
+        message: tooltip!,
         preferBelow: false,
         triggerMode: TooltipTriggerMode.tap,
         child: button,

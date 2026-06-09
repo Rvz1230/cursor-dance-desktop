@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-class TextTagEditor extends StatefulWidget {
+class TextTagEditor extends HookWidget {
   final List<String> tags;
   final ValueChanged<List<String>> onChanged;
 
@@ -13,34 +14,23 @@ class TextTagEditor extends StatefulWidget {
   });
 
   @override
-  State<TextTagEditor> createState() => _TextTagEditorState();
-}
-
-class _TextTagEditorState extends State<TextTagEditor> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _addTag() {
-    final text = _controller.text.trim();
-    if (text.isEmpty) return;
-    widget.onChanged([...widget.tags, text]);
-    _controller.clear();
-  }
-
-  void _removeTag(int index) {
-    final updated = [...widget.tags];
-    updated.removeAt(index);
-    widget.onChanged(updated);
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final controller = useTextEditingController();
     final theme = ShadTheme.of(context);
+
+    void addTag() {
+      final text = controller.text.trim();
+      if (text.isEmpty) return;
+      onChanged([...tags, text]);
+      controller.clear();
+    }
+
+    void removeTag(int index) {
+      final updated = [...tags];
+      updated.removeAt(index);
+      onChanged(updated);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -50,11 +40,11 @@ class _TextTagEditorState extends State<TextTagEditor> {
             spacing: 4,
             runSpacing: 4,
             children: [
-              for (int i = 0; i < widget.tags.length; i++)
+              for (int i = 0; i < tags.length; i++)
                 Chip(
-                  label: Text(widget.tags[i], style: theme.textTheme.small),
+                  label: Text(tags[i], style: theme.textTheme.small),
                   deleteIcon: Icon(LucideIcons.x, size: 12),
-                  onDeleted: () => _removeTag(i),
+                  onDeleted: () => removeTag(i),
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   visualDensity: VisualDensity.compact,
                   padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -67,14 +57,14 @@ class _TextTagEditorState extends State<TextTagEditor> {
           children: [
             Flexible(
               child: ShadInput(
-                controller: _controller,
+                controller: controller,
                 placeholder: const Text('添加标签...'),
-                onSubmitted: (_) => _addTag(),
+                onSubmitted: (_) => addTag(),
               ),
             ),
             const SizedBox(width: 4),
             ShadButton(
-              onPressed: _addTag,
+              onPressed: addTag,
               size: ShadButtonSize.sm,
               child: Text('添加'),
             ),
