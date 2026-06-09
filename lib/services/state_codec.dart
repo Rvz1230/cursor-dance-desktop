@@ -72,23 +72,15 @@ PersistenceSnapshot decodePersistenceState(Map<String, dynamic> data) {
   final enabled = data['enabled'] as bool? ?? true;
   final activeThemeId = data['activeThemeId'] as String? ?? '';
 
-  KeyFeedbackConfig keyFeedbackConfig = const KeyFeedbackConfig();
-  final kfcData = data['keyFeedbackConfig'] as Map<String, dynamic>?;
-  if (kfcData != null) {
-    keyFeedbackConfig = KeyFeedbackConfig.fromJson(kfcData);
-  }
+  final keyFeedbackConfig = data['keyFeedbackConfig'] != null
+      ? KeyFeedbackConfig.fromJson(data['keyFeedbackConfig'] as Map<String, dynamic>)
+      : const KeyFeedbackConfig();
 
   final List<ThemeItem> themeLibrary;
   final libraryData = data['themeLibrary'] as List<dynamic>?;
   if (libraryData != null && libraryData.isNotEmpty) {
     themeLibrary = libraryData.map((item) {
-      final m = item as Map<String, dynamic>;
-      return ThemeItem(
-        id: m['id'] as String,
-        name: m['name'] as String? ?? '未命名',
-        kind: m['kind'] as String? ?? '自定义',
-        icon: m['icon'] as String? ?? 'Wand2',
-      );
+      return ThemeItem.fromJson(item as Map<String, dynamic>);
     }).toList();
   } else {
     themeLibrary = const [];
@@ -111,9 +103,9 @@ PersistenceSnapshot decodePersistenceState(Map<String, dynamic> data) {
       }
       draftsByTheme[entry.key] = ThemeDraft(
         actionConfigs: actionConfigs,
-        atmosphere: AtmosphereConfig(
-          mode: (d['atmosphere'] as Map<String, dynamic>?)?['mode'] as String? ?? 'none',
-        ),
+        atmosphere: d['atmosphere'] != null
+            ? AtmosphereConfig.fromJson(d['atmosphere'] as Map<String, dynamic>)
+            : const AtmosphereConfig(),
         cursorModes: (d['cursorModes'] as Map<String, dynamic>?)
                 ?.map((k, v) => MapEntry(k, v as String)) ??
             const {},

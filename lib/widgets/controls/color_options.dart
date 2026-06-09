@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_tokens.dart';
 
+Color _parseHex(String hex) {
+  hex = hex.replaceFirst('#', '');
+  if (hex.length == 6) hex = 'FF$hex';
+  return Color(int.parse(hex, radix: 16));
+}
+
 /// 弹出式颜色选择器 — 插件版 ColorOptions 的 Flutter 实现
-///
-/// 点击当前色块弹出选择面板，包含:
-///   预设色板（多行圆点）
-///   Hex 输入框
-///   颜色预览
 class ColorOptions extends StatelessWidget {
   final String value;
   final List<String> swatches;
@@ -20,22 +21,15 @@ class ColorOptions extends StatelessWidget {
     required this.onChanged,
   });
 
-  Color _parse(String hex) {
-    hex = hex.replaceFirst('#', '');
-    if (hex.length == 6) hex = 'FF$hex';
-    return Color(int.parse(hex, radix: 16));
-  }
-
   @override
   Widget build(BuildContext context) {
-    final currentColor = _parse(value);
+    final currentColor = _parseHex(value);
 
     return GestureDetector(
       onTap: () => _showPicker(context, currentColor),
       child: ClipRect(
         child: Row(
           children: [
-            // Current color indicator
             Container(
               width: 20,
               height: 20,
@@ -46,7 +40,6 @@ class ColorOptions extends StatelessWidget {
                 border: Border.all(color: AppColors.border, width: 1),
               ),
             ),
-            // Hex label
             Text(
               value,
               style: TextStyle(
@@ -92,12 +85,6 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
   late TextEditingController _hexController;
   late Color _selectedColor;
 
-  Color _parse(String hex) {
-    hex = hex.replaceFirst('#', '');
-    if (hex.length == 6) hex = 'FF$hex';
-    return Color(int.parse(hex, radix: 16));
-  }
-
   String _formatHex(Color color) {
     final str = color.toARGB32().toRadixString(16).padLeft(8, '0');
     return '#${str.substring(2).toUpperCase()}';
@@ -106,10 +93,8 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedColor = _parse(widget.currentHex);
-    _hexController = TextEditingController(
-      text: _formatHex(_selectedColor),
-    );
+    _selectedColor = _parseHex(widget.currentHex);
+    _hexController = TextEditingController(text: _formatHex(_selectedColor));
   }
 
   @override
@@ -165,7 +150,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
               spacing: 8,
               runSpacing: 8,
               children: widget.swatches.map((hex) {
-                final color = _parse(hex);
+                final color = _parseHex(hex);
                 final isSelected = hex == _formatHex(_selectedColor);
                 return GestureDetector(
                   onTap: () {
@@ -181,9 +166,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
                       color: color,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isSelected
-                            ? AppColors.foreground
-                            : AppColors.border,
+                        color: isSelected ? AppColors.foreground : AppColors.border,
                         width: isSelected ? 2.5 : 1,
                       ),
                       boxShadow: isSelected
@@ -228,10 +211,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
                     decoration: const InputDecoration(
                       counterText: '',
                       isDense: true,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
-                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8)),
                         borderSide: BorderSide(color: AppColors.input),
@@ -248,19 +228,14 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
                     onChanged: (v) {
                       final cleaned = v.replaceAll('#', '');
                       if (cleaned.length == 6) {
-                        final hex = '#$cleaned';
                         try {
-                          setState(() {
-                            _selectedColor = _parse(hex);
-                          });
+                          setState(() => _selectedColor = _parseHex('#$cleaned'));
                         } catch (_) {}
                       }
                     },
                     onSubmitted: (v) {
                       final cleaned = v.replaceAll('#', '');
-                      if (cleaned.length == 6) {
-                        _apply('#$cleaned');
-                      }
+                      if (cleaned.length == 6) _apply('#$cleaned');
                     },
                   ),
                 ),
@@ -274,17 +249,13 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.mutedForeground,
-                  ),
+                  style: TextButton.styleFrom(foregroundColor: AppColors.mutedForeground),
                   child: const Text('取消', style: TextStyle(fontSize: FontSizes.base)),
                 ),
                 const SizedBox(width: 8),
                 TextButton(
                   onPressed: () => _apply(_formatHex(_selectedColor)),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.foreground,
-                  ),
+                  style: TextButton.styleFrom(foregroundColor: AppColors.foreground),
                   child: const Text('确定', style: TextStyle(fontSize: FontSizes.base)),
                 ),
               ],
