@@ -1,58 +1,24 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
 import 'action_config.dart';
 
-class ThemeItem {
-  final String id;
-  final String name;
-  final String kind; // "内置" or "自定义"
-  final String summary;
-  final String description;
-  final String tone; // "amber", "teal", "slate", "rose", "sky"
-  final String icon; // Lucide icon name
+part 'theme.freezed.dart';
+part 'theme.g.dart';
 
-  const ThemeItem({
-    required this.id,
-    required this.name,
-    this.kind = '自定义',
-    this.summary = '',
-    this.description = '',
-    this.tone = 'teal',
-    this.icon = 'Wand2',
-  });
+@freezed
+class ThemeItem with _$ThemeItem {
+  const factory ThemeItem({
+    required String id,
+    required String name,
+    @Default('自定义') String kind,
+    @Default('') String summary,
+    @Default('') String description,
+    @Default('teal') String tone,
+    @Default('Wand2') String icon,
+  }) = _ThemeItem;
 
-  ThemeItem copyWith({
-    String? id,
-    String? name,
-    String? kind,
-    String? summary,
-    String? description,
-    String? tone,
-    String? icon,
-  }) {
-    return ThemeItem(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      kind: kind ?? this.kind,
-      summary: summary ?? this.summary,
-      description: description ?? this.description,
-      tone: tone ?? this.tone,
-      icon: icon ?? this.icon,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ThemeItem &&
-          id == other.id &&
-          name == other.name &&
-          kind == other.kind &&
-          summary == other.summary &&
-          description == other.description &&
-          tone == other.tone &&
-          icon == other.icon;
-
-  @override
-  int get hashCode => Object.hash(id, name, kind, summary, description, tone, icon);
+  factory ThemeItem.fromJson(Map<String, dynamic> json) =>
+      _$ThemeItemFromJson(json);
 }
 
 const kThemeTones = ['amber', 'teal', 'sky', 'rose', 'slate'];

@@ -1,84 +1,43 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
 import 'action_config.dart';
 import '../services/preset_loader.dart';
 
-class AtmosphereConfig {
-  final String mode; // "none", "subtle", "medium", "intense"
+part 'theme_draft.freezed.dart';
+part 'theme_draft.g.dart';
 
-  const AtmosphereConfig({this.mode = 'none'});
+@freezed
+class AtmosphereConfig with _$AtmosphereConfig {
+  const factory AtmosphereConfig({
+    @Default('none') String mode,
+  }) = _AtmosphereConfig;
 
-  AtmosphereConfig copyWith({String? mode}) {
-    return AtmosphereConfig(mode: mode ?? this.mode);
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is AtmosphereConfig && mode == other.mode;
-
-  @override
-  int get hashCode => mode.hashCode;
+  factory AtmosphereConfig.fromJson(Map<String, dynamic> json) =>
+      _$AtmosphereConfigFromJson(json);
 }
 
-class CursorStateAsset {
-  final String imageDataUrl;
-  final int hotspotX;
-  final int hotspotY;
-  final int size;
+@freezed
+class CursorStateAsset with _$CursorStateAsset {
+  const factory CursorStateAsset({
+    @Default('') String imageDataUrl,
+    @Default(16) int hotspotX,
+    @Default(32) int hotspotY,
+    @Default(48) int size,
+  }) = _CursorStateAsset;
 
-  const CursorStateAsset({
-    this.imageDataUrl = '',
-    this.hotspotX = 16,
-    this.hotspotY = 32,
-    this.size = 48,
-  });
-
-  CursorStateAsset copyWith({
-    String? imageDataUrl,
-    int? hotspotX,
-    int? hotspotY,
-    int? size,
-  }) {
-    return CursorStateAsset(
-      imageDataUrl: imageDataUrl ?? this.imageDataUrl,
-      hotspotX: hotspotX ?? this.hotspotX,
-      hotspotY: hotspotY ?? this.hotspotY,
-      size: size ?? this.size,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'imageDataUrl': imageDataUrl,
-    'hotspotX': hotspotX,
-    'hotspotY': hotspotY,
-    'size': size,
-  };
-
-  factory CursorStateAsset.fromJson(Map<String, dynamic> json) {
-    return CursorStateAsset(
-      imageDataUrl: json['imageDataUrl'] as String? ?? '',
-      hotspotX: json['hotspotX'] as int? ?? 16,
-      hotspotY: json['hotspotY'] as int? ?? 32,
-      size: json['size'] as int? ?? 48,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CursorStateAsset &&
-          imageDataUrl == other.imageDataUrl &&
-          hotspotX == other.hotspotX &&
-          hotspotY == other.hotspotY &&
-          size == other.size;
-
-  @override
-  int get hashCode => Object.hash(imageDataUrl, hotspotX, hotspotY, size);
+  factory CursorStateAsset.fromJson(Map<String, dynamic> json) =>
+      _$CursorStateAssetFromJson(json);
 }
 
+/// ThemeDraft: per-theme full config including all actions.
+///
+/// This is NOT freezed because [ThemeDraft.create] contains logic
+/// (initializing cursor state defaults). copyWith is hand-written since
+/// it uses a const constructor.
 class ThemeDraft {
   final Map<String, ActionConfig> actionConfigs;
-  final Map<String, String> cursorModes; // stateId -> "源" | "继承" | "覆盖"
-  final Map<String, String> cursorStateActions; // stateId -> actionId
+  final Map<String, String> cursorModes;
+  final Map<String, String> cursorStateActions;
   final Map<String, CursorStateAsset> cursorStateAssets;
   final AtmosphereConfig atmosphere;
 
