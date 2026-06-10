@@ -20,7 +20,7 @@ class SectionTitle extends StatelessWidget {
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 14,
+          fontSize: FontSizes.base,
           fontWeight: FontWeight.w600,
           color: cs.foreground,
         ),

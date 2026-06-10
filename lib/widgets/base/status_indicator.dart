@@ -35,7 +35,7 @@ class StatusIndicator extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: FontSizes.small,
             fontWeight: FontWeight.w500,
             color: active ? (cs.custom['success'] ?? Color(0xFF065F46)) : cs.mutedForeground,
           ),

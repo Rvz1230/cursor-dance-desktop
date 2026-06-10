@@ -178,7 +178,7 @@ class _PreviewPanelState extends State<PreviewPanel> {
               ),
               child: Text(
                 '未开启效果',
-                style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: cs.custom['warning'] ?? cs.primary),
+                style: TextStyle(fontSize: FontSizes.micro, fontWeight: FontWeight.w600, color: cs.custom['warning'] ?? cs.primary),
               ),
             ),
           const Spacer(),

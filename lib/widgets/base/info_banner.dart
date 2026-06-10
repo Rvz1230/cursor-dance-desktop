@@ -65,7 +65,7 @@ class InfoBanner extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: TextStyle(fontSize: 12, color: fg),
+              style: TextStyle(fontSize: FontSizes.small, color: fg),
             ),
           ),
           if (onDismiss != null)
@@ -73,7 +73,7 @@ class InfoBanner extends StatelessWidget {
               onTap: onDismiss,
               child: Padding(
                 padding: const EdgeInsets.only(left: Spacing.xs),
-                child: Icon(LucideIcons.x, size: 12, color: fg),
+                child: Icon(LucideIcons.x, size: IconSizes.sm, color: fg),
               ),
             ),
         ],

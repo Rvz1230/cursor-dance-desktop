@@ -13,6 +13,28 @@ flutter test                       # Run Dart tests
 flutter pub upgrade --major-versions  # Upgrade dependencies
 ```
 
+## UI Development — 写任何 UI 代码前必读
+
+**设计系统文件（按优先级排列）：**
+
+| 优先级 | 文件 | 作用 |
+|--------|------|------|
+| 1 | `.claude/skills/shadcn-ui/SKILL.md` | 组件决策表 + 禁止清单（每次对话自动加载） |
+| 2 | `DESIGN_GUIDE.md` | 设计语言规范（色彩/圆角/阴影/排版/动画/布局） |
+| 3 | `lib/theme/app_tokens.dart` | 令牌唯一源（FontSizes / Spacing / RadiusTokens / IconSizes） |
+| 4 | `lib/theme/app_theme.dart` | ShadThemeData 全配置（含所有子主题） |
+| 5 | `lib/theme/animations.dart` | 动画时长/缓动/效果组合 |
+
+**核心原则 7 条：**
+
+1. **组件必须从 shadcn_ui 取** — 禁止 Material（PopupMenuButton → ShadContextMenuRegion、DropdownButton → ShadSelect、Card → PanelCard 等）。详见 skill 中的组件决策表。
+2. **颜色从 theme 取** — `ShadTheme.of(context).colorScheme`，禁止硬编码 `Color(0xFF...)`
+3. **尺寸从 tokens 取** — 禁止 `fontSize: 14` / `EdgeInsets.all(8)` / `BorderRadius.circular(12)` / `size: 14` 等数字字面量
+4. **子主题已配置** — `popoverTheme` / `selectTheme` / `optionTheme` / `contextMenuTheme` / `cardTheme` 一律从 `app_theme.dart` 取，Widget 中禁止覆盖
+5. **条件渲染用 AnimatedOpacity** — 禁止 `if (condition)` 在 widget tree 中插入/移除元素，这会触发二次 hover 事件
+6. **弹出层注意滚动** — 在可滚动容器内用 `ShadSelect`/`ShadPopover` 时，必须在 `didChangeDependencies` 中监听 `Scrollable.position` 并在滚动时关闭
+7. **提交前看历史** — 修改任何 UI 前先 `git show 992fee9` 了解上次设计系统统一的修复模式，避免重复同类错误
+
 ## Project Architecture
 
 **CursorDance Desktop** — Flutter 桌面特效应用。配置窗口编辑特效参数，macOS 全屏覆盖层渲染鼠标点击反馈（粒子/涟漪/飘字）+ 键盘键入动效（字符弹跳/雨滴）。

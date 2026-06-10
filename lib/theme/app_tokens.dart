@@ -47,6 +47,7 @@ class RadiusTokens {
 class FontSizes {
   FontSizes._();
 
+  static const double micro = 9;
   static const double caption = 11;
   static const double small = 12;
   static const double body = 13;

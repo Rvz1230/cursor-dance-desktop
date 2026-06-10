@@ -349,7 +349,7 @@ class _ThemeCardState extends State<ThemeCard> {
               child: Text(
                 widget.theme.kind,
                 style: TextStyle(
-                  fontSize: 9,
+                  fontSize: FontSizes.micro,
                   fontWeight: FontWeight.w600,
                   color: badgeFg,
                   height: 1.2,
@@ -376,8 +376,10 @@ class _ThemeCardState extends State<ThemeCard> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            if (_hovered)
-              GestureDetector(
+            AnimatedOpacity(
+              duration: AppAnimations.fastish,
+              opacity: _hovered ? 1.0 : 0.0,
+              child: GestureDetector(
                 onTap: _startRename,
                 child: Container(
                   padding: const EdgeInsets.all(Spacing.xs),
@@ -391,18 +393,52 @@ class _ThemeCardState extends State<ThemeCard> {
                   ),
                 ),
               ),
+            ),
           ],
         ),
       ],
     );
   }
 
-  // ── More actions popup ──
+  // ── More actions menu (shadcn-styled) ──
 
   Widget _buildMoreActions(ShadColorScheme cs) {
-    return PopupMenuButton<String>(
-      padding: EdgeInsets.zero,
-      icon: AnimatedContainer(
+    return ShadContextMenuRegion(
+      tapEnabled: true,
+      items: [
+        ShadContextMenuItem(
+          leading: Icon(LucideIcons.copy, size: 14, color: cs.mutedForeground),
+          onPressed: widget.onDuplicate,
+          child: Text('复制', style: TextStyle(fontSize: FontSizes.small)),
+        ),
+        ShadContextMenuItem(
+          leading: Icon(LucideIcons.download, size: 14, color: cs.mutedForeground),
+          onPressed: widget.onExport,
+          child: Text('导出', style: TextStyle(fontSize: FontSizes.small)),
+        ),
+        ShadContextMenuItem(
+          leading: Icon(LucideIcons.palette, size: 14, color: cs.mutedForeground),
+          onPressed: () => _showIconPicker(context),
+          child: Text('更改图标', style: TextStyle(fontSize: FontSizes.small)),
+        ),
+        ShadContextMenuItem(
+          leading: Icon(
+            LucideIcons.trash2,
+            size: 14,
+            color: widget.canDelete ? cs.destructive : cs.mutedForeground,
+          ),
+          enabled: widget.canDelete,
+          onPressed: widget.canDelete ? widget.onDelete : null,
+          child: Text(
+            '删除',
+            style: TextStyle(
+              fontSize: FontSizes.small,
+              color: widget.canDelete ? cs.destructive : cs.mutedForeground,
+            ),
+          ),
+        ),
+      ],
+      child: AnimatedContainer(
         duration: AppAnimations.fastish,
         width: 26,
         height: 26,
@@ -415,71 +451,6 @@ class _ThemeCardState extends State<ThemeCard> {
           color: cs.mutedForeground,
         ),
       ),
-      onSelected: (v) {
-        switch (v) {
-          case 'duplicate': widget.onDuplicate();
-          case 'export': widget.onExport();
-          case 'icon': _showIconPicker(context);
-          case 'delete': widget.onDelete();
-        }
-      },
-      itemBuilder: (_) => [
-        PopupMenuItem(
-          value: 'duplicate',
-          height: 36,
-          child: Row(
-            children: [
-              Icon(LucideIcons.copy, size: 14, color: cs.mutedForeground),
-              const SizedBox(width: Spacing.sm),
-              Text('复制', style: TextStyle(fontSize: FontSizes.small)),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'export',
-          height: 36,
-          child: Row(
-            children: [
-              Icon(LucideIcons.download, size: 14, color: cs.mutedForeground),
-              const SizedBox(width: Spacing.sm),
-              Text('导出', style: TextStyle(fontSize: FontSizes.small)),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'icon',
-          height: 36,
-          child: Row(
-            children: [
-              Icon(LucideIcons.palette, size: 14, color: cs.mutedForeground),
-              const SizedBox(width: Spacing.sm),
-              Text('更改图标', style: TextStyle(fontSize: FontSizes.small)),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'delete',
-          height: 36,
-          enabled: widget.canDelete,
-          child: Row(
-            children: [
-              Icon(
-                LucideIcons.trash2,
-                size: 14,
-                color: widget.canDelete ? cs.destructive : cs.mutedForeground,
-              ),
-              const SizedBox(width: Spacing.sm),
-              Text(
-                '删除',
-                style: TextStyle(
-                  fontSize: FontSizes.small,
-                  color: widget.canDelete ? cs.destructive : cs.mutedForeground,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 

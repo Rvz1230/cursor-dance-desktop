@@ -25,7 +25,7 @@ class SettingsPage extends StatelessWidget {
             Text(
               '设置页',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: FontSizes.h2,
                 fontWeight: FontWeight.w600,
                 color: cs.foreground,
               ),
@@ -34,7 +34,7 @@ class SettingsPage extends StatelessWidget {
             Text(
               '即将到来',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: FontSizes.base,
                 color: cs.mutedForeground,
               ),
             ),
