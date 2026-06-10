@@ -7,6 +7,9 @@ import '../../models/theme.dart';
 import '../providers/theme_provider.dart';
 import '../theme/app_tokens.dart';
 import '../theme/animations.dart';
+import 'base/empty_state.dart';
+import 'base/info_banner.dart';
+import 'base/panel_utils.dart';
 import 'controls/app_icon_button.dart';
 import 'theme_card.dart';
 import 'theme_composer_modal.dart';
@@ -73,7 +76,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 
     return AnimatedContainer(
       duration: AppAnimations.slow,
-      width: _collapsed ? 72 : 260,
+      width: _collapsed ? kSidebarCollapsedWidth : kSidebarExpandedWidth,
       decoration: BoxDecoration(
         color: cs.card,
         border: Border(
@@ -85,7 +88,15 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
           _buildHeader(theme, cs),
           if (!_collapsed) _buildCategoryTabs(cs),
           if (!_collapsed) _buildSearch(cs),
-          if (_actionError.isNotEmpty && !_collapsed) _buildErrorBanner(cs),
+          if (_actionError.isNotEmpty && !_collapsed)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(Spacing.sm, 2, Spacing.sm, Spacing.xs),
+              child: InfoBanner(
+                message: _actionError,
+                type: InfoBannerType.error,
+                onDismiss: _clearError,
+              ),
+            ),
           Expanded(child: _buildThemeList(theme, cs)),
           if (_collapsed) _buildCollapsedCreate(cs),
         ],
@@ -163,41 +174,30 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
     );
   }
 
-  Widget _buildErrorBanner(ShadColorScheme cs) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(Spacing.sm, 2, Spacing.sm, Spacing.xs),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.sm),
-        decoration: BoxDecoration(
-          color: cs.destructive.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(RadiusTokens.lg),
-          border: Border.all(color: cs.destructive.withValues(alpha: 0.15)),
-        ),
-        child: Row(
-          children: [
-            Icon(LucideIcons.alertTriangle, size: IconSizes.sm, color: cs.destructive),
-            const SizedBox(width: Spacing.sm),
-            Expanded(
-              child: Text(
-                _actionError,
-                style: TextStyle(fontSize: FontSizes.caption, color: cs.destructive),
-              ),
-            ),
-            GestureDetector(
-              onTap: _clearError,
-              child: Icon(LucideIcons.x, size: IconSizes.sm, color: cs.destructive),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildThemeList(ThemeProvider theme, ShadColorScheme cs) {
     final themes = _filteredThemes;
     if (themes.isEmpty) {
-      return _buildEmptyState(cs);
+      final (icon, title, subtitle) = switch (_categoryFilter) {
+        'builtin' => (LucideIcons.package, '暂无内置主题', '所有内置主题可能已被删除。'),
+        'custom' => (LucideIcons.penSquare, '暂无自定义主题', '点击上方的 + 新建一个主题。'),
+        _ => (
+          LucideIcons.search,
+          _query.isNotEmpty ? '没有找到匹配的主题' : '暂无可用主题',
+          _query.isNotEmpty ? '试试其他关键词？' : '新建一个主题，或导入已有主题包。',
+        ),
+      };
+      return EmptyState(
+        icon: icon,
+        title: title,
+        subtitle: subtitle,
+        actionLabel: _query.isEmpty ? '新建主题' : null,
+        onAction: _query.isEmpty
+            ? () {
+                _clearError();
+                _showComposerModal();
+              }
+            : null,
+      );
     }
 
     if (_focusedIndex >= themes.length) {
@@ -322,66 +322,6 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
             fontWeight: active ? FontWeight.w600 : FontWeight.normal,
             color: active ? cs.foreground : cs.mutedForeground,
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(ShadColorScheme cs) {
-    final (icon, title, subtitle) = switch (_categoryFilter) {
-      'builtin' => (
-        LucideIcons.package,
-        '暂无内置主题',
-        '所有内置主题可能已被删除。',
-      ),
-      'custom' => (
-        LucideIcons.penSquare,
-        '暂无自定义主题',
-        '点击上方的 + 新建一个主题。',
-      ),
-      _ => (
-        LucideIcons.search,
-        _query.isNotEmpty ? '没有找到匹配的主题' : '暂无可用主题',
-        _query.isNotEmpty ? '试试其他关键词？' : '新建一个主题，或导入已有主题包。',
-      ),
-    };
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(Spacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: IconSizes.xl, color: cs.mutedForeground),
-            const SizedBox(height: Spacing.sm),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: FontSizes.small,
-                fontWeight: FontWeight.w600,
-                color: cs.foreground,
-              ),
-            ),
-            const SizedBox(height: Spacing.xs),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: FontSizes.caption,
-                color: cs.mutedForeground,
-              ),
-            ),
-            if (_query.isEmpty) ...[
-              const SizedBox(height: Spacing.md),
-              ShadButton(
-                size: ShadButtonSize.sm,
-                onPressed: () {
-                  _clearError();
-                  _showComposerModal();
-                },
-                child: const Text('新建主题'),
-              ),
-            ],
-          ],
         ),
       ),
     );

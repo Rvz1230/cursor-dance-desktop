@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../models/theme.dart';
 import '../theme/app_tokens.dart';
 import '../theme/animations.dart';
+import 'controls/inline_edit_field.dart';
 import 'controls/scale_tap.dart';
 import 'icon_picker_dialog.dart';
 
@@ -48,43 +48,19 @@ class ThemeCard extends StatefulWidget {
 class _ThemeCardState extends State<ThemeCard> {
   bool _renaming = false;
   bool _hovered = false;
-  late TextEditingController _renameController;
-
-  @override
-  void initState() {
-    super.initState();
-    _renameController = TextEditingController(text: widget.theme.name);
-  }
-
-  @override
-  void didUpdateWidget(covariant ThemeCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.theme.name != oldWidget.theme.name) {
-      _renameController.text = widget.theme.name;
-    }
-  }
-
-  @override
-  void dispose() {
-    _renameController.dispose();
-    super.dispose();
-  }
 
   void _startRename() {
-    _renameController.text = widget.theme.name;
     setState(() => _renaming = true);
   }
 
-  void _commitRename() {
-    final trimmed = _renameController.text.trim();
-    if (trimmed.isNotEmpty && trimmed != widget.theme.name) {
-      widget.onRename(trimmed);
+  void _finishRename(String newName) {
+    if (newName.isNotEmpty && newName != widget.theme.name) {
+      widget.onRename(newName);
     }
     setState(() => _renaming = false);
   }
 
   void _cancelRename() {
-    _renameController.text = widget.theme.name;
     setState(() => _renaming = false);
   }
 
@@ -262,7 +238,11 @@ class _ThemeCardState extends State<ThemeCard> {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 6, bottom: Spacing.sm),
                       child: _renaming
-                          ? _buildRenameField(cs)
+                          ? InlineEditField(
+                              initialValue: widget.theme.name,
+                              onSubmit: _finishRename,
+                              onCancel: _cancelRename,
+                            )
                           : _buildNameSection(cs, badgeBg, badgeFg, badgeBorder),
                     ),
                   ),
@@ -275,33 +255,6 @@ class _ThemeCardState extends State<ThemeCard> {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  // ── Rename inline field ──
-
-  Widget _buildRenameField(ShadColorScheme cs) {
-    return SizedBox(
-      height: 32,
-      child: Focus(
-        onKeyEvent: (node, event) {
-          if (event.logicalKey == LogicalKeyboardKey.escape && event is KeyDownEvent) {
-            _cancelRename();
-            return KeyEventResult.handled;
-          }
-          return KeyEventResult.ignored;
-        },
-        child: ShadInput(
-          controller: _renameController,
-          autofocus: true,
-          style: TextStyle(
-            fontSize: FontSizes.small,
-            fontWeight: FontWeight.w600,
-            color: cs.foreground,
-          ),
-          onSubmitted: (_) => _commitRename(),
         ),
       ),
     );

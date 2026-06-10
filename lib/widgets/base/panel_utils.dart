@@ -14,3 +14,11 @@ class PanelDivider extends StatelessWidget {
     );
   }
 }
+
+// ── 侧栏尺寸常量 ──
+
+/// 侧栏折叠态宽度
+const double kSidebarCollapsedWidth = 72;
+
+/// 侧栏展开态宽度
+const double kSidebarExpandedWidth = 260;
