@@ -5,7 +5,6 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../providers/config_provider.dart';
 import '../providers/overlay_provider.dart';
 import '../providers/theme_provider.dart';
-import '../theme/app_tokens.dart';
 import '../widgets/workbench_header.dart';
 import '../widgets/workbench_sidebar.dart';
 import 'workspaces/keyboard_workspace.dart';
@@ -89,51 +88,7 @@ class ConfigPageState extends State<ConfigPage> {
             ],
           ),
         ),
-        _buildStatusBar(theme, overlay),
       ],
-    );
-  }
-
-  Widget _buildStatusBar(ThemeProvider theme, OverlayProvider overlay) {
-    final cs = ShadTheme.of(context).colorScheme;
-    return Container(
-      height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
-      decoration: BoxDecoration(
-        color: cs.card,
-        border: Border(
-          top: BorderSide(color: cs.border),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            overlay.enabled ? LucideIcons.circle : LucideIcons.radio,
-            size: 10,
-            color: overlay.enabled
-                ? (cs.custom['success'] ?? cs.primary)
-                : cs.mutedForeground,
-          ),
-          const SizedBox(width: Spacing.sm),
-          Text(
-            overlay.enabled ? '动效已启用' : '动效已停止',
-            style: TextStyle(
-              fontSize: FontSizes.base,
-              color: overlay.enabled
-                  ? (cs.custom['success'] ?? cs.primary)
-                  : cs.mutedForeground,
-            ),
-          ),
-          const Spacer(),
-          ShadButton(
-            onPressed: _toggleEnabled,
-            backgroundColor: overlay.enabled
-                ? cs.destructive
-                : cs.primary,
-            child: Text(overlay.enabled ? '停止' : '启用'),
-          ),
-        ],
-      ),
     );
   }
 
