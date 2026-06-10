@@ -48,27 +48,36 @@ class _TextTagEditorState extends State<TextTagEditor> {
   @override
   Widget build(BuildContext context) {
     final theme = ShadTheme.of(context);
+    final cs = theme.colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Material(
-          type: MaterialType.transparency,
-          child: Wrap(
-            spacing: Spacing.xs,
-            runSpacing: Spacing.xs,
-            children: [
-              for (int i = 0; i < widget.tags.length; i++)
-                Chip(
-                  label: Text(widget.tags[i], style: theme.textTheme.small),
-                  deleteIcon: Icon(LucideIcons.x, size: 12),
-                  onDeleted: () => _removeTag(i),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: Spacing.xs),
+        Wrap(
+          spacing: Spacing.xs,
+          runSpacing: Spacing.xs,
+          children: [
+            for (int i = 0; i < widget.tags.length; i++)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
+                decoration: BoxDecoration(
+                  color: cs.muted,
+                  borderRadius: BorderRadius.circular(RadiusTokens.lg),
+                  border: Border.all(color: cs.border),
                 ),
-            ],
-          ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(widget.tags[i], style: theme.textTheme.small),
+                    const SizedBox(width: Spacing.xs),
+                    GestureDetector(
+                      onTap: () => _removeTag(i),
+                      child: Icon(LucideIcons.x, size: IconSizes.sm, color: cs.mutedForeground),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: Spacing.xs),
         Row(

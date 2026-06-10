@@ -45,7 +45,7 @@ class WorkbenchHeader extends StatelessWidget {
                 'CursorDance',
                 style: TextStyle(
                   fontSize: FontSizes.base,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                   color: cs.foreground,
                 ),
               ),
@@ -109,7 +109,7 @@ class WorkbenchHeader extends StatelessWidget {
                       const SizedBox(
                         width: IconSizes.sm,
                         height: IconSizes.sm,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: ShadProgress(),
                       )
                     else
                       Icon(LucideIcons.save, size: IconSizes.md),

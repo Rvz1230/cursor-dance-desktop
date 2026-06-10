@@ -59,9 +59,14 @@ class ConfigPageState extends State<ConfigPage> {
   @override
   Widget build(BuildContext context) {
     if (!_isLoaded) {
-      return Scaffold(
-        backgroundColor: ShadTheme.of(context).colorScheme.background,
-        body: const Center(child: CircularProgressIndicator()),
+      return Container(
+        color: ShadTheme.of(context).colorScheme.background,
+        child: const Center(
+          child: SizedBox(
+            width: 120,
+            child: ShadProgress(),
+          ),
+        ),
       );
     }
 

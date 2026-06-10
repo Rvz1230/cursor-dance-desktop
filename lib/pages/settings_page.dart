@@ -10,37 +10,57 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = ShadTheme.of(context).colorScheme;
 
-    return Scaffold(
-      backgroundColor: cs.background,
-      appBar: AppBar(
-        title: const Text('设置'),
-        backgroundColor: cs.card,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(LucideIcons.settings, size: 48, color: cs.mutedForeground),
-            const SizedBox(height: Spacing.lg),
-            Text(
-              '设置页',
+    return Column(
+      children: [
+        Container(
+          height: 52,
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+          decoration: BoxDecoration(
+            color: cs.card,
+            border: Border(
+              bottom: BorderSide(color: cs.border),
+            ),
+          ),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '设置',
               style: TextStyle(
-                fontSize: FontSizes.h2,
+                fontSize: FontSizes.base,
                 fontWeight: FontWeight.w600,
                 color: cs.foreground,
               ),
             ),
-            const SizedBox(height: Spacing.sm),
-            Text(
-              '即将到来',
-              style: TextStyle(
-                fontSize: FontSizes.base,
-                color: cs.mutedForeground,
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(LucideIcons.settings, size: 48, color: cs.mutedForeground),
+                const SizedBox(height: Spacing.lg),
+                Text(
+                  '设置页',
+                  style: TextStyle(
+                    fontSize: FontSizes.h2,
+                    fontWeight: FontWeight.w600,
+                    color: cs.foreground,
+                  ),
+                ),
+                const SizedBox(height: Spacing.sm),
+                Text(
+                  '即将到来',
+                  style: TextStyle(
+                    fontSize: FontSizes.base,
+                    color: cs.mutedForeground,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

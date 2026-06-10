@@ -68,7 +68,7 @@ class KeyboardWorkspace extends StatelessWidget {
             child: const Icon(
               LucideIcons.keyboard,
               size: 16,
-              color: Color(0xFF4F46E5),
+              color: AppColors.toneKeyboardFg,
             ),
           ),
           const SizedBox(width: Spacing.md),
@@ -90,12 +90,12 @@ class KeyboardWorkspace extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: Spacing.md),
       decoration: BoxDecoration(
         color: config.enabled
-            ? (cs.custom['success']?.withValues(alpha: 0.08) ?? const Color(0xFFECFDF5))
+            ? (cs.custom['success']?.withValues(alpha: 0.08) ?? AppColors.success.withValues(alpha: 0.08))
             : cs.muted,
         borderRadius: BorderRadius.circular(RadiusTokens.xl),
         border: Border.all(
           color: config.enabled
-              ? (cs.custom['success']?.withValues(alpha: 0.3) ?? const Color(0xFF6EE7B7))
+              ? (cs.custom['success']?.withValues(alpha: 0.3) ?? AppColors.success.withValues(alpha: 0.3))
               : cs.border,
         ),
       ),

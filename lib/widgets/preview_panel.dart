@@ -156,7 +156,7 @@ class _PreviewPanelState extends State<PreviewPanel> {
 
   Widget _buildHeader(ShadColorScheme cs, String actionLabel, bool hasEffects) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: Spacing.sm),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: cs.border)),
       ),

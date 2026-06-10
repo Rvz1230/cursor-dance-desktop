@@ -73,11 +73,10 @@ class ColorOptions extends StatelessWidget {
 
     Color color = _parseHex(value);
 
-    final result = await showDialog<Color>(
+    final result = await showShadDialog<Color>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        contentPadding: const EdgeInsets.all(Spacing.lg),
-        content: ColorPicker(
+      builder: (ctx) => ShadDialog(
+        child: ColorPicker(
           color: color,
           onColorChanged: (c) => color = c,
           pickersEnabled: const <ColorPickerType, bool>{
@@ -88,11 +87,11 @@ class ColorOptions extends StatelessWidget {
           width: 320,
         ),
         actions: [
-          TextButton(
+          ShadButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('取消'),
           ),
-          TextButton(
+          ShadButton(
             onPressed: () => Navigator.of(ctx).pop(color),
             child: const Text('确定'),
           ),

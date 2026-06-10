@@ -66,8 +66,8 @@ class KeyFeedbackCard extends StatelessWidget {
             // ── Animation Style Picker ──
             const SectionTitle(title: '动画风格'),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: Spacing.sm,
+              runSpacing: Spacing.sm,
               children: _kAnimationStyles.map((style) {
                 final selected = config.animationStyle == style.$1;
                 return _StyleChip(

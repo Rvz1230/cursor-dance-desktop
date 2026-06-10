@@ -39,7 +39,7 @@ class InfoBanner extends StatelessWidget {
         LucideIcons.alertTriangle,
       ),
       InfoBannerType.success => (
-        cs.custom['success']?.withValues(alpha: 0.06) ?? const Color(0xFFECFDF5),
+        cs.custom['success']?.withValues(alpha: 0.06) ?? AppColors.success.withValues(alpha: 0.06),
         cs.custom['success']?.withValues(alpha: 0.2) ?? const Color(0xFF6EE7B7).withValues(alpha: 0.2),
         cs.custom['success'] ?? const Color(0xFF065F46),
         LucideIcons.checkCircle2,

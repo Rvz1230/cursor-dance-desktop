@@ -28,7 +28,7 @@ class StatusIndicator extends StatelessWidget {
           height: 8,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: active ? (cs.custom['success'] ?? Color(0xFF10B981)) : cs.mutedForeground,
+            color: active ? (cs.custom['success'] ?? AppColors.success) : cs.mutedForeground,
           ),
         ),
         const SizedBox(width: Spacing.sm),
@@ -37,7 +37,7 @@ class StatusIndicator extends StatelessWidget {
           style: TextStyle(
             fontSize: FontSizes.small,
             fontWeight: FontWeight.w500,
-            color: active ? (cs.custom['success'] ?? Color(0xFF065F46)) : cs.mutedForeground,
+            color: active ? (cs.custom['success'] ?? AppColors.success) : cs.mutedForeground,
           ),
         ),
       ],

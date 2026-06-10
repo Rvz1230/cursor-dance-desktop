@@ -93,7 +93,7 @@ class ConfigPanel extends StatelessWidget {
                   children: [
                     Icon(
                       LucideIcons.alertTriangle,
-                      size: 14,
+                      size: IconSizes.md,
                       color: cs.custom['warning'] ?? cs.primary,
                     ),
                     const SizedBox(width: Spacing.sm),

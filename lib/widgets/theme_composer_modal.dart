@@ -6,6 +6,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../providers/theme_provider.dart';
 import '../../theme/app_tokens.dart';
+import 'controls/app_icon_button.dart';
 
 /// Modal dialog for creating or importing themes.
 ///
@@ -43,8 +44,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
   Widget build(BuildContext context) {
     final cs = ShadTheme.of(context).colorScheme;
 
-    return Dialog(
-      child: Container(
+    return Container(
         width: 420,
         constraints: const BoxConstraints(maxHeight: 520),
         decoration: BoxDecoration(
@@ -85,9 +85,9 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(LucideIcons.x, size: IconSizes.md),
-                    onPressed: () => Navigator.of(context).pop(),
+                  AppIconButton(
+                    icon: LucideIcons.x,
+                    onTap: () => Navigator.of(context).pop(),
                     tooltip: '关闭',
                   ),
                 ],
@@ -115,7 +115,6 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -199,33 +198,20 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
 
   Widget _buildBaseThemeSelector(ShadColorScheme cs) {
     final theme = context.read<ThemeProvider>();
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: Spacing.xs),
-      decoration: BoxDecoration(
-        color: cs.muted,
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: cs.border),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _createBaseThemeId,
-          isExpanded: true,
-          style: TextStyle(fontSize: FontSizes.small, color: cs.foreground),
-          items: [
-            const DropdownMenuItem(
-              value: 'blank',
-              child: Text('空白主题'),
-            ),
-            ...theme.themeLibrary.map((t) => DropdownMenuItem(
-              value: t.id,
-              child: Text(t.name),
-            )),
-          ],
-          onChanged: (v) {
-            if (v != null) setState(() => _createBaseThemeId = v);
-          },
-        ),
-      ),
+    return ShadSelect<String>(
+      initialValue: _createBaseThemeId,
+      selectedOptionBuilder: (context, value) {
+        if (value == 'blank') return const Text('空白主题');
+        final t = theme.themeLibrary.firstWhere((t) => t.id == value);
+        return Text(t.name);
+      },
+      options: [
+        const ShadOption(value: 'blank', child: Text('空白主题')),
+        ...theme.themeLibrary.map((t) => ShadOption(value: t.id, child: Text(t.name))),
+      ],
+      onChanged: (v) {
+        if (v != null) setState(() => _createBaseThemeId = v);
+      },
     );
   }
 
@@ -397,20 +383,20 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
       width: double.infinity,
       padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
-        color: cs.custom['success']?.withValues(alpha: 0.06) ?? const Color(0xFFECFDF5),
+        color: cs.custom['success']?.withValues(alpha: 0.06) ?? AppColors.success.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(RadiusTokens.lg),
         border: Border.all(
-          color: cs.custom['success']?.withValues(alpha: 0.2) ?? const Color(0xFF6EE7B7).withValues(alpha: 0.2),
+          color: cs.custom['success']?.withValues(alpha: 0.2) ?? AppColors.success.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
         children: [
-          Icon(LucideIcons.checkCircle2, size: IconSizes.sm, color: cs.custom['success'] ?? const Color(0xFF065F46)),
+          Icon(LucideIcons.checkCircle2, size: IconSizes.sm, color: cs.custom['success'] ?? AppColors.success),
           const SizedBox(width: Spacing.sm),
           Expanded(
             child: Text(
               message,
-              style: TextStyle(fontSize: FontSizes.caption, color: cs.custom['success'] ?? const Color(0xFF065F46)),
+              style: TextStyle(fontSize: FontSizes.caption, color: cs.custom['success'] ?? AppColors.success),
             ),
           ),
         ],

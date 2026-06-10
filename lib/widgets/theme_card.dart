@@ -155,7 +155,7 @@ class _ThemeCardState extends State<ThemeCard> {
                           width: 10,
                           height: 10,
                           decoration: BoxDecoration(
-                            color: cs.custom['success'] ?? const Color(0xFF10B981),
+                            color: cs.custom['success'] ?? AppColors.success,
                             shape: BoxShape.circle,
                             border: Border.all(color: cs.card, width: 2),
                           ),
@@ -169,7 +169,7 @@ class _ThemeCardState extends State<ThemeCard> {
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: cs.custom['warning'] ?? const Color(0xFFF59E0B),
+                            color: cs.custom['warning'] ?? AppColors.warning,
                             shape: BoxShape.circle,
                             border: Border.all(color: cs.card, width: 1.5),
                           ),
@@ -194,12 +194,12 @@ class _ThemeCardState extends State<ThemeCard> {
     // Badge colors: builtin → teal tint, custom → amber tint
     final (Color badgeBg, Color badgeFg, Color badgeBorder) =
         widget.theme.kind == '内置'
-            ? (cs.custom['success']?.withValues(alpha: 0.2) ?? const Color(0xFFCCFBF1),
-               cs.custom['success'] ?? const Color(0xFF0D9488),
-               cs.custom['success']?.withValues(alpha: 0.4) ?? const Color(0xFF5EEAD4))
-            : (cs.custom['warning']?.withValues(alpha: 0.2) ?? const Color(0xFFFEF3C7),
-               cs.custom['warning'] ?? const Color(0xFFB45309),
-               cs.custom['warning']?.withValues(alpha: 0.4) ?? const Color(0xFFFCD34D));
+            ? (cs.custom['success']?.withValues(alpha: 0.2) ?? AppColors.success.withValues(alpha: 0.2),
+               cs.custom['success'] ?? AppColors.success,
+               cs.custom['success']?.withValues(alpha: 0.4) ?? AppColors.success.withValues(alpha: 0.4))
+            : (cs.custom['warning']?.withValues(alpha: 0.2) ?? AppColors.warning.withValues(alpha: 0.2),
+               cs.custom['warning'] ?? AppColors.warning,
+               cs.custom['warning']?.withValues(alpha: 0.4) ?? AppColors.warning.withValues(alpha: 0.4));
 
     return Padding(
       padding: const EdgeInsets.only(bottom: Spacing.xs),
@@ -293,25 +293,13 @@ class _ThemeCardState extends State<ThemeCard> {
           }
           return KeyEventResult.ignored;
         },
-        child: TextField(
+        child: ShadInput(
           controller: _renameController,
           autofocus: true,
           style: TextStyle(
             fontSize: FontSizes.small,
             fontWeight: FontWeight.w600,
             color: cs.foreground,
-          ),
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: Spacing.xs),
-            isDense: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(RadiusTokens.md),
-              borderSide: BorderSide(color: cs.primary),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(RadiusTokens.md),
-              borderSide: BorderSide(color: cs.primary, width: 1.5),
-            ),
           ),
           onSubmitted: (_) => _commitRename(),
         ),
@@ -359,7 +347,7 @@ class _ThemeCardState extends State<ThemeCard> {
             if (widget.isDirty)
               Padding(
                 padding: const EdgeInsets.only(left: Spacing.xs),
-                child: Icon(LucideIcons.circle, size: 6, color: cs.custom['warning'] ?? const Color(0xFFF59E0B)),
+                child: Icon(LucideIcons.circle, size: 6, color: cs.custom['warning'] ?? AppColors.warning),
               ),
           ],
         ),
@@ -457,7 +445,7 @@ class _ThemeCardState extends State<ThemeCard> {
   // ── Icon picker dialog ──
 
   void _showIconPicker(BuildContext context) {
-    showDialog(
+    showShadDialog(
       context: context,
       builder: (_) => IconPickerDialog(
         currentIcon: widget.theme.icon,

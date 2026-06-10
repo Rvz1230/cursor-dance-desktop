@@ -416,7 +416,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
   }
 
   void _showComposerModal() {
-    showDialog(
+    showShadDialog(
       context: context,
       builder: (_) => const ThemeComposerModal(),
     );
@@ -424,19 +424,17 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 
   void _confirmDelete(ThemeItem theme) {
     _clearError();
-    final cs = ShadTheme.of(context).colorScheme;
-    showDialog(
+    showShadDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => ShadDialog.alert(
         title: Text('删除「${theme.name}」？'),
-        content: const Text('此操作会在下次保存时生效。'),
+        description: const Text('此操作会在下次保存时生效。'),
         actions: [
-          TextButton(
+          ShadButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('取消'),
           ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: cs.destructive),
+          ShadButton.destructive(
             onPressed: () {
               _theme.deleteTheme(theme.id);
               Navigator.of(ctx).pop();
@@ -455,17 +453,17 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
         .where((t) => t.id == targetId)
         .firstOrNull
         ?.name;
-    showDialog(
+    showShadDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => ShadDialog.alert(
         title: const Text('未保存的更改'),
-        content: Text('「$currentName」有未保存的更改。${targetName != null ? '切换到「$targetName」前要保存这些更改吗？' : ''}'),
+        description: Text('「$currentName」有未保存的更改。${targetName != null ? '切换到「$targetName」前要保存这些更改吗？' : ''}'),
         actions: [
-          TextButton(
+          ShadButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('取消'),
           ),
-          TextButton(
+          ShadButton(
             onPressed: () {
               _theme.discardThemeChanges(_theme.selectedThemeId);
               _theme.setThemeId(targetId);

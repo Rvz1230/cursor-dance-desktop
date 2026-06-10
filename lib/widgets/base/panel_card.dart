@@ -84,7 +84,7 @@ class _PanelCardState extends State<PanelCard> {
           _buildHeader(theme, isDark),
           if (_isOpen)
             Padding(
-              padding: const EdgeInsets.fromLTRB(Spacing.lg, 12, 16, 12),
+              padding: const EdgeInsets.fromLTRB(Spacing.lg, Spacing.md, Spacing.lg, Spacing.md),
               child: widget.child.animate().fadeIn(duration: AppAnimations.normal).slideX(begin: 0.03, duration: AppAnimations.normal),
             ),
         ],
@@ -107,7 +107,7 @@ class _PanelCardState extends State<PanelCard> {
       behavior: HitTestBehavior.opaque,
       child: ScaleTap(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: Spacing.md),
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.md),
           decoration: BoxDecoration(
             border: hasBorder
                 ? Border(

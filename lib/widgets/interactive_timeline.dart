@@ -200,7 +200,7 @@ class _TimelineView extends StatelessWidget {
                 child: Text(
                   '${t}ms',
                   style: TextStyle(
-                    fontSize: 8,
+                    fontSize: FontSizes.micro,
                     color: cs.mutedForeground,
                   ),
                   textAlign: TextAlign.center,
@@ -284,7 +284,7 @@ class _TrackRow extends StatelessWidget {
                       child: Text(
                         '${track.configuredDuration}ms',
                         style: const TextStyle(
-                          fontSize: 9,
+                          fontSize: FontSizes.micro,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
@@ -299,7 +299,7 @@ class _TrackRow extends StatelessWidget {
                       child: Text(
                         '延迟 ${track.startMs}ms',
                         style: TextStyle(
-                          fontSize: 8,
+                          fontSize: FontSizes.micro,
                           color: cs.mutedForeground,
                         ),
                       ),

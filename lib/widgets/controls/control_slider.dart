@@ -104,9 +104,7 @@ class _ControlSliderState extends State<ControlSlider> {
           Flexible(
             child: SizedBox(
               width: 56,
-              child: Material(
-                type: MaterialType.transparency,
-                child: TextField(
+              child: ShadInput(
                   controller: _controller,
                   focusNode: _focusNode,
                   textAlign: TextAlign.right,
@@ -117,17 +115,12 @@ class _ControlSliderState extends State<ControlSlider> {
                     color: cs.foreground,
                     height: 1.2,
                   ),
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
+                  decoration: const ShadDecoration(
+                    border: ShadBorder.none,
                   ),
                   keyboardType: TextInputType.number,
                   onSubmitted: _onSubmitted,
                 ),
-              ),
             ),
           ),
           if (widget.suffix != null)
