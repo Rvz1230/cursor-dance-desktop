@@ -124,6 +124,7 @@ class _PreviewPanelState extends State<PreviewPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
     final actionLabel = kActionLabels[widget.actionId] ?? widget.actionId;
     final cfg = widget.config;
     final hasEffects =
@@ -131,16 +132,16 @@ class _PreviewPanelState extends State<PreviewPanel> {
         cfg.animationEnabled || cfg.imageEnabled;
 
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(Spacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: cs.card,
         borderRadius: BorderRadius.circular(RadiusTokens.xl),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: cs.border),
       ),
       child: Column(
         children: [
-          _buildHeader(actionLabel, hasEffects),
-          Expanded(child: _buildStage(hasEffects, actionLabel, cfg)),
+          _buildHeader(cs, actionLabel, hasEffects),
+          Expanded(child: _buildStage(cs, hasEffects, actionLabel, cfg)),
           if (hasEffects)
             SizedBox(
               height: 135,
@@ -153,53 +154,53 @@ class _PreviewPanelState extends State<PreviewPanel> {
     );
   }
 
-  Widget _buildHeader(String actionLabel, bool hasEffects) {
+  Widget _buildHeader(ShadColorScheme cs, String actionLabel, bool hasEffects) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border)),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: cs.border)),
       ),
       child: Row(
         children: [
-          const Icon(LucideIcons.mousePointer2, size: IconSizes.md, color: AppColors.foreground),
+          Icon(LucideIcons.mousePointer2, size: IconSizes.md, color: cs.foreground),
           const SizedBox(width: 6),
-          const Text(
+          Text(
             '实时预览',
-            style: TextStyle(fontSize: FontSizes.base, fontWeight: FontWeight.w600, color: AppColors.foreground),
+            style: TextStyle(fontSize: FontSizes.base, fontWeight: FontWeight.w600, color: cs.foreground),
           ),
           if (!hasEffects)
             Container(
               margin: const EdgeInsets.only(left: 6),
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: Spacing.xs, vertical: 1),
               decoration: BoxDecoration(
-                color: AppColors.warning.withValues(alpha: 0.1),
+                color: cs.custom['warning']?.withValues(alpha: 0.1) ?? cs.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(RadiusTokens.sm),
               ),
-              child: const Text(
+              child: Text(
                 '未开启效果',
-                style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.warning),
+                style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: cs.custom['warning'] ?? cs.primary),
               ),
             ),
           const Spacer(),
           if (hasEffects) ...[
-            _iconBtn(LucideIcons.rotateCcw, '重播', _replayOnce),
-            const SizedBox(width: 4),
-            _iconBtn(
+            _iconBtn(cs, LucideIcons.rotateCcw, '重播', _replayOnce),
+            const SizedBox(width: Spacing.xs),
+            _iconBtn(cs,
               _autoPlay ? LucideIcons.pause : LucideIcons.play,
               _autoPlay ? '暂停自动播放' : '开启自动播放',
               _toggleAutoPlay,
               active: _autoPlay,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: Spacing.sm),
             SizedBox(
               width: 100,
               child: Row(
                 children: [
                   Text(
                     _formatInterval(_triggerInterval),
-                    style: const TextStyle(fontSize: FontSizes.caption, fontWeight: FontWeight.w600, color: AppColors.foreground),
+                    style: TextStyle(fontSize: FontSizes.caption, fontWeight: FontWeight.w600, color: cs.foreground),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: Spacing.xs),
                   Expanded(
                     child: ShadSlider(
                       initialValue: _triggerInterval,
@@ -218,7 +219,7 @@ class _PreviewPanelState extends State<PreviewPanel> {
     );
   }
 
-  Widget _iconBtn(IconData icon, String tooltip, VoidCallback onTap, {bool active = false}) {
+  Widget _iconBtn(ShadColorScheme cs, IconData icon, String tooltip, VoidCallback onTap, {bool active = false}) {
     return Tooltip(
       message: tooltip,
       preferBelow: false,
@@ -230,13 +231,13 @@ class _PreviewPanelState extends State<PreviewPanel> {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: active ? AppColors.primary : AppColors.muted,
+              color: active ? cs.primary : cs.muted,
               borderRadius: BorderRadius.circular(RadiusTokens.sm),
             ),
             child: Icon(
               icon,
               size: IconSizes.sm,
-              color: active ? AppColors.primaryForeground : AppColors.mutedForeground,
+              color: active ? cs.primaryForeground : cs.mutedForeground,
             ),
           ),
         ),
@@ -244,7 +245,7 @@ class _PreviewPanelState extends State<PreviewPanel> {
     );
   }
 
-  Widget _buildStage(bool hasEffects, String actionLabel, ActionConfig cfg) {
+  Widget _buildStage(ShadColorScheme cs, bool hasEffects, String actionLabel, ActionConfig cfg) {
     return ClipRRect(
       borderRadius: const BorderRadius.only(
         bottomLeft: Radius.circular(RadiusTokens.xl),
@@ -254,7 +255,7 @@ class _PreviewPanelState extends State<PreviewPanel> {
         children: [
           // Background dot grid
           Positioned.fill(
-            child: CustomPaint(painter: _DotGridPainter()),
+            child: CustomPaint(painter: _DotGridPainter(cs)),
           ),
 
           if (hasEffects) ...[
@@ -274,7 +275,7 @@ class _PreviewPanelState extends State<PreviewPanel> {
             Positioned(
               top: 8,
               right: 8,
-              child: _buildEffectChips(cfg),
+              child: _buildEffectChips(cs, cfg),
             ),
           ] else ...[
             Center(
@@ -282,16 +283,16 @@ class _PreviewPanelState extends State<PreviewPanel> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(LucideIcons.mousePointer2, size: IconSizes.xxl, color: AppColors.mutedForeground),
-                    const SizedBox(height: 8),
+                    Icon(LucideIcons.mousePointer2, size: IconSizes.xxl, color: cs.mutedForeground),
+                    const SizedBox(height: Spacing.sm),
                     Text(
                       '点击此处预览「$actionLabel」动效',
-                      style: const TextStyle(fontSize: FontSizes.base, color: AppColors.mutedForeground),
+                      style: TextStyle(fontSize: FontSizes.base, color: cs.mutedForeground),
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
+                    const SizedBox(height: Spacing.xs),
+                    Text(
                       '在左侧配置面板中开启飘字、粒子、波纹等效果',
-                      style: TextStyle(fontSize: FontSizes.caption, color: AppColors.mutedForeground),
+                      style: TextStyle(fontSize: FontSizes.caption, color: cs.mutedForeground),
                     ),
                   ],
                 ),
@@ -303,12 +304,12 @@ class _PreviewPanelState extends State<PreviewPanel> {
     );
   }
 
-  Widget _buildEffectChips(ActionConfig cfg) {
+  Widget _buildEffectChips(ShadColorScheme cs, ActionConfig cfg) {
     final chips = <Widget>[];
-    if (cfg.particle) chips.add(_chip(cfg.particleStyle, LucideIcons.sparkles));
-    if (cfg.textEnabled) chips.add(_chip('飘字', LucideIcons.type));
-    if (cfg.ripple) chips.add(_chip(cfg.rippleStyle, LucideIcons.circleDashed));
-    if (cfg.sound) chips.add(_chip('音效', LucideIcons.volume2));
+    if (cfg.particle) chips.add(_chip(cs, cfg.particleStyle, LucideIcons.sparkles));
+    if (cfg.textEnabled) chips.add(_chip(cs, '飘字', LucideIcons.type));
+    if (cfg.ripple) chips.add(_chip(cs, cfg.rippleStyle, LucideIcons.circleDashed));
+    if (cfg.sound) chips.add(_chip(cs, '音效', LucideIcons.volume2));
     if (chips.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -316,21 +317,21 @@ class _PreviewPanelState extends State<PreviewPanel> {
     );
   }
 
-  Widget _chip(String label, IconData icon) {
+  Widget _chip(ShadColorScheme cs, String label, IconData icon) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: Spacing.xs),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
         decoration: BoxDecoration(
-          color: AppColors.card.withValues(alpha: 0.85),
+          color: cs.card.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: IconSizes.xs, color: AppColors.foreground),
+            Icon(icon, size: IconSizes.xs, color: cs.foreground),
             const SizedBox(width: 3),
-            Text(label, style: const TextStyle(fontSize: FontSizes.caption, color: AppColors.foreground)),
+            Text(label, style: TextStyle(fontSize: FontSizes.caption, color: cs.foreground)),
           ],
         ),
       ),
@@ -339,10 +340,13 @@ class _PreviewPanelState extends State<PreviewPanel> {
 }
 
 class _DotGridPainter extends CustomPainter {
+  final ShadColorScheme cs;
+  _DotGridPainter(this.cs);
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.border.withValues(alpha: 0.5)
+      ..color = cs.border.withValues(alpha: 0.5)
       ..style = PaintingStyle.fill;
     const spacing = 20.0;
     for (double x = spacing; x < size.width; x += spacing) {
@@ -353,5 +357,5 @@ class _DotGridPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _DotGridPainter oldDelegate) => false;
 }

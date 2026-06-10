@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
 import '../../theme/app_tokens.dart';
@@ -100,6 +101,7 @@ class InteractiveTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
     final tracks = _buildTracks();
     if (tracks.isEmpty) return const SizedBox.shrink();
 
@@ -108,15 +110,15 @@ class InteractiveTimeline extends StatelessWidget {
     final totalMs = ((maxEnd / 100).ceil()) * 100;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, Spacing.xs),
       decoration: BoxDecoration(
-        color: AppColors.muted.withAlpha(80),
+        color: cs.muted.withAlpha(80),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(RadiusTokens.xl),
           bottomRight: Radius.circular(RadiusTokens.xl),
         ),
         border: Border(
-          top: BorderSide(color: AppColors.border),
+          top: BorderSide(color: cs.border),
         ),
       ),
       child: Column(
@@ -129,13 +131,13 @@ class InteractiveTimeline extends StatelessWidget {
               style: TextStyle(
                 fontSize: FontSizes.base,
                 fontWeight: FontWeight.w600,
-                color: AppColors.foreground,
+                color: cs.foreground,
               ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(12),
-            child: _TimelineView(tracks: tracks, totalMs: totalMs),
+            child: _TimelineView(cs: cs, tracks: tracks, totalMs: totalMs),
           ),
         ],
       ),
@@ -148,10 +150,11 @@ class InteractiveTimeline extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════
 
 class _TimelineView extends StatelessWidget {
+  final ShadColorScheme cs;
   final List<_TimelineTrack> tracks;
   final int totalMs;
 
-  const _TimelineView({required this.tracks, required this.totalMs});
+  const _TimelineView({required this.cs, required this.tracks, required this.totalMs});
 
   @override
   Widget build(BuildContext context) {
@@ -165,9 +168,10 @@ class _TimelineView extends StatelessWidget {
           children: [
             // Tick marks
             _buildTickMarks(totalMs, availableWidth),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.xs),
             // Track rows
             ...tracks.map((track) => _TrackRow(
+              cs: cs,
               track: track,
               pxPerMs: pxPerMs,
               totalMs: totalMs,
@@ -195,9 +199,9 @@ class _TimelineView extends StatelessWidget {
                 width: 24,
                 child: Text(
                   '${t}ms',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 8,
-                    color: AppColors.mutedForeground,
+                    color: cs.mutedForeground,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -210,12 +214,14 @@ class _TimelineView extends StatelessWidget {
 }
 
 class _TrackRow extends StatelessWidget {
+  final ShadColorScheme cs;
   final _TimelineTrack track;
   final double pxPerMs;
   final int totalMs;
   final double labelWidth;
 
   const _TrackRow({
+    required this.cs,
     required this.track,
     required this.pxPerMs,
     required this.totalMs,
@@ -259,7 +265,7 @@ class _TrackRow extends StatelessWidget {
                       margin: EdgeInsets.only(top: barHeight * 0.15),
                       decoration: BoxDecoration(
                         color: track.bgColor.withAlpha(100),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       ),
                     ),
                   ),
@@ -272,7 +278,7 @@ class _TrackRow extends StatelessWidget {
                       height: barHeight,
                       decoration: BoxDecoration(
                         color: track.color.withAlpha(200),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       ),
                       alignment: Alignment.center,
                       child: Text(
@@ -292,9 +298,9 @@ class _TrackRow extends StatelessWidget {
                       top: barHeight + 1,
                       child: Text(
                         '延迟 ${track.startMs}ms',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 8,
-                          color: AppColors.mutedForeground,
+                          color: cs.mutedForeground,
                         ),
                       ),
                     ),

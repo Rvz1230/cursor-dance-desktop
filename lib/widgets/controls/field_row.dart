@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../theme/app_tokens.dart';
 
@@ -6,8 +7,8 @@ import '../../theme/app_tokens.dart';
 ///
 /// 参考插件版 WorkbenchControls.tsx:
 ///   md:grid-cols-[104px_minmax(0,1fr)]
-///   标签: text-sm font-medium text-slate-800
-///   hint: text-xs text-slate-500
+///   标签: text-sm font-medium
+///   hint: text-xs
 class FieldRow extends StatelessWidget {
   final String label;
   final String? hint;
@@ -22,6 +23,8 @@ class FieldRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -36,10 +39,10 @@ class FieldRow extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: FontSizes.base,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.foreground,
+                      color: cs.foreground,
                     ),
                   ),
                   if (hint != null)
@@ -47,9 +50,9 @@ class FieldRow extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(
                         hint!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: FontSizes.small,
-                          color: AppColors.mutedForeground,
+                          color: cs.mutedForeground,
                         ),
                       ),
                     ),
@@ -57,7 +60,7 @@ class FieldRow extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: Spacing.md),
           Expanded(child: child),
         ],
       ),

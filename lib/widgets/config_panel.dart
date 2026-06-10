@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
@@ -30,6 +29,7 @@ class ConfigPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
     final actionLabel = kActionLabels[actionId] ?? actionId;
     final actionHint = kActionHints[actionId] ?? '';
 
@@ -45,16 +45,16 @@ class ConfigPanel extends StatelessWidget {
       children: [
         // Action header
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 12),
+          padding: const EdgeInsets.only(left: Spacing.xs, bottom: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 actionLabel,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: FontSizes.h4,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.foreground,
+                  color: cs.foreground,
                 ),
               ),
               if (actionHint.isNotEmpty)
@@ -62,9 +62,9 @@ class ConfigPanel extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 2),
                   child: Text(
                     actionHint,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: FontSizes.small,
-                      color: AppColors.mutedForeground,
+                      color: cs.mutedForeground,
                     ),
                   ),
                 ),
@@ -79,9 +79,11 @@ class ConfigPanel extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.warning.withValues(alpha: 0.08),
+              color: cs.custom['warning']?.withValues(alpha: 0.08) ?? cs.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(RadiusTokens.lg),
-              border: Border.all(color: AppColors.warning.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: cs.custom['warning']?.withValues(alpha: 0.2) ?? cs.primary.withValues(alpha: 0.2),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +93,7 @@ class ConfigPanel extends StatelessWidget {
                     Icon(
                       LucideIcons.alertTriangle,
                       size: 14,
-                      color: AppColors.warning,
+                      color: cs.custom['warning'] ?? cs.primary,
                     ),
                     const SizedBox(width: 6),
                     Text(
@@ -99,7 +101,7 @@ class ConfigPanel extends StatelessWidget {
                       style: TextStyle(
                         fontSize: FontSizes.base,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.warning,
+                        color: cs.custom['warning'] ?? cs.primary,
                       ),
                     ),
                   ],
@@ -107,12 +109,12 @@ class ConfigPanel extends StatelessWidget {
                 const SizedBox(height: 6),
                 for (final conflict in conflicts)
                   Padding(
-                    padding: const EdgeInsets.only(top: 4),
+                    padding: const EdgeInsets.only(top: Spacing.xs),
                     child: Text(
                       conflict,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: FontSizes.small,
-                        color: AppColors.mutedForeground,
+                        color: cs.mutedForeground,
                       ),
                     ),
                   ),
@@ -124,12 +126,12 @@ class ConfigPanel extends StatelessWidget {
         if (!hasAnyEffect && conflicts.isEmpty)
           Container(
             width: double.infinity,
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
+            margin: const EdgeInsets.only(bottom: Spacing.lg),
+            padding: const EdgeInsets.symmetric(vertical: 36, horizontal: Spacing.xl),
             decoration: BoxDecoration(
-              color: AppColors.muted,
+              color: cs.muted,
               borderRadius: BorderRadius.circular(RadiusTokens.xl2),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: cs.border),
             ),
             child: Column(
               children: [
@@ -137,49 +139,49 @@ class ConfigPanel extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppColors.card,
+                    color: cs.card,
                     borderRadius: BorderRadius.circular(RadiusTokens.xl2),
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: cs.border),
                   ),
                   child: Icon(
                     LucideIcons.wand2,
                     size: IconSizes.xl,
-                    color: AppColors.mutedForeground,
+                    color: cs.mutedForeground,
                   ),
                 ),
-                const SizedBox(height: 16),
-                const Text(
+                const SizedBox(height: Spacing.lg),
+                Text(
                   '还没有开启任何效果',
                   style: TextStyle(
                     fontSize: FontSizes.base,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.foreground,
+                    color: cs.foreground,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
                   child: Text(
                     '展开下方的效果卡片，打开飘字、粒子、波纹或音效中的至少一项即可看到预览变化。',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: FontSizes.small,
-                      color: AppColors.mutedForeground,
+                      color: cs.mutedForeground,
                       height: 1.5,
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacing.lg),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _hintChip(LucideIcons.type, '飘字'),
-                    const SizedBox(width: 8),
-                    _hintChip(LucideIcons.waves, '粒子'),
-                    const SizedBox(width: 8),
-                    _hintChip(LucideIcons.circleDashed, '波纹'),
-                    const SizedBox(width: 8),
-                    _hintChip(LucideIcons.volume2, '音效'),
+                    _hintChip(cs, LucideIcons.type, '飘字'),
+                    const SizedBox(width: Spacing.sm),
+                    _hintChip(cs, LucideIcons.waves, '粒子'),
+                    const SizedBox(width: Spacing.sm),
+                    _hintChip(cs, LucideIcons.circleDashed, '波纹'),
+                    const SizedBox(width: Spacing.sm),
+                    _hintChip(cs, LucideIcons.volume2, '音效'),
                   ],
                 ),
               ],
@@ -187,43 +189,43 @@ class ConfigPanel extends StatelessWidget {
           ),
 
         // Panel cards (each manages own collapse state)
-        const SizedBox(height: 4),
+        const SizedBox(height: Spacing.xs),
         TriggerBehaviorCard(
           actionId: actionId,
           config: config,
           onUpdate: onUpdateConfig,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacing.sm),
         TextFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacing.sm),
         ParticleFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacing.sm),
         RippleFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacing.sm),
         AudioFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacing.sm),
         AnimationFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacing.sm),
         ImageFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: Spacing.sm),
         CursorFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
@@ -232,22 +234,22 @@ class ConfigPanel extends StatelessWidget {
     );
   }
 
-  Widget _hintChip(IconData icon, String label) {
+  Widget _hintChip(ShadColorScheme cs, IconData icon, String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.xs),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: cs.card,
         borderRadius: BorderRadius.circular(RadiusTokens.lg),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: cs.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: IconSizes.xs, color: AppColors.mutedForeground),
-          const SizedBox(width: 4),
+          Icon(icon, size: IconSizes.xs, color: cs.mutedForeground),
+          const SizedBox(width: Spacing.xs),
           Text(
             label,
-            style: const TextStyle(fontSize: FontSizes.caption, color: AppColors.mutedForeground),
+            style: TextStyle(fontSize: FontSizes.caption, color: cs.mutedForeground),
           ),
         ],
       ),

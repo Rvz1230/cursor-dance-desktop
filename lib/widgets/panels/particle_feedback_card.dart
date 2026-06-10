@@ -3,15 +3,14 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
 import '../../models/action_config_presets.dart';
-import '../../theme/app_tokens.dart';
 import '../controls/color_options.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
-import 'panel_utils.dart';
+import '../base/panel_utils.dart';
 import '../controls/small_select.dart';
-import '../controls/config_section.dart';
-import '../panels/panel_card.dart';
-import '../panels/panel_meta.dart';
+import '../base/section_title.dart';
+import '../base/panel_card.dart';
+import '../base/panel_meta.dart';
 
 class ParticleFeedbackCard extends StatelessWidget {
   final ActionConfig config;
@@ -60,7 +59,7 @@ class ParticleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(particleMotionMode: v)),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '粒子样式',
             child: SmallSelect(
@@ -70,7 +69,7 @@ class ParticleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(particleStyle: v)),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '粒子数量',
             child: ControlSlider(
@@ -83,7 +82,7 @@ class ParticleFeedbackCard extends StatelessWidget {
             ),
           ),
           if (!_isOrbital) ...[
-            panelDivider,
+            const PanelDivider(),
             FieldRow(
               label: '扩散范围',
               child: ControlSlider(
@@ -98,7 +97,7 @@ class ParticleFeedbackCard extends StatelessWidget {
             ),
           ],
           if (!_isOrbital) ...[
-            panelDivider,
+            const PanelDivider(),
             FieldRow(
               label: '扩散方向',
               child: SmallSelect(
@@ -110,7 +109,7 @@ class ParticleFeedbackCard extends StatelessWidget {
             ),
           ],
           if (_isOrbital) ...[
-            panelDivider,
+            const PanelDivider(),
             FieldRow(
               label: '轨道数量',
               child: ControlSlider(
@@ -124,7 +123,7 @@ class ParticleFeedbackCard extends StatelessWidget {
             ),
           ],
           if (_isOrbital) ...[
-            panelDivider,
+            const PanelDivider(),
             FieldRow(
               label: '轨道半径',
               child: ControlSlider(
@@ -139,7 +138,7 @@ class ParticleFeedbackCard extends StatelessWidget {
             ),
           ],
           if (_isOrbital) ...[
-            panelDivider,
+            const PanelDivider(),
             FieldRow(
               label: '轨道速度',
               child: ControlSlider(
@@ -166,7 +165,7 @@ class ParticleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(particleSize: v.round())),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           if (!_isOrbital) ...[
             FieldRow(
               label: '持续时长',
@@ -180,7 +179,7 @@ class ParticleFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(particleDuration: v.round())),
               ),
             ),
-            panelDivider,
+            const PanelDivider(),
           ],
           FieldRow(
             label: '透明度',
@@ -194,7 +193,7 @@ class ParticleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(particleOpacity: v.round())),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '颜色模式',
             child: SmallSelect(
@@ -204,7 +203,7 @@ class ParticleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(particleColorMode: v)),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '色板',
             child: ColorOptions(
@@ -233,7 +232,7 @@ class ParticleFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(particleGravity: v.round())),
               ),
             ),
-            panelDivider,
+            const PanelDivider(),
             FieldRow(
               label: '风力',
               child: ControlSlider(
@@ -246,7 +245,7 @@ class ParticleFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(particleWind: v.round())),
               ),
             ),
-            panelDivider,
+            const PanelDivider(),
             FieldRow(
               label: '弹跳',
               child: ControlSlider(
@@ -259,7 +258,7 @@ class ParticleFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(particleBounce: v.round())),
               ),
             ),
-            panelDivider,
+            const PanelDivider(),
             FieldRow(
               label: '拖尾',
               child: ShadSwitch(

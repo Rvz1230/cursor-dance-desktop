@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
 import '../../theme/app_tokens.dart';
-import '../controls/config_section.dart';
+import '../base/section_title.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
-import 'panel_utils.dart';
+import '../base/panel_utils.dart';
 import '../controls/wip_badge.dart';
-import '../panels/panel_card.dart';
-import '../panels/panel_meta.dart';
+import '../base/panel_card.dart';
+import '../base/panel_meta.dart';
 
 class ImageFeedbackCard extends StatelessWidget {
   final ActionConfig config;
@@ -29,6 +28,7 @@ class ImageFeedbackCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
     final enabled = config.imageEnabled;
 
     return PanelCard(
@@ -50,20 +50,20 @@ class ImageFeedbackCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
             decoration: BoxDecoration(
-              color: AppColors.muted,
+              color: cs.muted,
               borderRadius: BorderRadius.circular(RadiusTokens.xl),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: cs.border),
             ),
             child: Column(
               children: [
-                Icon(LucideIcons.imagePlus, size: 24, color: AppColors.mutedForeground),
+                Icon(LucideIcons.imagePlus, size: 24, color: cs.mutedForeground),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   '图片贴纸需要在桌面版中通过文件选择器上传',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: FontSizes.small,
-                    color: AppColors.mutedForeground,
+                    color: cs.mutedForeground,
                   ),
                 ),
               ],
@@ -83,7 +83,7 @@ class ImageFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(imageDuration: v.round())),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '尺寸',
             child: ControlSlider(
@@ -96,7 +96,7 @@ class ImageFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(imageSize: v.round())),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '透明度',
             child: ControlSlider(
@@ -109,7 +109,7 @@ class ImageFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(imageOpacity: v.round())),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '偏移 X',
             child: ControlSlider(
@@ -122,7 +122,7 @@ class ImageFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(imageOffsetX: v.round())),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '偏移 Y',
             child: ControlSlider(

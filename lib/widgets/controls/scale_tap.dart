@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+
+import '../../theme/animations.dart';
 
 /// 缩放点击反馈 — 插件版 active:scale-[0.97]
-class ScaleTap extends HookWidget {
+class ScaleTap extends StatefulWidget {
   final Widget child;
   final double scaleAmount;
   final Duration duration;
@@ -11,21 +12,26 @@ class ScaleTap extends HookWidget {
     super.key,
     required this.child,
     this.scaleAmount = 0.97,
-    this.duration = const Duration(milliseconds: 100),
+    this.duration = AppAnimations.fast,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final pressed = useState(false);
+  State<ScaleTap> createState() => _ScaleTapState();
+}
 
+class _ScaleTapState extends State<ScaleTap> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
     return Listener(
-      onPointerDown: (_) => pressed.value = true,
-      onPointerUp: (_) => pressed.value = false,
-      onPointerCancel: (_) => pressed.value = false,
+      onPointerDown: (_) => setState(() => _pressed = true),
+      onPointerUp: (_) => setState(() => _pressed = false),
+      onPointerCancel: (_) => setState(() => _pressed = false),
       child: AnimatedScale(
-        scale: pressed.value ? scaleAmount : 1.0,
-        duration: duration,
-        child: child,
+        scale: _pressed ? widget.scaleAmount : 1.0,
+        duration: widget.duration,
+        child: widget.child,
       ),
     );
   }

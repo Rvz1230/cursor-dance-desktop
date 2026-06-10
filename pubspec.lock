@@ -270,14 +270,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.5.2"
-  flutter_hooks:
-    dependency: "direct main"
-    description:
-      name: flutter_hooks
-      sha256: cde36b12f7188c85286fba9b38cc5a902e7279f36dd676967106c041dc9dde70
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.20.5"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -489,7 +481,7 @@ packages:
     source: hosted
     version: "1.3.0"
   lucide_icons_flutter:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: lucide_icons_flutter
       sha256: "7c5dc01a32a9905ae34e2d84224e92d6d0c42acf8926df9e01c35a1446bf1b69"
@@ -664,14 +656,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.0"
+  serial_csv:
+    dependency: transitive
+    description:
+      name: serial_csv
+      sha256: "2d62bb70cb3ce7251383fc86ea9aae1298ab1e57af6ef4e93b6a9751c5c268dd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.2"
   shadcn_ui:
     dependency: "direct main"
     description:
       name: shadcn_ui
-      sha256: f7f18b1d3c6e10628b72a7bc80fce32c91722800828efbfb248f6d846f36d5cb
+      sha256: "132d69a43145a9ead0687935b48224a6565d164ab718796fa344a179a69bed70"
       url: "https://pub.dev"
     source: hosted
-    version: "0.38.5"
+    version: "0.54.0"
   shelf:
     dependency: transitive
     description:
@@ -693,6 +693,22 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  slang:
+    dependency: transitive
+    description:
+      name: slang
+      sha256: "46e929158c2f563994c4d1fce5819cfa13e18b164941473d2553bcddcf387c31"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.15.0"
+  slang_flutter:
+    dependency: transitive
+    description:
+      name: slang_flutter
+      sha256: "0eb6348416a296f1bd940fe02669bcd2df5c5cfdabf893b98e448df8b7ecf4ac"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.15.0"
   source_gen:
     dependency: transitive
     description:
@@ -769,10 +785,10 @@ packages:
     dependency: transitive
     description:
       name: theme_extensions_builder_annotation
-      sha256: "5ed8e758c33a011fa8a2fd6af2d951cd5500874f465cea379aa7db80807aa7e9"
+      sha256: "75f28ac85d396d143d111a47c1395b01f3be41b7135f37bd51512921944e4206"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.1"
+    version: "7.3.0"
   timing:
     dependency: transitive
     description:
@@ -903,4 +919,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.12.1 <4.0.0"
-  flutter: ">=3.38.4"
+  flutter: ">=3.41.0"

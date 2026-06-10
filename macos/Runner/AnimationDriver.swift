@@ -57,7 +57,7 @@ func ease(_ name: String, _ t: Double) -> Double {
 // ═══════════════════════════════════════════════════════════════
 
 class ParticleRecord: AnimatableRecord {
-    let layer: CAShapeLayer
+    let layer: CALayer
     let startX: CGFloat
     let startY: CGFloat
     let deltaX: CGFloat
@@ -174,7 +174,7 @@ class TextRecord: AnimatableRecord {
 }
 
 class RippleRecord: AnimatableRecord {
-    let layer: CAShapeLayer
+    let layer: CALayer
     let startDelay: CFTimeInterval
     let duration: CFTimeInterval
     let easing: String

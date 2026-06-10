@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../state/workbench_state.dart';
-import '../../theme/app_tokens.dart';
 import '../../widgets/action_tabs.dart';
 import '../../widgets/config_panel.dart';
 import '../../widgets/preview_panel.dart';
@@ -24,6 +24,7 @@ class _WorkbenchWorkspaceState extends State<WorkbenchWorkspace> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final cs = ShadTheme.of(context).colorScheme;
         final totalWidth = constraints.maxWidth;
         final leftFlex = (_splitRatio * 100).round();
         final rightFlex = 100 - leftFlex;
@@ -79,8 +80,8 @@ class _WorkbenchWorkspaceState extends State<WorkbenchWorkspace> {
                       height: _hovered ? 64 : 32,
                       decoration: BoxDecoration(
                         color: _hovered
-                            ? AppColors.border
-                            : AppColors.border.withValues(alpha: 0.5),
+                            ? cs.border
+                            : cs.border.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),

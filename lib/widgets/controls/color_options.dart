@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../theme/app_tokens.dart';
 
@@ -29,6 +30,7 @@ class ColorOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
     final currentColor = _parseHex(value);
     return GestureDetector(
       onTap: () => _showPicker(context),
@@ -42,7 +44,7 @@ class ColorOptions extends StatelessWidget {
               decoration: BoxDecoration(
                 color: currentColor,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.border, width: 1),
+                border: Border.all(color: cs.border, width: 1),
               ),
             ),
             Text(
@@ -64,7 +66,7 @@ class ColorOptions extends StatelessWidget {
 
     final customSwatches = <ColorSwatch<Object>, String>{};
     if (swatchColors.isNotEmpty) {
-      customSwatches[ColorSwatch(swatchColors.first.value, {
+      customSwatches[ColorSwatch(swatchColors.first.toARGB32(), {
         for (int i = 0; i < swatchColors.length; i++) i: swatchColors[i],
       })] = '预设';
     }
@@ -74,7 +76,7 @@ class ColorOptions extends StatelessWidget {
     final result = await showDialog<Color>(
       context: context,
       builder: (ctx) => AlertDialog(
-        contentPadding: const EdgeInsets.all(20),
+        contentPadding: const EdgeInsets.all(Spacing.lg),
         content: ColorPicker(
           color: color,
           onColorChanged: (c) => color = c,

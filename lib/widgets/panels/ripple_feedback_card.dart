@@ -3,15 +3,14 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
 import '../../models/action_config_presets.dart';
-import '../../theme/app_tokens.dart';
 import '../controls/color_options.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
-import 'panel_utils.dart';
+import '../base/panel_utils.dart';
 import '../controls/small_select.dart';
-import '../controls/config_section.dart';
-import '../panels/panel_card.dart';
-import '../panels/panel_meta.dart';
+import '../base/section_title.dart';
+import '../base/panel_card.dart';
+import '../base/panel_meta.dart';
 
 class RippleFeedbackCard extends StatelessWidget {
   final ActionConfig config;
@@ -56,7 +55,7 @@ class RippleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(rippleStyle: v)),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '颜色',
             child: ColorOptions(
@@ -65,7 +64,7 @@ class RippleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(rippleColor: v)),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '波纹大小',
             child: ControlSlider(
@@ -78,7 +77,7 @@ class RippleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(rippleSize: v.round())),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '线宽',
             child: ControlSlider(
@@ -105,7 +104,7 @@ class RippleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(rippleDuration: v.round())),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '缓动',
             child: SmallSelect(
@@ -115,7 +114,7 @@ class RippleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(rippleEasing: v)),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '不透明度',
             child: ControlSlider(

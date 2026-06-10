@@ -7,10 +7,10 @@ import '../controls/color_options.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
 import '../controls/small_select.dart';
-import '../controls/config_section.dart';
+import '../base/section_title.dart';
 import '../controls/text_tag_editor.dart';
-import '../panels/panel_card.dart';
-import '../panels/panel_meta.dart';
+import '../base/panel_card.dart';
+import '../base/panel_meta.dart';
 
 class TextFeedbackCard extends StatelessWidget {
   final ActionConfig config;

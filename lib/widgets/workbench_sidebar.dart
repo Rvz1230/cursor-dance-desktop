@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/theme.dart';
 import '../../state/workbench_state.dart';
 import '../../theme/app_tokens.dart';
 import 'controls/app_icon_button.dart';
-import 'controls/icon_resolver.dart';
-import 'controls/scale_tap.dart';
 import 'theme_card.dart';
 import 'theme_composer_modal.dart';
 
@@ -76,14 +73,14 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
       width: _collapsed ? 72 : 260,
       decoration: BoxDecoration(
         color: cs.card,
-        border: const Border(
-          right: BorderSide(color: AppColors.border),
+        border: Border(
+          right: BorderSide(color: cs.border),
         ),
       ),
       child: Column(
         children: [
           _buildHeader(cs),
-          if (!_collapsed) _buildCategoryTabs(),
+          if (!_collapsed) _buildCategoryTabs(cs),
           if (!_collapsed) _buildSearch(cs),
           if (_actionError.isNotEmpty && !_collapsed) _buildErrorBanner(cs),
           Expanded(child: _buildThemeList(cs)),
@@ -96,7 +93,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
   Widget _buildHeader(ShadColorScheme cs) {
     return Container(
       height: 40,
-      padding: EdgeInsets.symmetric(horizontal: _collapsed ? 8 : 10),
+      padding: EdgeInsets.symmetric(horizontal: _collapsed ? Spacing.sm : 10),
       child: Row(
         children: [
           if (!_collapsed) ...[
@@ -118,7 +115,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
               },
               tooltip: '新建主题',
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: Spacing.xs),
             AppIconButton(
               icon: LucideIcons.panelLeftClose,
               onTap: () => setState(() => _collapsed = true),
@@ -138,13 +135,13 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 
   Widget _buildSearch(ShadColorScheme cs) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.xs),
       child: ShadInput(
         controller: _searchController,
         onChanged: (v) => setState(() => _query = v),
         placeholder: const Text('搜索主题...'),
         leading: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(Spacing.sm),
           child: Icon(LucideIcons.search, size: IconSizes.md, color: cs.mutedForeground),
         ),
         trailing: _searchController.text.isNotEmpty
@@ -154,7 +151,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
                   setState(() => _query = '');
                 },
                 child: Padding(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(Spacing.xs),
                   child: Icon(LucideIcons.x, size: IconSizes.sm, color: cs.mutedForeground),
                 ),
               )
@@ -165,28 +162,28 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 
   Widget _buildErrorBanner(ShadColorScheme cs) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 2, 8, 4),
+      padding: const EdgeInsets.fromLTRB(Spacing.sm, 2, Spacing.sm, Spacing.xs),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.destructive.withValues(alpha: 0.06),
+          color: cs.destructive.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(RadiusTokens.lg),
-          border: Border.all(color: AppColors.destructive.withValues(alpha: 0.15)),
+          border: Border.all(color: cs.destructive.withValues(alpha: 0.15)),
         ),
         child: Row(
           children: [
-            const Icon(LucideIcons.alertTriangle, size: IconSizes.sm, color: AppColors.destructive),
+            Icon(LucideIcons.alertTriangle, size: IconSizes.sm, color: cs.destructive),
             const SizedBox(width: 6),
             Expanded(
               child: Text(
                 _actionError,
-                style: const TextStyle(fontSize: FontSizes.caption, color: AppColors.destructive),
+                style: TextStyle(fontSize: FontSizes.caption, color: cs.destructive),
               ),
             ),
             GestureDetector(
               onTap: _clearError,
-              child: const Icon(LucideIcons.x, size: IconSizes.sm, color: AppColors.destructive),
+              child: Icon(LucideIcons.x, size: IconSizes.sm, color: cs.destructive),
             ),
           ],
         ),
@@ -197,7 +194,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
   Widget _buildThemeList(ShadColorScheme cs) {
     final themes = _filteredThemes;
     if (themes.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(cs);
     }
 
     if (_focusedIndex >= themes.length) {
@@ -237,7 +234,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
         return KeyEventResult.ignored;
       },
       child: ListView.builder(
-        padding: const EdgeInsets.only(top: 4, left: 4, right: 4),
+        padding: const EdgeInsets.only(top: Spacing.xs, left: Spacing.xs, right: Spacing.xs),
         itemCount: themes.length,
         itemBuilder: (context, index) {
           final t = themes[index];
@@ -269,7 +266,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 
   Widget _buildCollapsedCreate(ShadColorScheme cs) {
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(Spacing.sm),
       child: AppIconButton(
         icon: LucideIcons.plus,
         onTap: () {
@@ -285,22 +282,22 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 
   // ── Category Filter Tabs ──
 
-  Widget _buildCategoryTabs() {
+  Widget _buildCategoryTabs(ShadColorScheme cs) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 2, 8, 2),
+      padding: const EdgeInsets.fromLTRB(Spacing.sm, 2, Spacing.sm, 2),
       child: Row(
         children: [
-          _buildCategoryChip('全部', 'all'),
+          _buildCategoryChip(cs, '全部', 'all'),
           const SizedBox(width: 2),
-          _buildCategoryChip('内置', 'builtin'),
+          _buildCategoryChip(cs, '内置', 'builtin'),
           const SizedBox(width: 2),
-          _buildCategoryChip('自定义', 'custom'),
+          _buildCategoryChip(cs, '自定义', 'custom'),
         ],
       ),
     );
   }
 
-  Widget _buildCategoryChip(String label, String value) {
+  Widget _buildCategoryChip(ShadColorScheme cs, String label, String value) {
     final active = _categoryFilter == value;
     return GestureDetector(
       onTap: () => setState(() {
@@ -309,12 +306,12 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
       }),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 3),
         decoration: BoxDecoration(
-          color: active ? AppColors.muted : Colors.transparent,
+          color: active ? cs.muted : Colors.transparent,
           borderRadius: BorderRadius.circular(RadiusTokens.md),
           border: active
-              ? Border.all(color: AppColors.border)
+              ? Border.all(color: cs.border)
               : Border.all(color: Colors.transparent),
         ),
         child: Text(
@@ -322,7 +319,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
           style: TextStyle(
             fontSize: FontSizes.caption,
             fontWeight: active ? FontWeight.w600 : FontWeight.normal,
-            color: active ? AppColors.foreground : AppColors.mutedForeground,
+            color: active ? cs.foreground : cs.mutedForeground,
           ),
         ),
       ),
@@ -331,7 +328,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 
   // ── Category & Search empty states ──
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(ShadColorScheme cs) {
     final (
       icon,
       title,
@@ -356,26 +353,26 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(Spacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: IconSizes.xl, color: AppColors.mutedForeground),
-            const SizedBox(height: 8),
+            Icon(icon, size: IconSizes.xl, color: cs.mutedForeground),
+            const SizedBox(height: Spacing.sm),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: FontSizes.small,
                 fontWeight: FontWeight.w600,
-                color: AppColors.foreground,
+                color: cs.foreground,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.xs),
             Text(
               subtitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: FontSizes.caption,
-                color: AppColors.mutedForeground,
+                color: cs.mutedForeground,
               ),
             ),
             if (_query.isEmpty) ...[
@@ -440,6 +437,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 
   void _confirmDelete(ThemeItem theme) {
     _clearError();
+    final cs = ShadTheme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -451,7 +449,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
             child: const Text('取消'),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: AppColors.destructive),
+            style: TextButton.styleFrom(foregroundColor: cs.destructive),
             onPressed: () {
               widget.state.deleteTheme(theme.id);
               Navigator.of(ctx).pop();

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../theme/app_tokens.dart';
 
 /// 插件版 ControlSlider — 滑块 + 可编辑数值输入
-class ControlSlider extends HookWidget {
+class ControlSlider extends StatefulWidget {
   final String label;
   final double value;
   final double min;
@@ -26,75 +25,96 @@ class ControlSlider extends HookWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final controller = useTextEditingController(text: value.round().toString());
-    final focusNode = useFocusNode();
+  State<ControlSlider> createState() => _ControlSliderState();
+}
 
-    useEffect(() {
-      focusNode.addListener(() {
-        if (!focusNode.hasFocus) {
-          controller.text = value.round().toString();
-        }
-      });
-      return null;
-    }, [focusNode]);
+class _ControlSliderState extends State<ControlSlider> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
 
-    useEffect(() {
-      if (!focusNode.hasFocus) {
-        controller.text = value.round().toString();
-      }
-      return null;
-    }, [value]);
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.value.round().toString());
+    _focusNode = FocusNode();
+    _focusNode.addListener(_onFocusChange);
+  }
 
-    void onSubmitted(String text) {
-      final parsed = double.tryParse(text);
-      if (parsed != null) {
-        onChanged(parsed.clamp(min, max));
-      } else {
-        controller.text = value.round().toString();
-      }
-      focusNode.unfocus();
+  @override
+  void dispose() {
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(ControlSlider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value && !_focusNode.hasFocus) {
+      _controller.text = widget.value.round().toString();
     }
+  }
+
+  void _onFocusChange() {
+    if (!_focusNode.hasFocus) {
+      _controller.text = widget.value.round().toString();
+    }
+  }
+
+  void _onSubmitted(String text) {
+    final parsed = double.tryParse(text);
+    if (parsed != null) {
+      widget.onChanged(parsed.clamp(widget.min, widget.max));
+    } else {
+      _controller.text = widget.value.round().toString();
+    }
+    _focusNode.unfocus();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.muted,
+        color: cs.muted,
         borderRadius: BorderRadius.circular(RadiusTokens.xl),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: cs.border),
       ),
       child: Row(
         children: [
           Expanded(
             child: ShadSlider(
-              initialValue: value,
-              min: min,
-              max: max,
-              divisions: divisions,
-              label: '${value.round()}${suffix ?? ''}',
+              initialValue: widget.value,
+              min: widget.min,
+              max: widget.max,
+              divisions: widget.divisions,
+              label: '${widget.value.round()}${widget.suffix ?? ''}',
               onChanged: (v) {
-                onChanged(v);
-                if (!focusNode.hasFocus) {
-                  controller.text = v.round().toString();
+                widget.onChanged(v);
+                if (!_focusNode.hasFocus) {
+                  _controller.text = v.round().toString();
                 }
               },
             ),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: Spacing.xs),
           Flexible(
             child: SizedBox(
               width: 56,
               child: Material(
                 type: MaterialType.transparency,
                 child: TextField(
-                  controller: controller,
-                  focusNode: focusNode,
+                  controller: _controller,
+                  focusNode: _focusNode,
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: FontSizes.base,
                     fontWeight: FontWeight.w600,
                     fontFeatures: [FontFeature.tabularFigures()],
-                    color: AppColors.foreground,
+                    color: cs.foreground,
                     height: 1.2,
                   ),
                   decoration: const InputDecoration(
@@ -105,19 +125,19 @@ class ControlSlider extends HookWidget {
                     focusedBorder: InputBorder.none,
                   ),
                   keyboardType: TextInputType.number,
-                  onSubmitted: onSubmitted,
+                  onSubmitted: _onSubmitted,
                 ),
               ),
             ),
           ),
-          if (suffix != null)
+          if (widget.suffix != null)
             Padding(
               padding: const EdgeInsets.only(left: 1),
               child: Text(
-                suffix!,
-                style: const TextStyle(
+                widget.suffix!,
+                style: TextStyle(
                   fontSize: FontSizes.small,
-                  color: AppColors.mutedForeground,
+                  color: cs.mutedForeground,
                 ),
               ),
             ),

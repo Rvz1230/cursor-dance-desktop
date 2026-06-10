@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/key_feedback_config.dart';
 import '../../state/workbench_state.dart';
 import '../../theme/app_tokens.dart';
 import '../../widgets/panels/key_feedback_card.dart';
+import '../../widgets/base/status_indicator.dart';
+import '../../widgets/base/panel_meta.dart';
 
 class KeyboardWorkspace extends StatelessWidget {
   final WorkbenchState state;
@@ -22,14 +23,14 @@ class KeyboardWorkspace extends StatelessWidget {
         _buildHeader(cs),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(Spacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildStatusBanner(cs, config),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacing.lg),
                 _buildStylePickerCard(cs, config, state),
-                const SizedBox(height: 16),
+                const SizedBox(height: Spacing.lg),
                 KeyFeedbackCard(
                   config: config,
                   onUpdate: (fn) {
@@ -47,11 +48,11 @@ class KeyboardWorkspace extends StatelessWidget {
   Widget _buildHeader(ShadColorScheme cs) {
     return Container(
       height: 52,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
       decoration: BoxDecoration(
         color: cs.card,
-        border: const Border(
-          bottom: BorderSide(color: AppColors.border),
+        border: Border(
+          bottom: BorderSide(color: cs.border),
         ),
       ),
       child: Row(
@@ -60,22 +61,22 @@ class KeyboardWorkspace extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: const Color(0xFFE0E7FF),
+              color: PanelMetaRegistry.keyboard.bg,
               borderRadius: BorderRadius.circular(RadiusTokens.md),
             ),
-            child: const Icon(
+            child: Icon(
               LucideIcons.keyboard,
               size: 16,
-              color: Color(0xFF4F46E5),
+              color: PanelMetaRegistry.keyboard.fg,
             ),
           ),
           const SizedBox(width: 10),
-          const Text(
+          Text(
             '键盘动效配置',
             style: TextStyle(
               fontSize: FontSizes.base,
               fontWeight: FontWeight.w600,
-              color: AppColors.foreground,
+              color: cs.foreground,
             ),
           ),
         ],
@@ -87,31 +88,21 @@ class KeyboardWorkspace extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: config.enabled ? const Color(0xFFECFDF5) : cs.muted,
+        color: config.enabled
+            ? (cs.custom['success']?.withValues(alpha: 0.08) ?? const Color(0xFFECFDF5))
+            : cs.muted,
         borderRadius: BorderRadius.circular(RadiusTokens.xl),
         border: Border.all(
-          color: config.enabled ? const Color(0xFF6EE7B7) : cs.border,
+          color: config.enabled
+              ? (cs.custom['success']?.withValues(alpha: 0.3) ?? const Color(0xFF6EE7B7))
+              : cs.border,
         ),
       ),
       child: Row(
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color:
-                  config.enabled ? AppColors.success : AppColors.mutedForeground,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            config.enabled ? '键盘动效已启用 — 按下任意键查看效果' : '键盘动效已停用',
-            style: TextStyle(
-              fontSize: FontSizes.small,
-              fontWeight: FontWeight.w500,
-              color: config.enabled ? const Color(0xFF065F46) : cs.mutedForeground,
-            ),
+          StatusIndicator(
+            active: config.enabled,
+            label: config.enabled ? '键盘动效已启用 — 按下任意键查看效果' : '键盘动效已停用',
           ),
           const Spacer(),
           ShadSwitch(
@@ -127,7 +118,7 @@ class KeyboardWorkspace extends StatelessWidget {
   Widget _buildStylePickerCard(
       ShadColorScheme cs, KeyFeedbackConfig config, WorkbenchState state) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(Spacing.lg),
       decoration: BoxDecoration(
         color: cs.card,
         borderRadius: BorderRadius.circular(RadiusTokens.xl),
@@ -136,15 +127,15 @@ class KeyboardWorkspace extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '动画风格',
             style: TextStyle(
               fontSize: FontSizes.base,
               fontWeight: FontWeight.w600,
-              color: AppColors.foreground,
+              color: cs.foreground,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: Spacing.xs),
           Text(
             '选择按键后字符在屏幕上的动画表现方式',
             style: TextStyle(
@@ -205,10 +196,10 @@ class KeyboardWorkspace extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color:
-                selected ? AppColors.primary.withValues(alpha: 0.06) : cs.muted,
+                selected ? cs.primary.withValues(alpha: 0.06) : cs.muted,
             borderRadius: BorderRadius.circular(RadiusTokens.xl),
             border: Border.all(
-              color: selected ? AppColors.primary : cs.border,
+              color: selected ? cs.primary : cs.border,
               width: selected ? 2 : 1,
             ),
           ),
@@ -217,15 +208,15 @@ class KeyboardWorkspace extends StatelessWidget {
               Icon(
                 icon,
                 size: 28,
-                color: selected ? AppColors.primary : cs.mutedForeground,
+                color: selected ? cs.primary : cs.mutedForeground,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.sm),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: FontSizes.base,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                  color: selected ? AppColors.primary : cs.foreground,
+                  color: selected ? cs.primary : cs.foreground,
                 ),
               ),
               const SizedBox(height: 2),

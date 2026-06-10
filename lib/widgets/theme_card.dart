@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../models/theme.dart';
@@ -98,6 +97,7 @@ class _ThemeCardState extends State<ThemeCard> {
   // ── Collapsed: icon-only card ──
 
   Widget _buildCollapsedCard() {
+    final cs = ShadTheme.of(context).colorScheme;
     final toneColor = resolveToneColor(widget.theme.tone);
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
@@ -122,15 +122,15 @@ class _ThemeCardState extends State<ThemeCard> {
                       height: 44,
                       decoration: BoxDecoration(
                         color: widget.active
-                            ? AppColors.primary
-                            : AppColors.card,
+                            ? cs.primary
+                            : cs.card,
                         borderRadius: BorderRadius.circular(RadiusTokens.xl),
                         border: Border.all(
-                          color: widget.active ? AppColors.primary : AppColors.border,
+                          color: widget.active ? cs.primary : cs.border,
                           width: widget.active ? 1.5 : 1,
                         ),
                         boxShadow: widget.active
-                            ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.15), blurRadius: 4)]
+                            ? [BoxShadow(color: cs.primary.withValues(alpha: 0.15), blurRadius: 4)]
                             : null,
                       ),
                       child: Center(
@@ -141,7 +141,7 @@ class _ThemeCardState extends State<ThemeCard> {
                             color: toneColor,
                             borderRadius: BorderRadius.circular(RadiusTokens.sm),
                             border: widget.active
-                                ? Border.all(color: AppColors.primaryForeground.withValues(alpha: 0.3))
+                                ? Border.all(color: cs.primaryForeground.withValues(alpha: 0.3))
                                 : null,
                           ),
                         ),
@@ -155,9 +155,9 @@ class _ThemeCardState extends State<ThemeCard> {
                           width: 10,
                           height: 10,
                           decoration: BoxDecoration(
-                            color: AppColors.success,
+                            color: cs.custom['success'] ?? const Color(0xFF10B981),
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.card, width: 2),
+                            border: Border.all(color: cs.card, width: 2),
                           ),
                         ),
                       ),
@@ -169,9 +169,9 @@ class _ThemeCardState extends State<ThemeCard> {
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: AppColors.warning,
+                            color: cs.custom['warning'] ?? const Color(0xFFF59E0B),
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.card, width: 1.5),
+                            border: Border.all(color: cs.card, width: 1.5),
                           ),
                         ),
                       ),
@@ -188,11 +188,12 @@ class _ThemeCardState extends State<ThemeCard> {
   // ── Expanded: full card ──
 
   Widget _buildExpandedCard() {
+    final cs = ShadTheme.of(context).colorScheme;
     final toneColor = resolveToneColor(widget.theme.tone);
     final badgeStyle = kindBadgeStyle(widget.theme.kind);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: Spacing.xs),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),
@@ -204,17 +205,17 @@ class _ThemeCardState extends State<ThemeCard> {
               duration: const Duration(milliseconds: 120),
               decoration: BoxDecoration(
                 color: widget.active
-                    ? AppColors.muted
+                    ? cs.muted
                     : _hovered
-                        ? AppColors.muted.withValues(alpha: 0.5)
+                        ? cs.muted.withValues(alpha: 0.5)
                         : Colors.transparent,
                 borderRadius: BorderRadius.circular(RadiusTokens.xl),
                 border: widget.focused
-                    ? Border.all(color: AppColors.ring, width: 1.5)
+                    ? Border.all(color: cs.ring, width: 1.5)
                     : widget.active
-                        ? Border.all(color: AppColors.border)
+                        ? Border.all(color: cs.border)
                         : _hovered
-                            ? Border.all(color: AppColors.border)
+                            ? Border.all(color: cs.border)
                             : Border.all(color: Colors.transparent),
               ),
               child: Row(
@@ -224,12 +225,12 @@ class _ThemeCardState extends State<ThemeCard> {
                     duration: const Duration(milliseconds: 120),
                     width: 3,
                     height: _renaming ? 44 : 52,
-                    margin: const EdgeInsets.only(top: 4, right: 8),
+                    margin: const EdgeInsets.only(top: Spacing.xs, right: Spacing.sm),
                     decoration: BoxDecoration(
-                      color: widget.active ? AppColors.primary : Colors.transparent,
+                      color: widget.active ? cs.primary : Colors.transparent,
                       borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(2),
-                        bottomRight: Radius.circular(2),
+                        topRight: Radius.circular(RadiusTokens.sm),
+                        bottomRight: Radius.circular(RadiusTokens.sm),
                       ),
                     ),
                   ),
@@ -242,24 +243,24 @@ class _ThemeCardState extends State<ThemeCard> {
                         color: toneColor,
                         borderRadius: BorderRadius.circular(RadiusTokens.md),
                         border: widget.active
-                            ? Border.all(color: AppColors.primary.withValues(alpha: 0.3))
+                            ? Border.all(color: cs.primary.withValues(alpha: 0.3))
                             : null,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: Spacing.sm),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(top: 6, bottom: 6),
                       child: _renaming
-                          ? _buildRenameField()
-                          : _buildNameSection(badgeStyle),
+                          ? _buildRenameField(cs)
+                          : _buildNameSection(cs, badgeStyle),
                     ),
                   ),
                   if (!_renaming)
                     Padding(
                       padding: const EdgeInsets.only(top: 6, right: 2),
-                      child: _buildMoreActions(),
+                      child: _buildMoreActions(cs),
                     ),
                 ],
               ),
@@ -272,7 +273,7 @@ class _ThemeCardState extends State<ThemeCard> {
 
   // ── Rename inline field ──
 
-  Widget _buildRenameField() {
+  Widget _buildRenameField(ShadColorScheme cs) {
     return SizedBox(
       height: 32,
       child: Focus(
@@ -286,21 +287,21 @@ class _ThemeCardState extends State<ThemeCard> {
         child: TextField(
           controller: _renameController,
           autofocus: true,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: FontSizes.small,
             fontWeight: FontWeight.w600,
-            color: AppColors.foreground,
+            color: cs.foreground,
           ),
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: Spacing.xs),
             isDense: true,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(RadiusTokens.md),
-              borderSide: const BorderSide(color: AppColors.primary),
+              borderSide: BorderSide(color: cs.primary),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(RadiusTokens.md),
-              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+              borderSide: BorderSide(color: cs.primary, width: 1.5),
             ),
           ),
           onSubmitted: (_) => _commitRename(),
@@ -311,7 +312,7 @@ class _ThemeCardState extends State<ThemeCard> {
 
   // ── Name + badge + dirty + summary ──
 
-  Widget _buildNameSection(KindBadgeStyle badgeStyle) {
+  Widget _buildNameSection(ShadColorScheme cs, KindBadgeStyle badgeStyle) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -320,17 +321,17 @@ class _ThemeCardState extends State<ThemeCard> {
             Flexible(
               child: Text(
                 widget.theme.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: FontSizes.small,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.foreground,
+                  color: cs.foreground,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: Spacing.xs),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: Spacing.xs, vertical: 1),
               decoration: BoxDecoration(
                 color: badgeStyle.bg,
                 borderRadius: BorderRadius.circular(RadiusTokens.sm),
@@ -347,9 +348,9 @@ class _ThemeCardState extends State<ThemeCard> {
               ),
             ),
             if (widget.isDirty)
-              const Padding(
-                padding: EdgeInsets.only(left: 4),
-                child: Icon(LucideIcons.circle, size: 6, color: AppColors.warning),
+              Padding(
+                padding: const EdgeInsets.only(left: Spacing.xs),
+                child: Icon(LucideIcons.circle, size: 6, color: cs.custom['warning'] ?? const Color(0xFFF59E0B)),
               ),
           ],
         ),
@@ -358,9 +359,9 @@ class _ThemeCardState extends State<ThemeCard> {
             Expanded(
               child: Text(
                 widget.theme.summary,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: FontSizes.caption,
-                  color: AppColors.mutedForeground,
+                  color: cs.mutedForeground,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -374,10 +375,10 @@ class _ThemeCardState extends State<ThemeCard> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(RadiusTokens.sm),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     LucideIcons.pencil,
                     size: IconSizes.xs,
-                    color: AppColors.mutedForeground,
+                    color: cs.mutedForeground,
                   ),
                 ),
               ),
@@ -389,7 +390,7 @@ class _ThemeCardState extends State<ThemeCard> {
 
   // ── More actions popup ──
 
-  Widget _buildMoreActions() {
+  Widget _buildMoreActions(ShadColorScheme cs) {
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
       icon: AnimatedContainer(
@@ -399,10 +400,10 @@ class _ThemeCardState extends State<ThemeCard> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(RadiusTokens.md),
         ),
-        child: const Icon(
+        child: Icon(
           LucideIcons.moreHorizontal,
           size: IconSizes.md,
-          color: AppColors.mutedForeground,
+          color: cs.mutedForeground,
         ),
       ),
       onSelected: (v) {
@@ -414,35 +415,35 @@ class _ThemeCardState extends State<ThemeCard> {
         }
       },
       itemBuilder: (_) => [
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'duplicate',
           height: 36,
           child: Row(
             children: [
-              Icon(LucideIcons.copy, size: 14, color: AppColors.mutedForeground),
-              SizedBox(width: 8),
+              Icon(LucideIcons.copy, size: 14, color: cs.mutedForeground),
+              const SizedBox(width: Spacing.sm),
               Text('复制', style: TextStyle(fontSize: FontSizes.small)),
             ],
           ),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'export',
           height: 36,
           child: Row(
             children: [
-              Icon(LucideIcons.download, size: 14, color: AppColors.mutedForeground),
-              SizedBox(width: 8),
+              Icon(LucideIcons.download, size: 14, color: cs.mutedForeground),
+              const SizedBox(width: Spacing.sm),
               Text('导出', style: TextStyle(fontSize: FontSizes.small)),
             ],
           ),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'icon',
           height: 36,
           child: Row(
             children: [
-              Icon(LucideIcons.palette, size: 14, color: AppColors.mutedForeground),
-              SizedBox(width: 8),
+              Icon(LucideIcons.palette, size: 14, color: cs.mutedForeground),
+              const SizedBox(width: Spacing.sm),
               Text('更改图标', style: TextStyle(fontSize: FontSizes.small)),
             ],
           ),
@@ -456,14 +457,14 @@ class _ThemeCardState extends State<ThemeCard> {
               Icon(
                 LucideIcons.trash2,
                 size: 14,
-                color: widget.canDelete ? AppColors.destructive : AppColors.mutedForeground,
+                color: widget.canDelete ? cs.destructive : cs.mutedForeground,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: Spacing.sm),
               Text(
                 '删除',
                 style: TextStyle(
                   fontSize: FontSizes.small,
-                  color: widget.canDelete ? AppColors.destructive : AppColors.mutedForeground,
+                  color: widget.canDelete ? cs.destructive : cs.mutedForeground,
                 ),
               ),
             ],

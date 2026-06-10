@@ -98,13 +98,14 @@ class ConfigPageState extends State<ConfigPage> {
   }
 
   Widget _buildStatusBar() {
+    final cs = ShadTheme.of(context).colorScheme;
     return Container(
       height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: const BoxDecoration(
-        color: AppColors.card,
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+      decoration: BoxDecoration(
+        color: cs.card,
         border: Border(
-          top: BorderSide(color: AppColors.border),
+          top: BorderSide(color: cs.border),
         ),
       ),
       child: Row(
@@ -113,25 +114,25 @@ class ConfigPageState extends State<ConfigPage> {
             _state.enabled ? LucideIcons.circle : LucideIcons.radio,
             size: 10,
             color: _state.enabled
-                ? AppColors.success
-                : AppColors.mutedForeground,
+                ? (cs.custom['success'] ?? cs.primary)
+                : cs.mutedForeground,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: Spacing.sm),
           Text(
             _state.enabled ? '动效已启用' : '动效已停止',
             style: TextStyle(
               fontSize: FontSizes.base,
               color: _state.enabled
-                  ? AppColors.success
-                  : AppColors.mutedForeground,
+                  ? (cs.custom['success'] ?? cs.primary)
+                  : cs.mutedForeground,
             ),
           ),
           const Spacer(),
           ShadButton(
             onPressed: _toggleEnabled,
             backgroundColor: _state.enabled
-                ? AppColors.destructive
-                : AppColors.primary,
+                ? cs.destructive
+                : cs.primary,
             child: Text(_state.enabled ? '停止' : '启用'),
           ),
         ],

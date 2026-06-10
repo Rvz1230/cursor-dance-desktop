@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import 'app_tokens.dart';
+import 'animations.dart';
 
 /// 浅色主题 — Soft-Minimal Linear
 final appTheme = ShadThemeData(
@@ -9,6 +10,10 @@ final appTheme = ShadThemeData(
   radius: BorderRadius.all(Radius.circular(RadiusTokens.xl)),
   colorScheme: _appColorScheme,
   textTheme: _appTextTheme,
+  primaryToastTheme: ShadToastTheme(
+    animateIn: AppAnimations.slideIn,
+    animateOut: AppAnimations.slideOut,
+  ),
 );
 
 /// 深色主题 — 反转亮度层级，保持相同色调映射
@@ -16,6 +21,10 @@ final darkTheme = ShadThemeData(
   brightness: Brightness.dark,
   radius: BorderRadius.all(Radius.circular(RadiusTokens.xl)),
   colorScheme: _darkColorScheme,
+  primaryToastTheme: ShadToastTheme(
+    animateIn: AppAnimations.slideIn,
+    animateOut: AppAnimations.slideOut,
+  ),
   textTheme: _appTextTheme.copyWith(
     h2: const TextStyle(
       fontSize: FontSizes.h2,

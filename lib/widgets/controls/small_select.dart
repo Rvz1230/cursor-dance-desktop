@@ -19,14 +19,16 @@ class SmallSelect extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
+
     return ShadSelect<String>(
       initialValue: value,
       selectedOptionBuilder: (context, selectedValue) {
         return Text(
           selectedValue,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: FontSizes.base,
-            color: AppColors.foreground,
+            color: cs.foreground,
           ),
         );
       },
@@ -35,9 +37,9 @@ class SmallSelect extends StatelessWidget {
           value: opt,
           child: Text(
             opt,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: FontSizes.base,
-              color: AppColors.foreground,
+              color: cs.foreground,
             ),
           ),
         );

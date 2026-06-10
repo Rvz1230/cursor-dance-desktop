@@ -5,8 +5,8 @@ import '../../models/action_config_presets.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
 import '../controls/small_select.dart';
-import '../panels/panel_card.dart';
-import '../panels/panel_meta.dart';
+import '../base/panel_card.dart';
+import '../base/panel_meta.dart';
 
 /// 触发行为面板 — 定义动作的触发条件、作用范围和延迟阈值
 class TriggerBehaviorCard extends StatelessWidget {

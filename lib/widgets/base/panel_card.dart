@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../theme/app_tokens.dart';
+import '../../theme/animations.dart';
 import '../controls/scale_tap.dart';
 import 'panel_meta.dart';
 
@@ -85,7 +85,7 @@ class _PanelCardState extends State<PanelCard> {
           if (_isOpen)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-              child: widget.child,
+              child: widget.child.animate().fadeIn(duration: AppAnimations.normal).slideX(begin: 0.03, duration: AppAnimations.normal),
             ),
         ],
       ),

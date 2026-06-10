@@ -3,13 +3,12 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
 import '../../models/action_config_presets.dart';
-import '../../theme/app_tokens.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
-import 'panel_utils.dart';
+import '../base/panel_utils.dart';
 import '../controls/small_select.dart';
-import '../panels/panel_card.dart';
-import '../panels/panel_meta.dart';
+import '../base/panel_card.dart';
+import '../base/panel_meta.dart';
 
 /// Cursor 反馈（无独立开关，随动）
 class CursorFeedbackCard extends StatelessWidget {
@@ -45,7 +44,7 @@ class CursorFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(cursorOverride: v)),
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '光标尺寸',
             child: SmallSelect(
@@ -60,7 +59,7 @@ class CursorFeedbackCard extends StatelessWidget {
               },
             ),
           ),
-          panelDivider,
+          const PanelDivider(),
           FieldRow(
             label: '启用拖尾',
             child: ShadSwitch(
@@ -69,7 +68,7 @@ class CursorFeedbackCard extends StatelessWidget {
             ),
           ),
           if (config.cursorTrailEnabled) ...[
-            panelDivider,
+            const PanelDivider(),
             FieldRow(
               label: '拖尾数量',
               child: ControlSlider(
@@ -81,7 +80,7 @@ class CursorFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(cursorTrailCount: v.round())),
               ),
             ),
-            panelDivider,
+            const PanelDivider(),
             FieldRow(
               label: '拖尾透明度',
               child: ControlSlider(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../theme/app_tokens.dart';
 import 'controls/icon_resolver.dart';
@@ -17,24 +17,26 @@ class IconPickerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
+
     return AlertDialog(
-      contentPadding: const EdgeInsets.all(16),
+      contentPadding: const EdgeInsets.all(Spacing.lg),
       content: SizedBox(
         width: 240,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(LucideIcons.palette, size: IconSizes.md, color: AppColors.foreground),
-                SizedBox(width: 8),
+                Icon(LucideIcons.palette, size: IconSizes.md, color: cs.foreground),
+                const SizedBox(width: Spacing.sm),
                 Text(
                   '选择图标',
                   style: TextStyle(
                     fontSize: FontSizes.base,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.foreground,
+                    color: cs.foreground,
                   ),
                 ),
               ],
@@ -42,22 +44,22 @@ class IconPickerDialog extends StatelessWidget {
             const SizedBox(height: 12),
             const Divider(height: 1),
             const SizedBox(height: 12),
-            _buildIconGrid(context),
+            _buildIconGrid(context, cs),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildIconGrid(BuildContext context) {
+  Widget _buildIconGrid(BuildContext context, ShadColorScheme cs) {
     return LayoutBuilder(
       builder: (_, constraints) {
         final crossAxisCount = 5;
         final childWidth =
             (constraints.maxWidth - (crossAxisCount - 1) * 4.0) / crossAxisCount;
         return Wrap(
-          spacing: 4,
-          runSpacing: 4,
+          spacing: Spacing.xs,
+          runSpacing: Spacing.xs,
           children: kThemeIconNames.map((name) {
             final selected = name == currentIcon;
             final iconData = resolveThemeIcon(name);
@@ -75,15 +77,15 @@ class IconPickerDialog extends StatelessWidget {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 100),
                     decoration: BoxDecoration(
-                      color: selected ? AppColors.primary : Colors.transparent,
+                      color: selected ? cs.primary : Colors.transparent,
                       borderRadius: BorderRadius.circular(RadiusTokens.md),
                     ),
                     child: Icon(
                       iconData,
                       size: IconSizes.lg,
                       color: selected
-                          ? AppColors.primaryForeground
-                          : AppColors.mutedForeground,
+                          ? cs.primaryForeground
+                          : cs.mutedForeground,
                     ),
                   ),
                 ),

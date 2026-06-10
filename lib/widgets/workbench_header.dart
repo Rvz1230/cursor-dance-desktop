@@ -16,13 +16,15 @@ class WorkbenchHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
+
     return Container(
       height: 52,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: const BoxDecoration(
-        color: AppColors.card,
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+      decoration: BoxDecoration(
+        color: cs.card,
         border: Border(
-          bottom: BorderSide(color: AppColors.border),
+          bottom: BorderSide(color: cs.border),
         ),
       ),
       child: Row(
@@ -33,41 +35,41 @@ class WorkbenchHeader extends StatelessWidget {
               Icon(
                 LucideIcons.sparkles,
                 size: IconSizes.lg,
-                color: AppColors.foreground,
+                color: cs.foreground,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: Spacing.sm),
               Text(
                 'CursorDance',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: FontSizes.base,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.foreground,
+                  color: cs.foreground,
                 ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: Spacing.xs),
               Text(
                 '桌面版',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: FontSizes.small,
-                  color: AppColors.mutedForeground,
+                  color: cs.mutedForeground,
                 ),
               ),
             ],
           ),
 
-          const SizedBox(width: 24),
+          const SizedBox(width: Spacing.xl),
 
           // Workspace tabs
           Expanded(
             child: Row(
               children: [
-                _workspaceTab('workbench', '主题工作台', LucideIcons.wand2,
+                _workspaceTab(cs, 'workbench', '主题工作台', LucideIcons.wand2,
                     showActiveBg: state.workspaceId == 'workbench'),
-                const SizedBox(width: 4),
-                _workspaceTab('states', '光标状态', LucideIcons.mousePointer2,
+                const SizedBox(width: Spacing.xs),
+                _workspaceTab(cs, 'states', '光标状态', LucideIcons.mousePointer2,
                     showActiveBg: state.workspaceId == 'states'),
-                const SizedBox(width: 4),
-                _workspaceTab('keyboard', '键盘动效', LucideIcons.keyboard,
+                const SizedBox(width: Spacing.xs),
+                _workspaceTab(cs, 'keyboard', '键盘动效', LucideIcons.keyboard,
                     showActiveBg: state.workspaceId == 'keyboard'),
               ],
             ),
@@ -79,11 +81,11 @@ class WorkbenchHeader extends StatelessWidget {
               // Global enable switch
               Row(
                 children: [
-                  const Text(
+                  Text(
                     '全局',
                     style: TextStyle(
                       fontSize: FontSizes.small,
-                      color: AppColors.foreground,
+                      color: cs.foreground,
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -111,15 +113,15 @@ class WorkbenchHeader extends StatelessWidget {
                       )
                     else
                       Icon(LucideIcons.save, size: IconSizes.md),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: Spacing.xs),
                     Text(state.unsaved ? '保存' : '已保存'),
                   ],
                 ),
               ),
 
               if (state.saveError.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                Icon(LucideIcons.alertCircle, size: IconSizes.md, color: AppColors.destructive),
+                const SizedBox(width: Spacing.sm),
+                Icon(LucideIcons.alertCircle, size: IconSizes.md, color: cs.destructive),
               ],
             ],
           ),
@@ -128,7 +130,7 @@ class WorkbenchHeader extends StatelessWidget {
     );
   }
 
-  Widget _workspaceTab(String id, String label, IconData icon, {bool showActiveBg = false}) {
+  Widget _workspaceTab(ShadColorScheme cs, String id, String label, IconData icon, {bool showActiveBg = false}) {
     final active = showActiveBg;
     return GestureDetector(
       onTap: () => state.setWorkspaceId(id),
@@ -136,7 +138,7 @@ class WorkbenchHeader extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? AppColors.primary : Colors.transparent,
+          color: active ? cs.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(RadiusTokens.md),
         ),
         child: Row(
@@ -145,15 +147,15 @@ class WorkbenchHeader extends StatelessWidget {
             Icon(
               icon,
               size: IconSizes.md,
-              color: active ? AppColors.primaryForeground : AppColors.mutedForeground,
+              color: active ? cs.primaryForeground : cs.mutedForeground,
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: Spacing.xs),
             Text(
               label,
               style: TextStyle(
                 fontSize: FontSizes.small,
                 fontWeight: active ? FontWeight.w600 : FontWeight.normal,
-                color: active ? AppColors.primaryForeground : AppColors.mutedForeground,
+                color: active ? cs.primaryForeground : cs.mutedForeground,
               ),
             ),
           ],
