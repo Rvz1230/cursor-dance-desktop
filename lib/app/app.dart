@@ -6,6 +6,7 @@ import '../providers/config_provider.dart';
 import '../providers/overlay_provider.dart';
 import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
+import '../theme/animations.dart';
 import 'router.dart';
 
 class CursorDanceApp extends StatelessWidget {
@@ -40,6 +41,7 @@ class CursorDanceApp extends StatelessWidget {
         theme: appTheme,
         darkTheme: darkTheme,
         themeMode: ThemeMode.light,
+        themeCurve: AppAnimations.smooth,
         debugShowCheckedModeBanner: false,
         routerConfig: appRouter,
       ),

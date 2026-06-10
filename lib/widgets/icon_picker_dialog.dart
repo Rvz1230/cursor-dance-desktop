@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../theme/app_tokens.dart';
+import '../theme/animations.dart';
 import 'controls/icon_resolver.dart';
 
 /// Dialog for picking a theme icon from a grid of Lucide icons.
@@ -41,9 +42,9 @@ class IconPickerDialog extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: Spacing.md),
             const Divider(height: 1),
-            const SizedBox(height: 12),
+            const SizedBox(height: Spacing.md),
             _buildIconGrid(context, cs),
           ],
         ),
@@ -75,7 +76,7 @@ class IconPickerDialog extends StatelessWidget {
                     Navigator.of(context).pop();
                   },
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 100),
+                    duration: AppAnimations.fast,
                     decoration: BoxDecoration(
                       color: selected ? cs.primary : Colors.transparent,
                       borderRadius: BorderRadius.circular(RadiusTokens.md),

@@ -3,6 +3,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/key_feedback_config.dart';
 import '../../theme/app_tokens.dart';
+import '../../theme/animations.dart';
 import '../controls/color_options.dart';
 import '../controls/control_slider.dart';
 import '../controls/field_row.dart';
@@ -79,7 +80,7 @@ class KeyFeedbackCard extends StatelessWidget {
               }).toList(),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.xl),
             const SectionTitle(title: '动画参数'),
             FieldRow(
               label: '持续时长',
@@ -149,7 +150,7 @@ class KeyFeedbackCard extends StatelessWidget {
 
             // ── Style-Specific Parameters ──
             if (config.animationStyle == 'bounce') ...[
-              const SizedBox(height: 20),
+              const SizedBox(height: Spacing.xl),
               const SectionTitle(title: '弹跳参数'),
               FieldRow(
                 label: '弹跳高度',
@@ -166,7 +167,7 @@ class KeyFeedbackCard extends StatelessWidget {
               ),
             ],
             if (config.animationStyle == 'raindrop') ...[
-              const SizedBox(height: 20),
+              const SizedBox(height: Spacing.xl),
               const SectionTitle(title: '雨滴参数'),
               FieldRow(
                 label: '重力强度',
@@ -196,7 +197,7 @@ class KeyFeedbackCard extends StatelessWidget {
             ],
 
             // ── Position ──
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.xl),
             const SectionTitle(title: '弹出位置'),
             FieldRow(
               label: '起始边缘',
@@ -237,7 +238,7 @@ class KeyFeedbackCard extends StatelessWidget {
             ],
 
             // ── Text Style ──
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.xl),
             const SectionTitle(title: '字符样式'),
             FieldRow(
               label: '颜色',
@@ -287,7 +288,7 @@ class KeyFeedbackCard extends StatelessWidget {
             ),
 
             // ── Effects ──
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.xl),
             const SectionTitle(title: '特效增强'),
             FieldRow(
               label: '发光',
@@ -332,7 +333,7 @@ class KeyFeedbackCard extends StatelessWidget {
             ],
 
             // ── Advanced ──
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.xl),
             const SectionTitle(title: '高级'),
             FieldRow(
               label: '冷却时间',
@@ -387,8 +388,8 @@ class _StyleChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        duration: AppAnimations.normal,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: Spacing.sm),
         decoration: BoxDecoration(
           color: selected
               ? cs.primary.withValues(alpha: 0.1)

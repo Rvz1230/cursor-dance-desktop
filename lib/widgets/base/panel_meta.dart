@@ -72,8 +72,8 @@ class PanelMetaRegistry {
 
   static const keyboard = PanelMeta(
     icon: LucideIcons.keyboard,
-    bg: Color(0xFFE0E7FF),
-    fg: Color(0xFF4F46E5),
+    bg: AppColors.toneKeyboardBg,
+    fg: AppColors.toneKeyboardFg,
   );
 
   /// 深色模式的色调映射
@@ -86,7 +86,7 @@ class PanelMetaRegistry {
     LucideIcons.sparkles: AppDarkColors.toneAnimationBg,
     LucideIcons.imagePlus: AppDarkColors.toneImageBg,
     LucideIcons.settings2: AppDarkColors.toneCursorBg,
-    LucideIcons.keyboard: const Color(0xFF312E81),
+    LucideIcons.keyboard: AppDarkColors.toneKeyboardBg,
   };
 
   static final Map<IconData, Color> _darkFg = {
@@ -98,7 +98,7 @@ class PanelMetaRegistry {
     LucideIcons.sparkles: AppDarkColors.toneAnimationFg,
     LucideIcons.imagePlus: AppDarkColors.toneImageFg,
     LucideIcons.settings2: AppDarkColors.toneCursorFg,
-    LucideIcons.keyboard: const Color(0xFFA5B4FC),
+    LucideIcons.keyboard: AppDarkColors.toneKeyboardFg,
   };
 
   static PanelMeta darkVariant(PanelMeta light) {

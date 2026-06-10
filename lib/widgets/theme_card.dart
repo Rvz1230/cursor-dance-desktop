@@ -4,7 +4,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../models/theme.dart';
 import '../theme/app_tokens.dart';
-import 'controls/icon_resolver.dart';
+import '../theme/animations.dart';
 import 'controls/scale_tap.dart';
 import 'icon_picker_dialog.dart';
 
@@ -100,7 +100,7 @@ class _ThemeCardState extends State<ThemeCard> {
     final cs = ShadTheme.of(context).colorScheme;
     final toneColor = resolveToneColor(widget.theme.tone);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: Spacing.sm),
       child: Semantics(
         button: true,
         label: widget.theme.name,
@@ -117,7 +117,7 @@ class _ThemeCardState extends State<ThemeCard> {
                   clipBehavior: Clip.none,
                   children: [
                     AnimatedContainer(
-                      duration: const Duration(milliseconds: 120),
+                      duration: AppAnimations.fastish,
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
@@ -190,7 +190,16 @@ class _ThemeCardState extends State<ThemeCard> {
   Widget _buildExpandedCard() {
     final cs = ShadTheme.of(context).colorScheme;
     final toneColor = resolveToneColor(widget.theme.tone);
-    final badgeStyle = kindBadgeStyle(widget.theme.kind);
+
+    // Badge colors: builtin → teal tint, custom → amber tint
+    final (Color badgeBg, Color badgeFg, Color badgeBorder) =
+        widget.theme.kind == '内置'
+            ? (cs.custom['success']?.withValues(alpha: 0.2) ?? const Color(0xFFCCFBF1),
+               cs.custom['success'] ?? const Color(0xFF0D9488),
+               cs.custom['success']?.withValues(alpha: 0.4) ?? const Color(0xFF5EEAD4))
+            : (cs.custom['warning']?.withValues(alpha: 0.2) ?? const Color(0xFFFEF3C7),
+               cs.custom['warning'] ?? const Color(0xFFB45309),
+               cs.custom['warning']?.withValues(alpha: 0.4) ?? const Color(0xFFFCD34D));
 
     return Padding(
       padding: const EdgeInsets.only(bottom: Spacing.xs),
@@ -202,7 +211,7 @@ class _ThemeCardState extends State<ThemeCard> {
           onTap: widget.onTap,
           child: ScaleTap(
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 120),
+              duration: AppAnimations.fastish,
               decoration: BoxDecoration(
                 color: widget.active
                     ? cs.muted
@@ -222,7 +231,7 @@ class _ThemeCardState extends State<ThemeCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AnimatedContainer(
-                    duration: const Duration(milliseconds: 120),
+                    duration: AppAnimations.fastish,
                     width: 3,
                     height: _renaming ? 44 : 52,
                     margin: const EdgeInsets.only(top: Spacing.xs, right: Spacing.sm),
@@ -235,7 +244,7 @@ class _ThemeCardState extends State<ThemeCard> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(top: 10),
+                    padding: const EdgeInsets.only(top: Spacing.md),
                     child: Container(
                       width: 24,
                       height: 24,
@@ -251,15 +260,15 @@ class _ThemeCardState extends State<ThemeCard> {
                   const SizedBox(width: Spacing.sm),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 6, bottom: 6),
+                      padding: const EdgeInsets.only(top: 6, bottom: Spacing.sm),
                       child: _renaming
                           ? _buildRenameField(cs)
-                          : _buildNameSection(cs, badgeStyle),
+                          : _buildNameSection(cs, badgeBg, badgeFg, badgeBorder),
                     ),
                   ),
                   if (!_renaming)
                     Padding(
-                      padding: const EdgeInsets.only(top: 6, right: 2),
+                      padding: const EdgeInsets.only(top: 6, right: Spacing.xs),
                       child: _buildMoreActions(cs),
                     ),
                 ],
@@ -312,7 +321,7 @@ class _ThemeCardState extends State<ThemeCard> {
 
   // ── Name + badge + dirty + summary ──
 
-  Widget _buildNameSection(ShadColorScheme cs, KindBadgeStyle badgeStyle) {
+  Widget _buildNameSection(ShadColorScheme cs, Color badgeBg, Color badgeFg, Color badgeBorder) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -333,16 +342,16 @@ class _ThemeCardState extends State<ThemeCard> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: Spacing.xs, vertical: 1),
               decoration: BoxDecoration(
-                color: badgeStyle.bg,
+                color: badgeBg,
                 borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                border: Border.all(color: badgeStyle.border, width: 0.5),
+                border: Border.all(color: badgeBorder, width: 0.5),
               ),
               child: Text(
                 widget.theme.kind,
                 style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w600,
-                  color: badgeStyle.fg,
+                  color: badgeFg,
                   height: 1.2,
                 ),
               ),
@@ -371,7 +380,7 @@ class _ThemeCardState extends State<ThemeCard> {
               GestureDetector(
                 onTap: _startRename,
                 child: Container(
-                  padding: const EdgeInsets.all(2),
+                  padding: const EdgeInsets.all(Spacing.xs),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(RadiusTokens.sm),
                   ),
@@ -394,7 +403,7 @@ class _ThemeCardState extends State<ThemeCard> {
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
       icon: AnimatedContainer(
-        duration: const Duration(milliseconds: 120),
+        duration: AppAnimations.fastish,
         width: 26,
         height: 26,
         decoration: BoxDecoration(

@@ -77,7 +77,7 @@ class _ControlSliderState extends State<ControlSlider> {
     final cs = ShadTheme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.sm),
       decoration: BoxDecoration(
         color: cs.muted,
         borderRadius: BorderRadius.circular(RadiusTokens.xl),

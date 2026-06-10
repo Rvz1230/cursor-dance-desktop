@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_tokens.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
@@ -90,7 +91,7 @@ class RippleFeedbackCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(rippleLineWidth: v.round())),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: Spacing.xl),
           const SectionTitle(title: '消退'),
           FieldRow(
             label: '持续时长',

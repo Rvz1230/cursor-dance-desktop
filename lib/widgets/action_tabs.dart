@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/animations.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config_presets.dart';
@@ -25,7 +26,7 @@ class ActionTabs extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: kActionIds.length,
         separatorBuilder: (_, _) => const SizedBox(width: Spacing.xs),
-        padding: const EdgeInsets.symmetric(horizontal: 2),
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.xs),
         itemBuilder: (context, index) {
           final actionId = kActionIds[index];
           final active = actionId == selectedActionId;
@@ -34,8 +35,8 @@ class ActionTabs extends StatelessWidget {
           return GestureDetector(
             onTap: () => onActionChanged(actionId),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              duration: AppAnimations.normal,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: Spacing.sm),
               decoration: BoxDecoration(
                 color: active ? cs.primary : Colors.transparent,
                 borderRadius: BorderRadius.circular(RadiusTokens.lg),

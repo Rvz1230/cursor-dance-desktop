@@ -4,6 +4,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../models/action_config.dart';
 import '../../models/action_config_presets.dart';
 import '../../theme/app_tokens.dart';
+import '../../theme/animations.dart';
 import 'panels/animation_feedback_card.dart';
 import 'panels/audio_feedback_card.dart';
 import 'panels/cursor_feedback_card.dart';
@@ -45,7 +46,7 @@ class ConfigPanel extends StatelessWidget {
       children: [
         // Action header
         Padding(
-          padding: const EdgeInsets.only(left: Spacing.xs, bottom: 12),
+          padding: const EdgeInsets.only(left: Spacing.xs, bottom: Spacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -59,7 +60,7 @@ class ConfigPanel extends StatelessWidget {
               ),
               if (actionHint.isNotEmpty)
                 Padding(
-                  padding: const EdgeInsets.only(top: 2),
+                  padding: const EdgeInsets.only(top: Spacing.xs),
                   child: Text(
                     actionHint,
                     style: TextStyle(
@@ -76,8 +77,8 @@ class ConfigPanel extends StatelessWidget {
         if (conflicts.isNotEmpty)
           Container(
             width: double.infinity,
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(bottom: Spacing.md),
+            padding: const EdgeInsets.all(Spacing.md),
             decoration: BoxDecoration(
               color: cs.custom['warning']?.withValues(alpha: 0.08) ?? cs.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(RadiusTokens.lg),
@@ -95,7 +96,7 @@ class ConfigPanel extends StatelessWidget {
                       size: 14,
                       color: cs.custom['warning'] ?? cs.primary,
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: Spacing.sm),
                     Text(
                       '待确认',
                       style: TextStyle(
@@ -106,7 +107,7 @@ class ConfigPanel extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: Spacing.sm),
                 for (final conflict in conflicts)
                   Padding(
                     padding: const EdgeInsets.only(top: Spacing.xs),
@@ -158,7 +159,7 @@ class ConfigPanel extends StatelessWidget {
                     color: cs.foreground,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: Spacing.sm),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
                   child: Text(
@@ -194,42 +195,42 @@ class ConfigPanel extends StatelessWidget {
           actionId: actionId,
           config: config,
           onUpdate: onUpdateConfig,
-        ),
+        ).animate().fadeIn(duration: AppAnimations.normal).slideX(begin: 0.03, duration: AppAnimations.normal),
         const SizedBox(height: Spacing.sm),
         TextFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
-        ),
+        ).animate(delay: 30.ms).fadeIn(duration: AppAnimations.normal).slideX(begin: 0.03, duration: AppAnimations.normal),
         const SizedBox(height: Spacing.sm),
         ParticleFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
-        ),
+        ).animate(delay: 60.ms).fadeIn(duration: AppAnimations.normal).slideX(begin: 0.03, duration: AppAnimations.normal),
         const SizedBox(height: Spacing.sm),
         RippleFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
-        ),
+        ).animate(delay: 90.ms).fadeIn(duration: AppAnimations.normal).slideX(begin: 0.03, duration: AppAnimations.normal),
         const SizedBox(height: Spacing.sm),
         AudioFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
-        ),
+        ).animate(delay: 120.ms).fadeIn(duration: AppAnimations.normal).slideX(begin: 0.03, duration: AppAnimations.normal),
         const SizedBox(height: Spacing.sm),
         AnimationFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
-        ),
+        ).animate(delay: 150.ms).fadeIn(duration: AppAnimations.normal).slideX(begin: 0.03, duration: AppAnimations.normal),
         const SizedBox(height: Spacing.sm),
         ImageFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
-        ),
+        ).animate(delay: 180.ms).fadeIn(duration: AppAnimations.normal).slideX(begin: 0.03, duration: AppAnimations.normal),
         const SizedBox(height: Spacing.sm),
         CursorFeedbackCard(
           config: config,
           onUpdate: onUpdateConfig,
-        ),
+        ).animate(delay: 210.ms).fadeIn(duration: AppAnimations.normal).slideX(begin: 0.03, duration: AppAnimations.normal),
       ],
     );
   }

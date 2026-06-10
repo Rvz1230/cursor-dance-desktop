@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../theme/app_tokens.dart';
+import '../../theme/animations.dart';
 
 /// 统一的图标按钮组件。
 class AppIconButton extends StatefulWidget {
@@ -55,7 +56,7 @@ class _AppIconButtonState extends State<AppIconButton> {
         child: GestureDetector(
           onTap: widget.disabled ? null : widget.onTap,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 120),
+            duration: AppAnimations.fastish,
             width: effectiveSize,
             height: effectiveSize,
             decoration: BoxDecoration(

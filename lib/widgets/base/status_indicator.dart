@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import '../../theme/app_tokens.dart';
+
 /// 状态指示器 — 圆点 + 文字
 ///
 /// 用于显示启用/停用等状态，整合了 config_page 和 keyboard_workspace 中的状态横幅模式。
@@ -26,16 +28,16 @@ class StatusIndicator extends StatelessWidget {
           height: 8,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: active ? Colors.green : cs.mutedForeground,
+            color: active ? (cs.custom['success'] ?? Color(0xFF10B981)) : cs.mutedForeground,
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: Spacing.sm),
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: active ? Colors.green.shade700 : cs.mutedForeground,
+            color: active ? (cs.custom['success'] ?? Color(0xFF065F46)) : cs.mutedForeground,
           ),
         ),
       ],

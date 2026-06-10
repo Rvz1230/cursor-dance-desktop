@@ -156,21 +156,21 @@ class _PreviewPanelState extends State<PreviewPanel> {
 
   Widget _buildHeader(ShadColorScheme cs, String actionLabel, bool hasEffects) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: Spacing.sm),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: cs.border)),
       ),
       child: Row(
         children: [
           Icon(LucideIcons.mousePointer2, size: IconSizes.md, color: cs.foreground),
-          const SizedBox(width: 6),
+          const SizedBox(width: Spacing.sm),
           Text(
             '实时预览',
             style: TextStyle(fontSize: FontSizes.base, fontWeight: FontWeight.w600, color: cs.foreground),
           ),
           if (!hasEffects)
             Container(
-              margin: const EdgeInsets.only(left: 6),
+              margin: const EdgeInsets.only(left: Spacing.sm),
               padding: const EdgeInsets.symmetric(horizontal: Spacing.xs, vertical: 1),
               decoration: BoxDecoration(
                 color: cs.custom['warning']?.withValues(alpha: 0.1) ?? cs.primary.withValues(alpha: 0.1),
@@ -321,7 +321,7 @@ class _PreviewPanelState extends State<PreviewPanel> {
     return Padding(
       padding: const EdgeInsets.only(bottom: Spacing.xs),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.xs),
         decoration: BoxDecoration(
           color: cs.card.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
@@ -330,7 +330,7 @@ class _PreviewPanelState extends State<PreviewPanel> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: IconSizes.xs, color: cs.foreground),
-            const SizedBox(width: 3),
+            const SizedBox(width: Spacing.xs),
             Text(label, style: TextStyle(fontSize: FontSizes.caption, color: cs.foreground)),
           ],
         ),

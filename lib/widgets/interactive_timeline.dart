@@ -110,7 +110,7 @@ class InteractiveTimeline extends StatelessWidget {
     final totalMs = ((maxEnd / 100).ceil()) * 100;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, Spacing.xs),
+      padding: const EdgeInsets.fromLTRB(Spacing.md, 0, Spacing.md, Spacing.xs),
       decoration: BoxDecoration(
         color: cs.muted.withAlpha(80),
         borderRadius: const BorderRadius.only(
@@ -125,7 +125,7 @@ class InteractiveTimeline extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
+            padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
             child: Text(
               '时间轴编排',
               style: TextStyle(
@@ -136,7 +136,7 @@ class InteractiveTimeline extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(Spacing.md),
             child: _TimelineView(cs: cs, tracks: tracks, totalMs: totalMs),
           ),
         ],
@@ -238,7 +238,7 @@ class _TrackRow extends StatelessWidget {
     final clampedWidth = barWidth.clamp(4.0, totalMs * pxPerMs - barStart);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: Spacing.sm),
       child: Row(
         children: [
           // Label

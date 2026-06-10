@@ -5,6 +5,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../models/key_feedback_config.dart';
 import '../../providers/theme_provider.dart';
 import '../../theme/app_tokens.dart';
+import '../../theme/animations.dart';
 import '../../widgets/base/panel_meta.dart';
 import '../../widgets/base/status_indicator.dart';
 import '../../widgets/panels/key_feedback_card.dart';
@@ -70,7 +71,7 @@ class KeyboardWorkspace extends StatelessWidget {
               color: Color(0xFF4F46E5),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: Spacing.md),
           Text(
             '键盘动效配置',
             style: TextStyle(
@@ -86,7 +87,7 @@ class KeyboardWorkspace extends StatelessWidget {
 
   Widget _buildStatusBanner(ShadColorScheme cs, KeyFeedbackConfig config, ThemeProvider theme) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: Spacing.md),
       decoration: BoxDecoration(
         color: config.enabled
             ? (cs.custom['success']?.withValues(alpha: 0.08) ?? const Color(0xFFECFDF5))
@@ -142,7 +143,7 @@ class KeyboardWorkspace extends StatelessWidget {
               color: cs.mutedForeground,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: Spacing.lg),
           Row(
             children: [
               _styleCard(
@@ -158,7 +159,7 @@ class KeyboardWorkspace extends StatelessWidget {
                   }
                 },
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: Spacing.md),
               _styleCard(
                 cs: cs,
                 icon: LucideIcons.cloudRain,
@@ -191,8 +192,8 @@ class KeyboardWorkspace extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.all(14),
+          duration: AppAnimations.normal,
+          padding: const EdgeInsets.all(Spacing.lg),
           decoration: BoxDecoration(
             color:
                 selected ? cs.primary.withValues(alpha: 0.06) : cs.muted,
@@ -218,7 +219,7 @@ class KeyboardWorkspace extends StatelessWidget {
                   color: selected ? cs.primary : cs.foreground,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: Spacing.xs),
               Text(
                 description,
                 style: TextStyle(

@@ -5,6 +5,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../providers/config_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../theme/app_tokens.dart';
+import '../../theme/animations.dart';
 import '../../widgets/action_tabs.dart';
 import '../../widgets/config_panel.dart';
 import '../../widgets/preview_panel.dart';
@@ -85,7 +86,7 @@ class _WorkbenchWorkspaceState extends State<WorkbenchWorkspace> {
                   color: Colors.transparent,
                   child: Center(
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
+                      duration: AppAnimations.normal,
                       width: 3,
                       height: _hovered ? 64 : 32,
                       decoration: BoxDecoration(

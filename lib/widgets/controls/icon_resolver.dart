@@ -56,33 +56,3 @@ const kActionIconMap = <String, IconData>{
 IconData actionIcon(String actionId) {
   return kActionIconMap[actionId] ?? LucideIcons.mousePointer2;
 }
-
-/// Kind badge colors.
-class KindBadgeStyle {
-  final Color bg;
-  final Color fg;
-  final Color border;
-
-  const KindBadgeStyle({
-    required this.bg,
-    required this.fg,
-    required this.border,
-  });
-}
-
-const kKindBadgeStyles = <String, KindBadgeStyle>{
-  '内置': KindBadgeStyle(
-    bg: Color(0xFFCCFBF1),
-    fg: Color(0xFF0D9488),
-    border: Color(0xFF5EEAD4),
-  ),
-  '自定义': KindBadgeStyle(
-    bg: Color(0xFFFEF3C7),
-    fg: Color(0xFFB45309),
-    border: Color(0xFFFCD34D),
-  ),
-};
-
-KindBadgeStyle kindBadgeStyle(String kind) {
-  return kKindBadgeStyles[kind] ?? kKindBadgeStyles['自定义']!;
-}

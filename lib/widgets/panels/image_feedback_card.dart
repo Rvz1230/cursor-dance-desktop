@@ -48,7 +48,7 @@ class ImageFeedbackCard extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: Spacing.md),
             decoration: BoxDecoration(
               color: cs.muted,
               borderRadius: BorderRadius.circular(RadiusTokens.xl),
@@ -57,7 +57,7 @@ class ImageFeedbackCard extends StatelessWidget {
             child: Column(
               children: [
                 Icon(LucideIcons.imagePlus, size: 24, color: cs.mutedForeground),
-                const SizedBox(height: 8),
+                const SizedBox(height: Spacing.sm),
                 Text(
                   '图片贴纸需要在桌面版中通过文件选择器上传',
                   textAlign: TextAlign.center,
@@ -69,7 +69,7 @@ class ImageFeedbackCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: Spacing.xl),
           const SectionTitle(title: '参数'),
           FieldRow(
             label: '显示时长',

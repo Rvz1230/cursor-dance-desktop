@@ -84,7 +84,7 @@ class _PanelCardState extends State<PanelCard> {
           _buildHeader(theme, isDark),
           if (_isOpen)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              padding: const EdgeInsets.fromLTRB(Spacing.lg, 12, 16, 12),
               child: widget.child.animate().fadeIn(duration: AppAnimations.normal).slideX(begin: 0.03, duration: AppAnimations.normal),
             ),
         ],
@@ -107,7 +107,7 @@ class _PanelCardState extends State<PanelCard> {
       behavior: HitTestBehavior.opaque,
       child: ScaleTap(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: Spacing.md),
           decoration: BoxDecoration(
             border: hasBorder
                 ? Border(
@@ -135,7 +135,7 @@ class _PanelCardState extends State<PanelCard> {
                           color: effectiveMeta.fg,
                         ),
                       ),
-                    if (effectiveMeta != null) const SizedBox(width: 12),
+                    if (effectiveMeta != null) const SizedBox(width: Spacing.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,14 +155,14 @@ class _PanelCardState extends State<PanelCard> {
                                 ),
                               ),
                               if (widget.badge != null) ...[
-                                const SizedBox(width: 6),
+                                const SizedBox(width: Spacing.sm),
                                 widget.badge!,
                               ],
                             ],
                           ),
                           if (widget.summary != null)
                             Padding(
-                              padding: const EdgeInsets.only(top: 2),
+                              padding: const EdgeInsets.only(top: Spacing.xs),
                               child: Text(
                                 widget.summary!,
                                 style: TextStyle(
@@ -182,16 +182,16 @@ class _PanelCardState extends State<PanelCard> {
 
               // Action (e.g., Switch)
               if (widget.action != null) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: Spacing.sm),
                 widget.action!,
               ],
 
               // Chevron
               if (widget.collapsible) ...[
-                const SizedBox(width: 4),
+                const SizedBox(width: Spacing.xs),
                 AnimatedRotation(
                   turns: _isOpen ? 0.5 : 0.0,
-                  duration: const Duration(milliseconds: 150),
+                  duration: AppAnimations.normal,
                   child: Icon(
                     LucideIcons.chevronDown,
                     size: 16,

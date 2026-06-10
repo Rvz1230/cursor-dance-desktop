@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_tokens.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
@@ -59,7 +60,7 @@ class TextFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(textKind: v)),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
 
             // ── 数字飘字专属字段 ──
             if (isNumberKind) ...[
@@ -73,7 +74,7 @@ class TextFeedbackCard extends StatelessWidget {
                   onChanged: (v) => onUpdate((c) => c.copyWith(textStyle: v, textEnabled: true)),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.sm),
               FieldRow(
                 label: '数字模式',
                 hint: '默认或模板。',
@@ -85,7 +86,7 @@ class TextFeedbackCard extends StatelessWidget {
                 ),
               ),
               if (config.textMode == '模板模式') ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: Spacing.sm),
                 FieldRow(
                   label: '模板字符串',
                   hint: r'${number} 为占位符。',
@@ -95,7 +96,7 @@ class TextFeedbackCard extends StatelessWidget {
                   ),
                 ),
               ],
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.sm),
               FieldRow(
                 label: '连击累加',
                 hint: '连续触发累加。',
@@ -105,7 +106,7 @@ class TextFeedbackCard extends StatelessWidget {
                 ),
               ),
               if (config.comboEnabled) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: Spacing.sm),
                 FieldRow(
                   label: '连击窗口',
                   hint: '多久以内算连续。',
@@ -134,7 +135,7 @@ class TextFeedbackCard extends StatelessWidget {
                   onChanged: (v) => onUpdate((c) => c.copyWith(textTagPlayMode: v)),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: Spacing.sm),
               FieldRow(
                 label: '标签内容',
                 hint: '多条轮播。',
@@ -149,7 +150,7 @@ class TextFeedbackCard extends StatelessWidget {
               ),
             ],
 
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.xl),
             const SectionTitle(title: '动画'),
             FieldRow(
               label: '持续时长',
@@ -164,7 +165,7 @@ class TextFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(textDuration: v.round())),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             FieldRow(
               label: '缓动效果',
               hint: '运动节奏。',
@@ -175,7 +176,7 @@ class TextFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(textEasing: v)),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             FieldRow(
               label: '水平偏移',
               hint: '左右偏移。',
@@ -189,7 +190,7 @@ class TextFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(textOffsetX: v.round())),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             FieldRow(
               label: '垂直偏移',
               hint: '上下偏移。',
@@ -204,7 +205,7 @@ class TextFeedbackCard extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.xl),
             const SectionTitle(title: '样式'),
             FieldRow(
               label: '飘字大小',
@@ -219,7 +220,7 @@ class TextFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(fontSize: v.round())),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             FieldRow(
               label: '飘字字体',
               hint: '字体。',
@@ -230,7 +231,7 @@ class TextFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(textFontFamily: v)),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             FieldRow(
               label: '飘字颜色',
               hint: '颜色。',
@@ -240,7 +241,7 @@ class TextFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(textColor: v)),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             FieldRow(
               label: '透明度',
               hint: '透明度。',
@@ -254,7 +255,7 @@ class TextFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(textOpacity: v.round())),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             FieldRow(
               label: '字重',
               hint: '粗细。',
@@ -265,7 +266,7 @@ class TextFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(textWeight: v)),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             FieldRow(
               label: '描边',
               hint: '描边宽度。',
@@ -279,7 +280,7 @@ class TextFeedbackCard extends StatelessWidget {
                 onChanged: (v) => onUpdate((c) => c.copyWith(textOutlineWidth: v.round())),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             FieldRow(
               label: '阴影效果',
               hint: '阴影。',

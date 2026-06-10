@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_tokens.dart';
 
 import '../../models/action_config.dart';
 import '../../models/action_config_presets.dart';
@@ -58,7 +59,7 @@ class TriggerBehaviorCard extends StatelessWidget {
               onChanged: (v) => onUpdate((c) => c.copyWith(triggerTiming: v)),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: Spacing.sm),
           FieldRow(
             label: '作用范围',
             hint: '监听目标。',
@@ -70,7 +71,7 @@ class TriggerBehaviorCard extends StatelessWidget {
             ),
           ),
           if (timingMeta.min != timingMeta.max) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             FieldRow(
               label: timingMeta.label,
               hint: timingMeta.hint,

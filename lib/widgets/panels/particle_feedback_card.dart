@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_tokens.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/action_config.dart';
@@ -151,7 +152,7 @@ class ParticleFeedbackCard extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 20),
+          const SizedBox(height: Spacing.xl),
           const SectionTitle(title: '样式'),
           FieldRow(
             label: '粒子大小',
@@ -218,7 +219,7 @@ class ParticleFeedbackCard extends StatelessWidget {
             ),
           ),
           if (!_isOrbital) ...[
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.xl),
             const SectionTitle(title: '物理'),
             FieldRow(
               label: '重力',

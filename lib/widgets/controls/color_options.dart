@@ -40,7 +40,7 @@ class ColorOptions extends StatelessWidget {
             Container(
               width: 20,
               height: 20,
-              margin: const EdgeInsets.only(right: 6),
+              margin: const EdgeInsets.only(right: Spacing.sm),
               decoration: BoxDecoration(
                 color: currentColor,
                 shape: BoxShape.circle,

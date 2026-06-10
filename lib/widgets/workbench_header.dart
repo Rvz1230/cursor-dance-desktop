@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/animations.dart';
 import 'package:provider/provider.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -87,7 +88,7 @@ class WorkbenchHeader extends StatelessWidget {
                       color: cs.foreground,
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: Spacing.sm),
                   ShadSwitch(
                     value: overlay.enabled,
                     onChanged: onGlobalToggle ?? (v) => overlay.setEnabled(v),
@@ -95,7 +96,7 @@ class WorkbenchHeader extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(width: 14),
+              const SizedBox(width: Spacing.lg),
 
               // Save button
               ShadButton(
@@ -134,8 +135,8 @@ class WorkbenchHeader extends StatelessWidget {
     return GestureDetector(
       onTap: () => theme.setWorkspaceId(id),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        duration: AppAnimations.normal,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: Spacing.sm),
         decoration: BoxDecoration(
           color: active ? cs.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(RadiusTokens.md),

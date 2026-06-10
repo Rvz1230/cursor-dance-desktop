@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/animations.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -73,7 +74,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
                             color: cs.foreground,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: Spacing.xs),
                         Text(
                           '新建一个可编辑主题，或导入现有 JSON 主题包。',
                           style: TextStyle(
@@ -94,11 +95,11 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
             ),
             // Tabs
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.md),
               child: Row(
                 children: [
                   _buildTab(cs, '新建主题', 0),
-                  const SizedBox(width: Spacing.xs),
+                  const SizedBox(height: Spacing.xs),
                   _buildTab(cs, '导入 JSON', 1),
                 ],
               ),
@@ -123,8 +124,8 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
     return GestureDetector(
       onTap: () => setState(() => _tabIndex = index),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        duration: AppAnimations.normal,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: Spacing.sm),
         decoration: BoxDecoration(
           color: active ? cs.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(RadiusTokens.md),
@@ -161,7 +162,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
         const SizedBox(height: Spacing.lg),
         if (_createError.isNotEmpty) ...[
           _buildErrorBox(cs, _createError),
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.md),
         ],
         Row(
           children: [
@@ -178,14 +179,14 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: Spacing.md),
             ShadButton(
               onPressed: _handleCreate,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(LucideIcons.plus, size: IconSizes.md),
-                  const SizedBox(width: Spacing.xs),
+                  const SizedBox(height: Spacing.xs),
                   const Text('创建主题'),
                 ],
               ),
@@ -199,7 +200,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
   Widget _buildBaseThemeSelector(ShadColorScheme cs) {
     final theme = context.read<ThemeProvider>();
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: Spacing.xs),
       decoration: BoxDecoration(
         color: cs.muted,
         borderRadius: BorderRadius.circular(RadiusTokens.md),
@@ -273,7 +274,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
                   color: cs.mutedForeground,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: Spacing.md),
               Text(
                 '粘贴 JSON 主题包',
                 style: TextStyle(fontSize: FontSizes.base, fontWeight: FontWeight.w600, color: cs.foreground),
@@ -290,7 +291,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
                 maxLines: 4,
                 placeholder: const Text('在此粘贴 JSON 内容...'),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: Spacing.md),
               Row(
                 children: [
                   Expanded(
@@ -300,7 +301,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(LucideIcons.upload, size: IconSizes.md),
-                          const SizedBox(width: Spacing.xs),
+                          const SizedBox(height: Spacing.xs),
                           const Text('导入'),
                         ],
                       ),
@@ -314,7 +315,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(LucideIcons.clipboardPaste, size: IconSizes.md),
-                          const SizedBox(width: Spacing.xs),
+                          const SizedBox(height: Spacing.xs),
                           const Text('从剪贴板粘贴'),
                         ],
                       ),
@@ -326,11 +327,11 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
           ),
         ),
         if (_importSuccess.isNotEmpty) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.md),
           _buildSuccessBox(cs, _importSuccess),
         ],
         if (_importError.isNotEmpty) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: Spacing.md),
           _buildErrorBox(cs, _importError),
         ],
       ],
@@ -378,7 +379,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
   Widget _buildErrorBox(ShadColorScheme cs, String message) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
         color: cs.destructive.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(RadiusTokens.lg),
@@ -394,7 +395,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
   Widget _buildSuccessBox(ShadColorScheme cs, String message) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
         color: cs.custom['success']?.withValues(alpha: 0.06) ?? const Color(0xFFECFDF5),
         borderRadius: BorderRadius.circular(RadiusTokens.lg),
@@ -405,7 +406,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
       child: Row(
         children: [
           Icon(LucideIcons.checkCircle2, size: IconSizes.sm, color: cs.custom['success'] ?? const Color(0xFF065F46)),
-          const SizedBox(width: 6),
+          const SizedBox(width: Spacing.sm),
           Expanded(
             child: Text(
               message,

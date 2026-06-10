@@ -12,8 +12,10 @@ class AppAnimations {
 
   // ── 时长 ──
   static const Duration fast = Duration(milliseconds: 100);
+  static const Duration fastish = Duration(milliseconds: 120);
   static const Duration normal = Duration(milliseconds: 150);
-  static const Duration slow = Duration(milliseconds: 250);
+  static const Duration slow = Duration(milliseconds: 200);
+  static const Duration slower = Duration(milliseconds: 250);
   static const Duration theme = Duration(milliseconds: 400);
 
   // ── 缓动曲线 ──

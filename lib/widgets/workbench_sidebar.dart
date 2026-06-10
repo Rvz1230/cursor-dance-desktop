@@ -6,6 +6,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../models/theme.dart';
 import '../providers/theme_provider.dart';
 import '../theme/app_tokens.dart';
+import '../theme/animations.dart';
 import 'controls/app_icon_button.dart';
 import 'theme_card.dart';
 import 'theme_composer_modal.dart';
@@ -71,7 +72,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
     final cs = ShadTheme.of(context).colorScheme;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: AppAnimations.slow,
       width: _collapsed ? 72 : 260,
       decoration: BoxDecoration(
         color: cs.card,
@@ -167,7 +168,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
       padding: const EdgeInsets.fromLTRB(Spacing.sm, 2, Spacing.sm, Spacing.xs),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.sm),
         decoration: BoxDecoration(
           color: cs.destructive.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(RadiusTokens.lg),
@@ -176,7 +177,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
         child: Row(
           children: [
             Icon(LucideIcons.alertTriangle, size: IconSizes.sm, color: cs.destructive),
-            const SizedBox(width: 6),
+            const SizedBox(width: Spacing.sm),
             Expanded(
               child: Text(
                 _actionError,
@@ -288,9 +289,9 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
       child: Row(
         children: [
           _buildCategoryChip(cs, '全部', 'all'),
-          const SizedBox(width: 2),
+          const SizedBox(width: Spacing.xs),
           _buildCategoryChip(cs, '内置', 'builtin'),
-          const SizedBox(width: 2),
+          const SizedBox(width: Spacing.xs),
           _buildCategoryChip(cs, '自定义', 'custom'),
         ],
       ),
@@ -305,7 +306,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
         _focusedIndex = 0;
       }),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+        duration: AppAnimations.normal,
         padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 3),
         decoration: BoxDecoration(
           color: active ? cs.muted : Colors.transparent,
@@ -370,7 +371,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
               ),
             ),
             if (_query.isEmpty) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: Spacing.md),
               ShadButton(
                 size: ShadButtonSize.sm,
                 onPressed: () {

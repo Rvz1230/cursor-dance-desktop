@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import '../../theme/app_tokens.dart';
+
 /// 信息横幅组件 — 支持 error / warning / success 三种变体
 ///
 /// 整合了项目中多处散落的横幅样式：
@@ -46,10 +48,10 @@ class InfoBanner extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: Spacing.sm),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(RadiusTokens.lg),
         border: Border.all(color: border),
       ),
       child: Row(
@@ -59,7 +61,7 @@ class InfoBanner extends StatelessWidget {
             padding: const EdgeInsets.only(top: 1),
             child: Icon(icon, size: 14, color: fg),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: Spacing.sm),
           Expanded(
             child: Text(
               message,
@@ -70,7 +72,7 @@ class InfoBanner extends StatelessWidget {
             GestureDetector(
               onTap: onDismiss,
               child: Padding(
-                padding: const EdgeInsets.only(left: 4),
+                padding: const EdgeInsets.only(left: Spacing.xs),
                 child: Icon(LucideIcons.x, size: 12, color: fg),
               ),
             ),

@@ -114,6 +114,8 @@ class AppColors {
   static const Color toneImageFg = Color(0xFFA21CAF); // fuchsia-700
   static const Color toneCursorBg = Color(0xFFF1F5F9); // slate-100
   static const Color toneCursorFg = Color(0xFF334155); // slate-700
+  static const Color toneKeyboardBg = Color(0xFFE0E7FF); // indigo-100
+  static const Color toneKeyboardFg = Color(0xFF4F46E5); // indigo-700
 }
 
 /// 深色模式颜色常量
@@ -160,6 +162,8 @@ class AppDarkColors {
   static const Color toneImageFg = Color(0xFFF0ABFC);
   static const Color toneCursorBg = Color(0xFF334155);
   static const Color toneCursorFg = Color(0xFFE2E8F0);
+  static const Color toneKeyboardBg = Color(0xFF312E81); // indigo-900
+  static const Color toneKeyboardFg = Color(0xFFA5B4FC); // indigo-200
 }
 
 /// 主题色调 → 预览色板
