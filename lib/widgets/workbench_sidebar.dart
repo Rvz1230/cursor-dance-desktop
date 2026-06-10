@@ -11,12 +11,16 @@ import 'base/empty_state.dart';
 import 'base/info_banner.dart';
 import 'base/panel_utils.dart';
 import 'controls/app_icon_button.dart';
+import 'controls/icon_resolver.dart';
 import 'theme_card.dart';
 import 'theme_composer_modal.dart';
 
-/// 侧栏工作台 — 主题库浏览与管理
+/// 侧栏工作台 — V2 · 色调
 ///
-/// 支持展开/折叠双态、分类筛选、搜索、键盘导航、CRUD 操作。
+/// - 28px 大色点，更强视觉权重
+/// - pill 式筛选标签（圆角 20px）
+/// - 搜索框圆角 + focus 光晕
+/// - 展开/折叠双态
 class WorkbenchSidebar extends StatefulWidget {
   const WorkbenchSidebar({super.key});
 
@@ -38,8 +42,6 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
     super.dispose();
   }
 
-  // ── Computed ──
-
   ThemeProvider get _theme => context.read<ThemeProvider>();
 
   List<ThemeItem> get _filteredThemes {
@@ -58,8 +60,6 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
     }
     return themes;
   }
-
-  // ── Actions ──
 
   void _clearError() => setState(() => _actionError = '');
 
@@ -132,15 +132,14 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 
   void _confirmSwitchTheme(String targetId) {
     final currentName = _theme.activeTheme.name;
-    final targetName =
-        _theme.themeLibrary.firstWhereOrNull((t) => t.id == targetId)?.name;
+    final target = _theme.themeLibrary.firstWhere((t) => t.id == targetId);
     showShadDialog(
       context: context,
       builder: (ctx) => ShadDialog.alert(
         title: const Text('未保存的更改'),
         description: Text(
           '「$currentName」有未保存的更改。'
-          '${targetName != null ? '切换到「$targetName」前要保存这些更改吗？' : ''}',
+          '切换到「${target.name}」前要保存这些更改吗？',
         ),
         actions: [
           ShadButton(
@@ -169,8 +168,6 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
     );
   }
 
-  // ── Build ──
-
   @override
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>();
@@ -183,148 +180,54 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
         color: cs.card,
         border: Border(right: BorderSide(color: cs.border)),
       ),
-      child: Column(children: [
-        _buildHeader(theme, cs),
-        if (!_collapsed) _buildCategoryFilter(cs),
-        if (!_collapsed) _buildSearch(cs),
-        if (_actionError.isNotEmpty && !_collapsed)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Spacing.sm, 2, Spacing.sm, Spacing.xs),
-            child: InfoBanner(
-              message: _actionError,
-              type: InfoBannerType.error,
-              onDismiss: _clearError,
-            ),
-          ),
-        Expanded(child: _buildThemeList(theme, cs)),
-        if (_collapsed) _CollapsedActions(onCreate: () {
-          _clearError();
-          _showComposerModal();
-        }),
-      ]),
-    );
-  }
-
-  // ── Header ──
-
-  Widget _buildHeader(ThemeProvider theme, ShadColorScheme cs) {
-    return Container(
-      height: 40,
-      padding: EdgeInsets.symmetric(
-        horizontal: _collapsed ? 0 : Spacing.sm,
-      ),
-      child: Row(children: [
-        if (!_collapsed) ...[
-          Expanded(
-            child: Text(
-              '主题库',
-              style: TextStyle(
-                fontSize: FontSizes.base,
-                fontWeight: FontWeight.w600,
-                color: cs.foreground,
+      child: _collapsed
+          ? _CollapsedSidebar(
+              themes: _filteredThemes,
+              selectedId: theme.selectedThemeId,
+              onSelect: _handleThemeClick,
+              onExpand: () => setState(() => _collapsed = false),
+              onCreate: () {
+                _clearError();
+                _showComposerModal();
+              },
+            )
+          : Column(children: [
+              _ExpandedHeader(
+                onCreate: () {
+                  _clearError();
+                  _showComposerModal();
+                },
+                onCollapse: () => setState(() => _collapsed = true),
               ),
-            ),
-          ),
-          AppIconButton(
-            icon: LucideIcons.plus,
-            onTap: () {
-              _clearError();
-              _showComposerModal();
-            },
-            tooltip: '新建主题',
-          ),
-          const SizedBox(width: Spacing.xs),
-          AppIconButton(
-            icon: LucideIcons.panelLeftClose,
-            onTap: () => setState(() => _collapsed = true),
-            tooltip: '收起侧栏',
-          ),
-        ] else
-          Expanded(
-            child: AppIconButton(
-              icon: LucideIcons.panelLeftOpen,
-              onTap: () => setState(() => _collapsed = false),
-              tooltip: '展开侧栏',
-            ),
-          ),
-      ]),
-    );
-  }
-
-  // ── Category filter chips ──
-
-  Widget _buildCategoryFilter(ShadColorScheme cs) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(Spacing.sm, Spacing.xs, Spacing.sm, 0),
-      child: Row(children: [
-        _filterChip(cs, '全部', 'all'),
-        const SizedBox(width: Spacing.xs),
-        _filterChip(cs, '内置', 'builtin'),
-        const SizedBox(width: Spacing.xs),
-        _filterChip(cs, '自定义', 'custom'),
-      ]),
-    );
-  }
-
-  Widget _filterChip(ShadColorScheme cs, String label, String value) {
-    final active = _categoryFilter == value;
-    return GestureDetector(
-      onTap: () => setState(() {
-        _categoryFilter = value;
-        _focusedIndex = 0;
-      }),
-      child: AnimatedContainer(
-        duration: AppAnimations.fastish,
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 3),
-        decoration: BoxDecoration(
-          color: active ? cs.muted : Colors.transparent,
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
-          border: Border.all(
-            color: active ? cs.border : Colors.transparent,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: FontSizes.caption,
-            fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-            color: active ? cs.foreground : cs.mutedForeground,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ── Search ──
-
-  Widget _buildSearch(ShadColorScheme cs) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(Spacing.sm, Spacing.sm, Spacing.sm, 0),
-      child: ShadInput(
-        controller: _searchController,
-        onChanged: (v) => setState(() => _query = v),
-        placeholder: const Text('搜索主题...'),
-        leading: Padding(
-          padding: const EdgeInsets.all(Spacing.sm),
-          child: Icon(LucideIcons.search, size: IconSizes.md, color: cs.mutedForeground),
-        ),
-        trailing: _searchController.text.isNotEmpty
-            ? GestureDetector(
-                onTap: () {
+              _CategoryFilter(
+                current: _categoryFilter,
+                onChanged: (v) => setState(() {
+                  _categoryFilter = v;
+                  _focusedIndex = 0;
+                }),
+              ),
+              _SearchBar(
+                controller: _searchController,
+                query: _query,
+                onChanged: (v) => setState(() => _query = v),
+                onClear: () {
                   _searchController.clear();
                   setState(() => _query = '');
                 },
-                child: Padding(
-                  padding: const EdgeInsets.all(Spacing.xs),
-                  child: Icon(LucideIcons.x, size: IconSizes.sm, color: cs.mutedForeground),
+              ),
+              if (_actionError.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(Spacing.sm, 2, Spacing.sm, Spacing.xs),
+                  child: InfoBanner(
+                    message: _actionError,
+                    type: InfoBannerType.error,
+                    onDismiss: _clearError,
+                  ),
                 ),
-              )
-            : null,
-      ),
+              Expanded(child: _buildThemeList(theme, cs)),
+            ]),
     );
   }
-
-  // ── Theme List ──
 
   Widget _buildThemeList(ThemeProvider theme, ShadColorScheme cs) {
     final themes = _filteredThemes;
@@ -388,7 +291,6 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
             key: ValueKey(t.id),
             theme: t,
             active: t.id == theme.selectedThemeId,
-            collapsed: _collapsed,
             focused: index == _focusedIndex,
             isDirty: theme.dirtyThemes[t.id] == true,
             canDelete: t.kind != '内置' && theme.themeLibrary.length > 1,
@@ -408,21 +310,280 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
   }
 }
 
-/// 折叠态底部操作按钮
-class _CollapsedActions extends StatelessWidget {
+// ═══════════════════════════════════════════════════════════════
+// Collapsed sidecar widget
+// ═══════════════════════════════════════════════════════════════
+
+class _CollapsedSidebar extends StatelessWidget {
+  final List<ThemeItem> themes;
+  final String selectedId;
+  final ValueChanged<String> onSelect;
+  final VoidCallback onExpand;
   final VoidCallback onCreate;
-  const _CollapsedActions({required this.onCreate});
+
+  const _CollapsedSidebar({
+    required this.themes,
+    required this.selectedId,
+    required this.onSelect,
+    required this.onExpand,
+    required this.onCreate,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
+
+    return Column(children: [
+      // Expand top
+      Padding(
+        padding: const EdgeInsets.only(top: Spacing.sm),
+        child: AppIconButton(
+          icon: LucideIcons.panelLeftOpen,
+          onTap: onExpand,
+          tooltip: '展开侧栏',
+        ),
+      ),
+      const SizedBox(height: Spacing.sm),
+      // Theme dots
+      Expanded(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
+          itemExtent: 52,
+          children: themes.map((t) {
+            final active = t.id == selectedId;
+            final toneColor = resolveToneColor(t.tone);
+            return Center(
+              child: GestureDetector(
+                onTap: () => onSelect(t.id),
+                child: AnimatedContainer(
+                  duration: AppAnimations.fastish,
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: active ? cs.primary : Colors.transparent,
+                    borderRadius: BorderRadius.circular(RadiusTokens.xl),
+                    border: Border.all(
+                      color: active ? cs.primary : cs.border,
+                      width: active ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: toneColor,
+                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+      // Bottom actions
+      Padding(
+        padding: const EdgeInsets.all(Spacing.sm),
+        child: Column(children: [
+          AppIconButton(
+            icon: LucideIcons.plus,
+            onTap: onCreate,
+            tooltip: '新建主题',
+            size: 44,
+            iconSize: IconSizes.lg,
+          ),
+        ]),
+      ),
+    ]);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Expanded header
+// ═══════════════════════════════════════════════════════════════
+
+class _ExpandedHeader extends StatelessWidget {
+  final VoidCallback onCreate;
+  final VoidCallback onCollapse;
+
+  const _ExpandedHeader({
+    required this.onCreate,
+    required this.onCollapse,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
+
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: cs.border)),
+      ),
+      child: Row(children: [
+        Text(
+          '主题库',
+          style: TextStyle(
+            fontSize: FontSizes.base,
+            fontWeight: FontWeight.w600,
+            color: cs.foreground,
+          ),
+        ),
+        const Spacer(),
+        AppIconButton(
+          icon: LucideIcons.plus,
+          onTap: onCreate,
+          tooltip: '新建主题',
+        ),
+        const SizedBox(width: 2),
+        AppIconButton(
+          icon: LucideIcons.panelLeftClose,
+          onTap: onCollapse,
+          tooltip: '收起侧栏',
+        ),
+      ]),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Category filter pills (pill-style, 20px radius)
+// ═══════════════════════════════════════════════════════════════
+
+class _CategoryFilter extends StatelessWidget {
+  final String current;
+  final ValueChanged<String> onChanged;
+
+  const _CategoryFilter({required this.current, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
+
     return Padding(
-      padding: const EdgeInsets.all(Spacing.sm),
-      child: AppIconButton(
-        icon: LucideIcons.plus,
-        onTap: onCreate,
-        tooltip: '新建主题',
-        size: 44,
-        iconSize: IconSizes.lg,
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
+      child: Row(children: [
+        _pill(context, cs, '全部', 'all'),
+        const SizedBox(width: 4),
+        _pill(context, cs, '内置', 'builtin'),
+        const SizedBox(width: 4),
+        _pill(context, cs, '自定义', 'custom'),
+      ]),
+    );
+  }
+
+  Widget _pill(BuildContext context, ShadColorScheme cs, String label, String value) {
+    final active = current == value;
+    return GestureDetector(
+      onTap: () => onChanged(value),
+      child: AnimatedContainer(
+        duration: AppAnimations.fastish,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        decoration: BoxDecoration(
+          color: active ? cs.primary : cs.card,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: active ? cs.primary : cs.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: FontSizes.caption,
+            fontWeight: FontWeight.w500,
+            color: active ? cs.primaryForeground : cs.mutedForeground,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Search bar (rounded, muted bg, focus ring)
+// ═══════════════════════════════════════════════════════════════
+
+class _SearchBar extends StatefulWidget {
+  final TextEditingController controller;
+  final String query;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
+
+  const _SearchBar({
+    required this.controller,
+    required this.query,
+    required this.onChanged,
+    required this.onClear,
+  });
+
+  @override
+  State<_SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends State<_SearchBar> {
+  final _focusNode = FocusNode();
+  bool _hasFocus = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      if (mounted) setState(() => _hasFocus = _focusNode.hasFocus);
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
+      child: AnimatedContainer(
+        duration: AppAnimations.fastish,
+        height: 36,
+        decoration: BoxDecoration(
+          color: cs.muted,
+          borderRadius: BorderRadius.circular(20),
+          border: _hasFocus
+              ? Border.all(color: cs.ring, width: 1.5)
+              : null,
+        ),
+        child: Row(children: [
+          const SizedBox(width: 10),
+          Icon(LucideIcons.search, size: IconSizes.md, color: cs.mutedForeground.withValues(alpha: 0.6)),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Focus(
+              focusNode: _focusNode,
+              child: ShadInput(
+                controller: widget.controller,
+                onChanged: widget.onChanged,
+                placeholder: const Text('搜索主题...'),
+                decoration: const ShadDecoration(
+                  border: ShadBorder.none,
+                ),
+              ),
+            ),
+          ),
+          if (widget.query.isNotEmpty)
+            GestureDetector(
+              onTap: widget.onClear,
+              child: Padding(
+                padding: const EdgeInsets.all(Spacing.xs),
+                child: Icon(LucideIcons.x, size: IconSizes.sm, color: cs.mutedForeground),
+              ),
+            ),
+          const SizedBox(width: 4),
+        ]),
       ),
     );
   }
