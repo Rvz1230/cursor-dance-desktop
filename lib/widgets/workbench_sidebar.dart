@@ -419,7 +419,7 @@ class _ExpandedHeader extends StatelessWidget {
 
     return Container(
       height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: cs.border)),
       ),
@@ -464,7 +464,7 @@ class _CategoryFilter extends StatelessWidget {
     final cs = ShadTheme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
+      padding: const EdgeInsets.fromLTRB(Spacing.md, 10, Spacing.md, 6),
       child: Row(children: [
         _pill(context, cs, '全部', 'all'),
         const SizedBox(width: 4),
@@ -481,7 +481,7 @@ class _CategoryFilter extends StatelessWidget {
       onTap: () => onChanged(value),
       child: AnimatedContainer(
         duration: AppAnimations.fastish,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: 4),
         decoration: BoxDecoration(
           color: active ? cs.primary : cs.card,
           borderRadius: BorderRadius.circular(20),
@@ -524,29 +524,14 @@ class _SearchBar extends StatefulWidget {
 }
 
 class _SearchBarState extends State<_SearchBar> {
-  final _focusNode = FocusNode();
   bool _hasFocus = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode.addListener(() {
-      if (mounted) setState(() => _hasFocus = _focusNode.hasFocus);
-    });
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final cs = ShadTheme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
+      padding: const EdgeInsets.fromLTRB(Spacing.md, 8, Spacing.md, 0),
       child: AnimatedContainer(
         duration: AppAnimations.fastish,
         height: 36,
@@ -563,7 +548,9 @@ class _SearchBarState extends State<_SearchBar> {
           const SizedBox(width: 6),
           Expanded(
             child: Focus(
-              focusNode: _focusNode,
+              onFocusChange: (focused) {
+                if (mounted) setState(() => _hasFocus = focused);
+              },
               child: ShadInput(
                 controller: widget.controller,
                 onChanged: widget.onChanged,

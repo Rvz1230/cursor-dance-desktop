@@ -84,8 +84,8 @@ class _ThemeCardState extends State<ThemeCard> {
         onTap: w.onTap,
         child: AnimatedContainer(
           duration: AppAnimations.fastish,
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          margin: const EdgeInsets.symmetric(horizontal: Spacing.xs),
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
           decoration: BoxDecoration(
             color: w.active
                 ? cs.muted
@@ -144,7 +144,7 @@ class _ThemeCardState extends State<ThemeCard> {
                           const SizedBox(width: 4),
                           // Kind badge
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                            padding: const EdgeInsets.symmetric(horizontal: Spacing.xs, vertical: 1),
                             decoration: BoxDecoration(
                               color: badgeBg,
                               borderRadius: BorderRadius.circular(RadiusTokens.sm),
@@ -159,7 +159,7 @@ class _ThemeCardState extends State<ThemeCard> {
                           ),
                           if (w.isDirty)
                             Padding(
-                              padding: const EdgeInsets.only(left: 4),
+                              padding: const EdgeInsets.only(left: Spacing.xs),
                               child: Icon(LucideIcons.circle, size: 6,
                                   color: cs.custom['warning'] ?? AppColors.warning),
                             ),
@@ -172,17 +172,20 @@ class _ThemeCardState extends State<ThemeCard> {
                       ],
                     ),
             ),
-            // More button — fades in on hover
+            // More button — fades in on hover, ignored when invisible
             const SizedBox(width: 4),
-            AnimatedOpacity(
-              duration: AppAnimations.fastish,
-              opacity: _hovered ? 1.0 : 0.0,
-              child: _MoreMenu(
-                canDelete: widget.canDelete,
-                onDuplicate: widget.onDuplicate,
-                onExport: widget.onExport,
-                onChangeIcon: () => _showIconPicker(context),
-                onDelete: widget.onDelete,
+            IgnorePointer(
+              ignoring: !_hovered,
+              child: AnimatedOpacity(
+                duration: AppAnimations.fastish,
+                opacity: _hovered ? 1.0 : 0.0,
+                child: _MoreMenu(
+                  canDelete: widget.canDelete,
+                  onDuplicate: widget.onDuplicate,
+                  onExport: widget.onExport,
+                  onChangeIcon: () => _showIconPicker(context),
+                  onDelete: widget.onDelete,
+                ),
               ),
             ),
           ]),
