@@ -1,18 +1,25 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/action_config.dart';
-import '../models/action_config_presets.dart';
 import '../models/key_feedback_config.dart';
 import '../models/theme.dart';
 import '../models/theme_draft.dart';
+import '../repository/persistence_repository.dart';
 import '../services/theme_io_service.dart';
-import '../services/workbench_persistence_service.dart';
 
-class WorkbenchState extends ChangeNotifier {
-  final WorkbenchPersistenceService _persistenceService;
+/// 主题库状态管理 Provider
+///
+/// 负责：
+/// - 主题库 CRUD（create/delete/rename/duplicate）
+/// - 草稿管理（draftsByTheme）
+/// - 选中态（selectedThemeId / workspaceId）
+/// - 键盘反馈配置（keyFeedbackConfig）
+/// - 持久化（save/load）
+class ThemeProvider extends ChangeNotifier {
+  final PersistenceRepository _repo;
 
-  WorkbenchState({WorkbenchPersistenceService? persistenceService})
-      : _persistenceService = persistenceService ?? WorkbenchPersistenceService();
+  ThemeProvider({PersistenceRepository? repo})
+      : _repo = repo ?? PersistenceRepository();
 
   // ── Workspace ──
   String _workspaceId = 'workbench';
@@ -20,11 +27,9 @@ class WorkbenchState extends ChangeNotifier {
 
   // ── Selection ──
   String _selectedThemeId = kBuiltinThemes.first.id;
-  String _selectedActionId = 'leftClick';
   String _selectedCursorStateId = 'default';
 
   String get selectedThemeId => _selectedThemeId;
-  String get selectedActionId => _selectedActionId;
   String get selectedCursorStateId => _selectedCursorStateId;
 
   // ── Data ──
@@ -35,20 +40,18 @@ class WorkbenchState extends ChangeNotifier {
   Map<String, ThemeDraft> get draftsByTheme => _draftsByTheme;
 
   // ── UI State ──
-  bool _enabled = true;
   bool _unsaved = false;
   bool _isSaving = false;
   String _saveError = '';
   final Map<String, bool> _dirtyThemes = {};
 
-  // ── Keyboard Feedback ──
-  KeyFeedbackConfig _keyFeedbackConfig = const KeyFeedbackConfig();
-
-  bool get enabled => _enabled;
   bool get unsaved => _unsaved;
   bool get isSaving => _isSaving;
   String get saveError => _saveError;
   Map<String, bool> get dirtyThemes => Map.unmodifiable(_dirtyThemes);
+
+  // ── Keyboard Feedback ──
+  KeyFeedbackConfig _keyFeedbackConfig = const KeyFeedbackConfig();
   KeyFeedbackConfig get keyFeedbackConfig => _keyFeedbackConfig;
 
   // ── Derived ──
@@ -58,13 +61,8 @@ class WorkbenchState extends ChangeNotifier {
         orElse: () => _themeLibrary.first,
       );
 
-  ThemeDraft get currentDraft => _draftsByTheme[_selectedThemeId] ?? ThemeDraft.create(_selectedThemeId);
-
-  ActionConfig get currentActionConfig =>
-      currentDraft.actionConfigs[_selectedActionId] ?? ActionConfig();
-
-  List<String> get currentConflicts =>
-      conflictsForAction(_selectedActionId, currentDraft.actionConfigs);
+  ThemeDraft get currentDraft =>
+      _draftsByTheme[_selectedThemeId] ?? ThemeDraft.create(_selectedThemeId);
 
   bool get isWorkbench => _workspaceId == 'workbench';
 
@@ -88,12 +86,6 @@ class WorkbenchState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setActionId(String id) {
-    if (_selectedActionId == id) return;
-    _selectedActionId = id;
-    notifyListeners();
-  }
-
   void setCursorStateId(String id) {
     if (_selectedCursorStateId == id) return;
     _selectedCursorStateId = id;
@@ -101,13 +93,13 @@ class WorkbenchState extends ChangeNotifier {
   }
 
   // ═══════════════════════════════════════════════
-  // Config Updates
+  // Config Updates (delegated from ConfigProvider)
   // ═══════════════════════════════════════════════
 
-  void updateActionConfig(ActionConfig Function(ActionConfig) updater) {
+  void updateActionConfig(String actionId, ActionConfig Function(ActionConfig) updater) {
     final draft = _draftsByTheme[_selectedThemeId] ?? ThemeDraft.create(_selectedThemeId);
     final actionConfigs = Map<String, ActionConfig>.from(draft.actionConfigs);
-    actionConfigs[_selectedActionId] = updater(actionConfigs[_selectedActionId] ?? ActionConfig());
+    actionConfigs[actionId] = updater(actionConfigs[actionId] ?? ActionConfig());
     _draftsByTheme[_selectedThemeId] = draft.copyWith(actionConfigs: actionConfigs);
     _unsaved = true;
     _dirtyThemes[_selectedThemeId] = true;
@@ -248,26 +240,32 @@ class WorkbenchState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setEnabled(bool value) {
-    _enabled = value;
-    notifyListeners();
-  }
+  // ═══════════════════════════════════════════════
+  // Key Feedback
+  // ═══════════════════════════════════════════════
 
   void updateKeyFeedbackConfig(KeyFeedbackConfig config) {
     _keyFeedbackConfig = config;
     notifyListeners();
   }
 
-  Map<String, dynamic> buildOverlayPayload() {
+  // ═══════════════════════════════════════════════
+  // Overlay payload
+  // ═══════════════════════════════════════════════
+
+  Map<String, dynamic> buildOverlayPayload(String actionId, ActionConfig config) {
     return {
-      'actionId': _selectedActionId,
-      'config': currentActionConfig.toJson(),
+      'actionId': actionId,
+      'config': config.toJson(),
     };
   }
 
+  // ═══════════════════════════════════════════════
+  // Persistence
+  // ═══════════════════════════════════════════════
+
   Map<String, dynamic> toPersistenceJson() {
     return {
-      'enabled': _enabled,
       'activeThemeId': _selectedThemeId,
       'keyFeedbackConfig': _keyFeedbackConfig.toJson(),
       'themeLibrary': _themeLibrary
@@ -297,7 +295,6 @@ class WorkbenchState extends ChangeNotifier {
   }
 
   void applyPersistenceJson(Map<String, dynamic> data) {
-    _enabled = data['enabled'] as bool? ?? true;
     final themeId = data['activeThemeId'] as String?;
     if (themeId != null && themeId.isNotEmpty) {
       _selectedThemeId = themeId;
@@ -357,7 +354,7 @@ class WorkbenchState extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _persistenceService.save(toPersistenceJson());
+      await _repo.save(toPersistenceJson());
       _unsaved = false;
       _dirtyThemes.clear();
     } catch (e) {
@@ -371,7 +368,7 @@ class WorkbenchState extends ChangeNotifier {
 
   Future<void> loadSavedConfig() async {
     try {
-      final data = await _persistenceService.load();
+      final data = await _repo.load();
       if (data != null) {
         applyPersistenceJson(data);
       }

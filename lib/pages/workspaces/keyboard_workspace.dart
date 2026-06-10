@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/key_feedback_config.dart';
-import '../../state/workbench_state.dart';
+import '../../providers/theme_provider.dart';
 import '../../theme/app_tokens.dart';
-import '../../widgets/panels/key_feedback_card.dart';
-import '../../widgets/base/status_indicator.dart';
 import '../../widgets/base/panel_meta.dart';
+import '../../widgets/base/status_indicator.dart';
+import '../../widgets/panels/key_feedback_card.dart';
 
 class KeyboardWorkspace extends StatelessWidget {
-  final WorkbenchState state;
-
-  const KeyboardWorkspace({super.key, required this.state});
+  const KeyboardWorkspace({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final config = state.keyFeedbackConfig;
+    final theme = context.watch<ThemeProvider>();
+    final config = theme.keyFeedbackConfig;
     final cs = ShadTheme.of(context).colorScheme;
 
     return Column(
@@ -27,14 +27,14 @@ class KeyboardWorkspace extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildStatusBanner(cs, config),
+                _buildStatusBanner(cs, config, theme),
                 const SizedBox(height: Spacing.lg),
-                _buildStylePickerCard(cs, config, state),
+                _buildStylePickerCard(cs, config, theme),
                 const SizedBox(height: Spacing.lg),
                 KeyFeedbackCard(
                   config: config,
                   onUpdate: (fn) {
-                    state.updateKeyFeedbackConfig(fn(config));
+                    theme.updateKeyFeedbackConfig(fn(config));
                   },
                 ),
               ],
@@ -64,10 +64,10 @@ class KeyboardWorkspace extends StatelessWidget {
               color: PanelMetaRegistry.keyboard.bg,
               borderRadius: BorderRadius.circular(RadiusTokens.md),
             ),
-            child: Icon(
+            child: const Icon(
               LucideIcons.keyboard,
               size: 16,
-              color: PanelMetaRegistry.keyboard.fg,
+              color: Color(0xFF4F46E5),
             ),
           ),
           const SizedBox(width: 10),
@@ -84,7 +84,7 @@ class KeyboardWorkspace extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBanner(ShadColorScheme cs, KeyFeedbackConfig config) {
+  Widget _buildStatusBanner(ShadColorScheme cs, KeyFeedbackConfig config, ThemeProvider theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -108,15 +108,14 @@ class KeyboardWorkspace extends StatelessWidget {
           ShadSwitch(
             value: config.enabled,
             onChanged: (v) =>
-                state.updateKeyFeedbackConfig(config.copyWith(enabled: v)),
+                theme.updateKeyFeedbackConfig(config.copyWith(enabled: v)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStylePickerCard(
-      ShadColorScheme cs, KeyFeedbackConfig config, WorkbenchState state) {
+  Widget _buildStylePickerCard(ShadColorScheme cs, KeyFeedbackConfig config, ThemeProvider theme) {
     return Container(
       padding: const EdgeInsets.all(Spacing.lg),
       decoration: BoxDecoration(
@@ -154,7 +153,7 @@ class KeyboardWorkspace extends StatelessWidget {
                 selected: config.animationStyle == 'bounce',
                 onTap: () {
                   if (config.animationStyle != 'bounce') {
-                    state.updateKeyFeedbackConfig(
+                    theme.updateKeyFeedbackConfig(
                         config.copyWith(animationStyle: 'bounce'));
                   }
                 },
@@ -168,7 +167,7 @@ class KeyboardWorkspace extends StatelessWidget {
                 selected: config.animationStyle == 'raindrop',
                 onTap: () {
                   if (config.animationStyle != 'raindrop') {
-                    state.updateKeyFeedbackConfig(
+                    theme.updateKeyFeedbackConfig(
                         config.copyWith(animationStyle: 'raindrop'));
                   }
                 },

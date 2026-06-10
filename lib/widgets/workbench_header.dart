@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import '../../state/workbench_state.dart';
+import '../../providers/overlay_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../../theme/app_tokens.dart';
 
 class WorkbenchHeader extends StatelessWidget {
-  final WorkbenchState state;
   final ValueChanged<bool>? onGlobalToggle;
 
   const WorkbenchHeader({
     super.key,
-    required this.state,
     this.onGlobalToggle,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    final overlay = context.watch<OverlayProvider>();
     final cs = ShadTheme.of(context).colorScheme;
 
     return Container(
@@ -63,14 +65,11 @@ class WorkbenchHeader extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                _workspaceTab(cs, 'workbench', '主题工作台', LucideIcons.wand2,
-                    showActiveBg: state.workspaceId == 'workbench'),
+                _workspaceTab(cs, theme, 'workbench', '主题工作台', LucideIcons.wand2),
                 const SizedBox(width: Spacing.xs),
-                _workspaceTab(cs, 'states', '光标状态', LucideIcons.mousePointer2,
-                    showActiveBg: state.workspaceId == 'states'),
+                _workspaceTab(cs, theme, 'states', '光标状态', LucideIcons.mousePointer2),
                 const SizedBox(width: Spacing.xs),
-                _workspaceTab(cs, 'keyboard', '键盘动效', LucideIcons.keyboard,
-                    showActiveBg: state.workspaceId == 'keyboard'),
+                _workspaceTab(cs, theme, 'keyboard', '键盘动效', LucideIcons.keyboard),
               ],
             ),
           ),
@@ -90,8 +89,8 @@ class WorkbenchHeader extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   ShadSwitch(
-                    value: state.enabled,
-                    onChanged: onGlobalToggle ?? (v) => state.setEnabled(v),
+                    value: overlay.enabled,
+                    onChanged: onGlobalToggle ?? (v) => overlay.setEnabled(v),
                   ),
                 ],
               ),
@@ -100,12 +99,12 @@ class WorkbenchHeader extends StatelessWidget {
 
               // Save button
               ShadButton(
-                onPressed: () => state.saveChanges(),
+                onPressed: () => theme.saveChanges(),
                 size: ShadButtonSize.sm,
-                enabled: state.unsaved,
+                enabled: theme.unsaved,
                 child: Row(
                   children: [
-                    if (state.isSaving)
+                    if (theme.isSaving)
                       const SizedBox(
                         width: IconSizes.sm,
                         height: IconSizes.sm,
@@ -114,12 +113,12 @@ class WorkbenchHeader extends StatelessWidget {
                     else
                       Icon(LucideIcons.save, size: IconSizes.md),
                     const SizedBox(width: Spacing.xs),
-                    Text(state.unsaved ? '保存' : '已保存'),
+                    Text(theme.unsaved ? '保存' : '已保存'),
                   ],
                 ),
               ),
 
-              if (state.saveError.isNotEmpty) ...[
+              if (theme.saveError.isNotEmpty) ...[
                 const SizedBox(width: Spacing.sm),
                 Icon(LucideIcons.alertCircle, size: IconSizes.md, color: cs.destructive),
               ],
@@ -130,10 +129,10 @@ class WorkbenchHeader extends StatelessWidget {
     );
   }
 
-  Widget _workspaceTab(ShadColorScheme cs, String id, String label, IconData icon, {bool showActiveBg = false}) {
-    final active = showActiveBg;
+  Widget _workspaceTab(ShadColorScheme cs, ThemeProvider theme, String id, String label, IconData icon) {
+    final active = theme.workspaceId == id;
     return GestureDetector(
-      onTap: () => state.setWorkspaceId(id),
+      onTap: () => theme.setWorkspaceId(id),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

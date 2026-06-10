@@ -1,24 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import '../state/workbench_state.dart';
-import '../theme/app_tokens.dart';
+import '../../providers/theme_provider.dart';
+import '../../theme/app_tokens.dart';
 
 /// Modal dialog for creating or importing themes.
 ///
 /// Extracted from workbench_sidebar.dart for maintainability.
 class ThemeComposerModal extends StatefulWidget {
-  final WorkbenchState state;
-  final void Function(String message) onShowToast;
-  final void Function(String message) onError;
-
-  const ThemeComposerModal({
-    super.key,
-    required this.state,
-    required this.onShowToast,
-    required this.onError,
-  });
+  const ThemeComposerModal({super.key});
 
   @override
   State<ThemeComposerModal> createState() => _ThemeComposerModalState();
@@ -36,7 +28,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
   @override
   void initState() {
     super.initState();
-    _createBaseThemeId = widget.state.selectedThemeId;
+    _createBaseThemeId = context.read<ThemeProvider>().selectedThemeId;
   }
 
   @override
@@ -205,6 +197,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
   }
 
   Widget _buildBaseThemeSelector(ShadColorScheme cs) {
+    final theme = context.read<ThemeProvider>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -222,7 +215,7 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
               value: 'blank',
               child: Text('空白主题'),
             ),
-            ...widget.state.themeLibrary.map((t) => DropdownMenuItem(
+            ...theme.themeLibrary.map((t) => DropdownMenuItem(
               value: t.id,
               child: Text(t.name),
             )),
@@ -236,17 +229,18 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
   }
 
   void _handleCreate() {
+    final theme = context.read<ThemeProvider>();
     final name = _createNameController.text.trim();
     if (name.isEmpty) {
       setState(() => _createError = '请输入主题名称');
       return;
     }
     setState(() => _createError = '');
-    widget.state.createTheme(
+    theme.createTheme(
       name,
       basedOnThemeId: _createBaseThemeId == 'blank' ? null : _createBaseThemeId,
     );
-    widget.onShowToast('已创建主题「$name」');
+    _showToast('已创建主题「$name」');
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -344,18 +338,19 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
   }
 
   void _handleImport() {
+    final theme = context.read<ThemeProvider>();
     final text = _importController.text.trim();
     if (text.isEmpty) {
       setState(() => _importError = '请输入或粘贴 JSON 内容');
       return;
     }
     try {
-      widget.state.importThemeFromText(text, '导入主题');
+      theme.importThemeFromText(text, '导入主题');
       setState(() {
         _importError = '';
         _importSuccess = '已导入主题';
       });
-      widget.onShowToast('已导入主题');
+      _showToast('已导入主题');
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       setState(() => _importError = '导入失败：$e');
@@ -367,6 +362,17 @@ class _ThemeComposerModalState extends State<ThemeComposerModal> {
     if (data?.text != null && data!.text!.isNotEmpty) {
       _importController.text = data.text!;
     }
+  }
+
+  Widget _showToast(String message) {
+    if (!mounted) return const SizedBox.shrink();
+    ShadToaster.of(context).show(
+      ShadToast(
+        title: Text(message),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    return const SizedBox.shrink();
   }
 
   Widget _buildErrorBox(ShadColorScheme cs, String message) {

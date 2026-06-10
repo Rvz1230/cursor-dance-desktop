@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import '../state/workbench_state.dart';
+import '../providers/config_provider.dart';
+import '../providers/overlay_provider.dart';
+import '../providers/theme_provider.dart';
 import '../theme/app_tokens.dart';
-import '../services/overlay_sync_service.dart';
 import '../widgets/workbench_header.dart';
 import '../widgets/workbench_sidebar.dart';
 import 'workspaces/keyboard_workspace.dart';
@@ -18,86 +20,76 @@ class ConfigPage extends StatefulWidget {
 }
 
 class ConfigPageState extends State<ConfigPage> {
-  final WorkbenchState _state = WorkbenchState();
-  final OverlaySyncService _overlaySync = OverlaySyncService();
+  bool _isLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    _overlaySync.setOverlayStateChangedHandler((enabled) {
-      _state.setEnabled(enabled);
+
+    final overlay = context.read<OverlayProvider>();
+    overlay.setOverlayStateChangedHandler((enabled) {
+      if (!mounted) return;
+      context.read<OverlayProvider>().setEnabled(enabled);
       if (enabled) {
-        // 失焦任何文本字段，防止中文 IME 候选框弹出在覆盖层上
         FocusManager.instance.primaryFocus?.unfocus();
       }
     });
-    _state.addListener(_onStateChanged);
-    _state.loadSavedConfig().then((_) {
-      if (_state.enabled) {
-        _overlaySync.start(_state);
+
+    final themeProvider = context.read<ThemeProvider>();
+    themeProvider.loadSavedConfig().then((_) {
+      if (!mounted) return;
+      setState(() => _isLoaded = true);
+      if (themeProvider.isWorkbench && overlay.enabled) {
+        overlay.start();
       }
     });
   }
 
-  @override
-  void dispose() {
-    _state.removeListener(_onStateChanged);
-    _state.dispose();
-    _overlaySync.dispose();
-    super.dispose();
-  }
-
-  void _onStateChanged() {
-    if (!mounted) return;
-    _overlaySync.syncIfNeeded(_state);
-  }
-
   Future<void> _toggleEnabled() async {
-    if (_state.enabled) {
-      await _overlaySync.stop();
-      _state.setEnabled(false);
+    final overlay = context.read<OverlayProvider>();
+    if (overlay.enabled) {
+      await overlay.stop();
+      overlay.setEnabled(false);
     } else {
-      _state.setEnabled(true);
-      await _overlaySync.start(_state);
+      overlay.setEnabled(true);
+      await overlay.start();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_isLoaded) {
+      return Scaffold(
+        backgroundColor: ShadTheme.of(context).colorScheme.background,
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final theme = context.watch<ThemeProvider>();
+    final config = context.watch<ConfigProvider>();
+    final overlay = context.watch<OverlayProvider>();
+
     return Column(
       children: [
-        ListenableBuilder(
-          listenable: _state,
-          builder: (context, _) => WorkbenchHeader(
-            state: _state,
-            onGlobalToggle: (_) => _toggleEnabled(),
-          ),
+        WorkbenchHeader(
+          onGlobalToggle: (_) => _toggleEnabled(),
         ),
         Expanded(
           child: Row(
             children: [
-              ListenableBuilder(
-                listenable: _state,
-                builder: (context, _) => WorkbenchSidebar(state: _state),
-              ),
+              const WorkbenchSidebar(),
               Expanded(
-                child: ListenableBuilder(
-                  listenable: _state,
-                  builder: (context, _) => _buildWorkspaceContent(),
-                ),
+                child: _buildWorkspaceContent(theme, config, overlay),
               ),
             ],
           ),
         ),
-        ListenableBuilder(
-          listenable: _state,
-          builder: (context, _) => _buildStatusBar(),
-        ),
+        _buildStatusBar(theme, overlay),
       ],
     );
   }
 
-  Widget _buildStatusBar() {
+  Widget _buildStatusBar(ThemeProvider theme, OverlayProvider overlay) {
     final cs = ShadTheme.of(context).colorScheme;
     return Container(
       height: 48,
@@ -111,18 +103,18 @@ class ConfigPageState extends State<ConfigPage> {
       child: Row(
         children: [
           Icon(
-            _state.enabled ? LucideIcons.circle : LucideIcons.radio,
+            overlay.enabled ? LucideIcons.circle : LucideIcons.radio,
             size: 10,
-            color: _state.enabled
+            color: overlay.enabled
                 ? (cs.custom['success'] ?? cs.primary)
                 : cs.mutedForeground,
           ),
           const SizedBox(width: Spacing.sm),
           Text(
-            _state.enabled ? '动效已启用' : '动效已停止',
+            overlay.enabled ? '动效已启用' : '动效已停止',
             style: TextStyle(
               fontSize: FontSizes.base,
-              color: _state.enabled
+              color: overlay.enabled
                   ? (cs.custom['success'] ?? cs.primary)
                   : cs.mutedForeground,
             ),
@@ -130,24 +122,28 @@ class ConfigPageState extends State<ConfigPage> {
           const Spacer(),
           ShadButton(
             onPressed: _toggleEnabled,
-            backgroundColor: _state.enabled
+            backgroundColor: overlay.enabled
                 ? cs.destructive
                 : cs.primary,
-            child: Text(_state.enabled ? '停止' : '启用'),
+            child: Text(overlay.enabled ? '停止' : '启用'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildWorkspaceContent() {
-    switch (_state.workspaceId) {
+  Widget _buildWorkspaceContent(
+      ThemeProvider theme, ConfigProvider config, OverlayProvider overlay) {
+    switch (theme.workspaceId) {
       case 'states':
         return const StatesWorkspace();
       case 'keyboard':
-        return KeyboardWorkspace(state: _state);
+        return const KeyboardWorkspace();
       default:
-        return WorkbenchWorkspace(state: _state);
+        return WorkbenchWorkspace(
+          config: config,
+          theme: theme,
+        );
     }
   }
 }

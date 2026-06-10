@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../models/theme.dart';
-import '../../state/workbench_state.dart';
-import '../../theme/app_tokens.dart';
+import '../providers/theme_provider.dart';
+import '../theme/app_tokens.dart';
 import 'controls/app_icon_button.dart';
 import 'theme_card.dart';
 import 'theme_composer_modal.dart';
 
 class WorkbenchSidebar extends StatefulWidget {
-  final WorkbenchState state;
-
-  const WorkbenchSidebar({super.key, required this.state});
+  const WorkbenchSidebar({super.key});
 
   @override
   State<WorkbenchSidebar> createState() => _WorkbenchSidebarState();
@@ -20,14 +19,16 @@ class WorkbenchSidebar extends StatefulWidget {
 
 class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
   bool _collapsed = false;
-  String _categoryFilter = 'all'; // 'all', 'builtin', 'custom'
+  String _categoryFilter = 'all';
   final _searchController = TextEditingController();
   String _query = '';
   int _focusedIndex = 0;
   String _actionError = '';
 
+  ThemeProvider get _theme => context.read<ThemeProvider>();
+
   List<ThemeItem> get _filteredThemes {
-    var themes = widget.state.themeLibrary;
+    var themes = _theme.themeLibrary;
 
     switch (_categoryFilter) {
       case 'builtin':
@@ -66,6 +67,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
     final cs = ShadTheme.of(context).colorScheme;
 
     return AnimatedContainer(
@@ -79,18 +81,18 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
       ),
       child: Column(
         children: [
-          _buildHeader(cs),
+          _buildHeader(theme, cs),
           if (!_collapsed) _buildCategoryTabs(cs),
           if (!_collapsed) _buildSearch(cs),
           if (_actionError.isNotEmpty && !_collapsed) _buildErrorBanner(cs),
-          Expanded(child: _buildThemeList(cs)),
+          Expanded(child: _buildThemeList(theme, cs)),
           if (_collapsed) _buildCollapsedCreate(cs),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(ShadColorScheme cs) {
+  Widget _buildHeader(ThemeProvider theme, ShadColorScheme cs) {
     return Container(
       height: 40,
       padding: EdgeInsets.symmetric(horizontal: _collapsed ? Spacing.sm : 10),
@@ -191,7 +193,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
     );
   }
 
-  Widget _buildThemeList(ShadColorScheme cs) {
+  Widget _buildThemeList(ThemeProvider theme, ShadColorScheme cs) {
     final themes = _filteredThemes;
     if (themes.isEmpty) {
       return _buildEmptyState(cs);
@@ -238,8 +240,8 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
         itemCount: themes.length,
         itemBuilder: (context, index) {
           final t = themes[index];
-          final active = t.id == widget.state.selectedThemeId;
-          final isDirty = widget.state.dirtyThemes[t.id] == true;
+          final active = t.id == theme.selectedThemeId;
+          final isDirty = theme.dirtyThemes[t.id] == true;
           final focused = index == _focusedIndex;
           return ThemeCard(
             key: ValueKey(t.id),
@@ -248,16 +250,16 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
             collapsed: _collapsed,
             focused: focused,
             isDirty: isDirty,
-            canDelete: t.kind != '内置' && widget.state.themeLibrary.length > 1,
+            canDelete: t.kind != '内置' && theme.themeLibrary.length > 1,
             onTap: () => _handleThemeClick(t.id),
-            onRename: (name) => widget.state.renameTheme(t.id, name),
+            onRename: (name) => theme.renameTheme(t.id, name),
             onDelete: () => _confirmDelete(t),
             onDuplicate: () => _runAction('复制主题', () {
-              widget.state.duplicateTheme(t.id);
+              theme.duplicateTheme(t.id);
               _showToast('已复制主题「${t.name}」');
             }),
             onExport: () => _handleExport(t),
-            onUpdateIcon: (icon) => widget.state.updateThemeIcon(t.id, icon),
+            onUpdateIcon: (icon) => theme.updateThemeIcon(t.id, icon),
           );
         },
       ),
@@ -279,8 +281,6 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
       ),
     );
   }
-
-  // ── Category Filter Tabs ──
 
   Widget _buildCategoryTabs(ShadColorScheme cs) {
     return Padding(
@@ -326,14 +326,8 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
     );
   }
 
-  // ── Category & Search empty states ──
-
   Widget _buildEmptyState(ShadColorScheme cs) {
-    final (
-      icon,
-      title,
-      subtitle,
-    ) = switch (_categoryFilter) {
+    final (icon, title, subtitle) = switch (_categoryFilter) {
       'builtin' => (
         LucideIcons.package,
         '暂无内置主题',
@@ -392,21 +386,19 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
     );
   }
 
-  // ── Interactions ──
-
   void _handleThemeClick(String targetId) {
-    if (targetId == widget.state.selectedThemeId) return;
+    if (targetId == _theme.selectedThemeId) return;
     _clearError();
-    if (widget.state.dirtyThemes[widget.state.selectedThemeId] == true) {
+    if (_theme.dirtyThemes[_theme.selectedThemeId] == true) {
       _confirmSwitchTheme(targetId);
       return;
     }
-    widget.state.setThemeId(targetId);
+    _theme.setThemeId(targetId);
   }
 
   void _handleExport(ThemeItem theme) {
     _runAction('导出主题', () {
-      final json = widget.state.exportTheme(theme.id);
+      final json = _theme.exportTheme(theme.id);
       Clipboard.setData(ClipboardData(text: json));
       _showToast('「${theme.name}」已复制到剪贴板');
     });
@@ -422,16 +414,10 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
     );
   }
 
-  // ── Dialogs ──
-
   void _showComposerModal() {
     showDialog(
       context: context,
-      builder: (_) => ThemeComposerModal(
-        state: widget.state,
-        onShowToast: _showToast,
-        onError: (msg) => setState(() => _actionError = msg),
-      ),
+      builder: (_) => const ThemeComposerModal(),
     );
   }
 
@@ -451,7 +437,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
           TextButton(
             style: TextButton.styleFrom(foregroundColor: cs.destructive),
             onPressed: () {
-              widget.state.deleteTheme(theme.id);
+              _theme.deleteTheme(theme.id);
               Navigator.of(ctx).pop();
               _showToast('已移除「${theme.name}」');
             },
@@ -463,8 +449,8 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
   }
 
   void _confirmSwitchTheme(String targetId) {
-    final currentName = widget.state.activeTheme.name;
-    final targetName = widget.state.themeLibrary
+    final currentName = _theme.activeTheme.name;
+    final targetName = _theme.themeLibrary
         .where((t) => t.id == targetId)
         .firstOrNull
         ?.name;
@@ -480,16 +466,16 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
           ),
           TextButton(
             onPressed: () {
-              widget.state.discardThemeChanges(widget.state.selectedThemeId);
-              widget.state.setThemeId(targetId);
+              _theme.discardThemeChanges(_theme.selectedThemeId);
+              _theme.setThemeId(targetId);
               Navigator.of(ctx).pop();
             },
             child: const Text('不保存直接切换'),
           ),
           ShadButton(
             onPressed: () {
-              widget.state.saveChanges().then((_) {
-                widget.state.setThemeId(targetId);
+              _theme.saveChanges().then((_) {
+                _theme.setThemeId(targetId);
                 if (ctx.mounted) Navigator.of(ctx).pop();
               });
             },
