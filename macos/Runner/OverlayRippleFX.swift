@@ -1,15 +1,16 @@
 import Cocoa
 
 /// Mirrors EffectsEngine._spawnRipples in lib/effects/effects_engine.dart.
-/// Creates CAShapeLayers and registers RippleRecord with AnimationDriver.
+/// Uses CABasicAnimation for scale + fade, CATransaction for cleanup.
 class OverlayRippleFX {
-    func spawn(at point: NSPoint, config: ActionConfig.ConfigData, parent: CALayer, driver: AnimationDriver) {
+    func spawn(at point: NSPoint, config: ActionConfig.ConfigData, parent: CALayer) {
         let size = CGFloat(config.rippleSize ?? 72)
         let duration = Double(config.rippleDuration ?? 860) / 1000.0
         let opacity = CGFloat(config.rippleOpacity ?? 72) / 100.0
         let lineWidth = CGFloat(config.rippleLineWidth ?? 2)
         let color = hexColor(config.rippleColor)
         let style = config.rippleStyle ?? "单环"
+        let easing = config.rippleEasing ?? "缓出"
 
         let layers = rippleLayers(for: style, size: size, opacity: opacity,
                                   lineWidth: lineWidth, color: color)
@@ -17,17 +18,39 @@ class OverlayRippleFX {
         let baseDelay: TimeInterval = TimeInterval(config.rippleDelay ?? 0) / 1000.0
         let stagger: TimeInterval = 0.08
         for (index, layer) in layers.enumerated() {
+            let delay = baseDelay + Double(index) * stagger
+            let startOpacity = Float(opacity)
+
+            // Model values = final state (set before addSublayer to avoid flicker)
             layer.position = point
+            layer.transform = CATransform3DMakeScale(1, 1, 1)
+            layer.opacity = 0
             parent.addSublayer(layer)
 
-            let record = RippleRecord(
-                layer: layer,
-                startDelay: baseDelay + Double(index) * stagger,
-                duration: duration,
-                easing: config.rippleEasing ?? "缓出",
-                startOpacity: Float(opacity)
-            )
-            driver.add(record)
+            CATransaction.begin()
+            CATransaction.setCompletionBlock { layer.removeFromSuperlayer() }
+
+            // Scale: 0.18 → 1.0 with easing
+            let scaleAnim = CABasicAnimation(keyPath: "transform.scale")
+            scaleAnim.fromValue = 0.18
+            scaleAnim.toValue = 1.0
+            scaleAnim.duration = duration
+            scaleAnim.beginTime = CACurrentMediaTime() + delay
+            scaleAnim.timingFunction = easingFunction(easing)
+            scaleAnim.fillMode = .backwards
+            layer.add(scaleAnim, forKey: "transform.scale")
+
+            // Opacity: linear fade
+            let opacityAnim = CABasicAnimation(keyPath: "opacity")
+            opacityAnim.fromValue = startOpacity
+            opacityAnim.toValue = 0
+            opacityAnim.duration = duration
+            opacityAnim.beginTime = CACurrentMediaTime() + delay
+            opacityAnim.timingFunction = CAMediaTimingFunction(name: .linear)
+            opacityAnim.fillMode = .backwards
+            layer.add(opacityAnim, forKey: "opacity")
+
+            CATransaction.commit()
         }
     }
 

@@ -5,57 +5,43 @@ import FlutterMacOS
 
 /// NSView that hosts preview effects. Transparent background,
 /// receives trigger commands via MethodChannel set up by the factory.
-/// Uses AnimationDriver for manual frame-driven animation on every NSView layout.
+/// Uses EffectsRenderer (shared with OverlayManager) for identical rendering.
 class PreviewRenderer: NSView {
-    private let particleFX = OverlayParticleFX()
-    private let textFX = OverlayTextFX()
-    private let rippleFX = OverlayRippleFX()
-    private let cursorFX = OverlayCursorFX()
-    private let animationFX = OverlayAnimationFX()
-    private let imageFX = OverlayImageFX()
-    private let driver = AnimationDriver()
+    private let renderer = EffectsRenderer()
+    private var currentConfig: ActionConfig.ConfigData?
+    private var comboCounter: Int = 0
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         self.wantsLayer = true
         self.layer?.backgroundColor = NSColor.clear.cgColor
-        driver.start()
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.wantsLayer = true
         self.layer?.backgroundColor = NSColor.clear.cgColor
-        driver.start()
     }
 
-    deinit {
-        driver.clear()
-        driver.stop()
+    /// Store config for subsequent triggers.
+    func updateConfig(_ config: ActionConfig.ConfigData) {
+        currentConfig = config
+        comboCounter = 0
     }
 
-    /// Trigger effects at the given point (in view coordinates).
-    /// point.y comes from Flutter (top-left origin), convert to NSView (bottom-left).
-    func trigger(at point: NSPoint, config: ActionConfig.ConfigData, runIndex: Int = 1) {
-        guard let layer = self.layer else { return }
+    /// Trigger effects at the given point (in Flutter top-left origin).
+    func trigger(at point: NSPoint) {
+        guard let config = currentConfig,
+              let layer = self.layer else { return }
+        comboCounter += 1
         let adjusted = NSPoint(x: point.x, y: bounds.height - point.y)
+        renderer.playClickEffects(at: adjusted, config: config, parent: layer, runIndex: comboCounter)
+    }
 
-        if config.textEnabled == true {
-            textFX.spawn(at: adjusted, config: config, parent: layer, driver: driver, runIndex: runIndex)
-        }
-        if config.particle == true {
-            particleFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
-        }
-        if config.ripple == true {
-            rippleFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
-        }
-        if config.animationEnabled == true {
-            animationFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
-        }
-        if config.imageEnabled == true {
-            imageFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
-        }
-        cursorFX.spawn(at: adjusted, config: config, parent: layer, driver: driver)
+    /// Clear all active effects.
+    func clearEffects() {
+        layer?.sublayers?.removeAll()
+        comboCounter = 0
     }
 }
 
@@ -78,10 +64,8 @@ class PreviewPlatformViewFactory: NSObject, FlutterPlatformViewFactory {
 
         channel.setMethodCallHandler { call, result in
             switch call.method {
-            case "trigger":
+            case "updateConfig":
                 guard let dict = call.arguments as? [String: Any],
-                      let x = dict["x"] as? Double,
-                      let y = dict["y"] as? Double,
                       let configDict = dict["config"] as? [String: Any],
                       let jsonData = try? JSONSerialization.data(withJSONObject: configDict),
                       let configData = try? JSONDecoder().decode(
@@ -90,8 +74,22 @@ class PreviewPlatformViewFactory: NSObject, FlutterPlatformViewFactory {
                     result(FlutterError(code: "INVALID_ARGS", message: nil, details: nil))
                     return
                 }
-                let runIndex = dict["runIndex"] as? Int ?? 1
-                renderer.trigger(at: NSPoint(x: x, y: y), config: configData, runIndex: runIndex)
+                renderer.updateConfig(configData)
+                result(nil)
+
+            case "trigger":
+                guard let dict = call.arguments as? [String: Any],
+                      let x = dict["x"] as? Double,
+                      let y = dict["y"] as? Double
+                else {
+                    result(FlutterError(code: "INVALID_ARGS", message: nil, details: nil))
+                    return
+                }
+                renderer.trigger(at: NSPoint(x: x, y: y))
+                result(nil)
+
+            case "clear":
+                renderer.clearEffects()
                 result(nil)
 
             default:

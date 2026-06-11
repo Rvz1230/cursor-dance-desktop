@@ -1,16 +1,13 @@
 import Cocoa
 
-// MARK: - OverlayCursorFX
-
 /// Cursor feedback — override cursor appearance and shake on click.
-/// Mirrors plugin renderCursorOverride().
+/// Uses CAKeyframeAnimation with pre-sampled shake trajectory.
 class OverlayCursorFX {
-    func spawn(at point: NSPoint, config: ActionConfig.ConfigData, parent: CALayer, driver: AnimationDriver) {
+    func spawn(at point: NSPoint, config: ActionConfig.ConfigData, parent: CALayer) {
         let shakeValue = CGFloat(config.shake ?? 0)
         let hasOverride = hasCursorOverride(config.cursorOverride)
         let hasTrail = config.cursorTrailEnabled == true
 
-        // Ensure at least one effect is active
         guard shakeValue > 0 || hasOverride || hasTrail else { return }
 
         let cursorSize = CGFloat(config.cursorSize ?? 48)
@@ -18,19 +15,10 @@ class OverlayCursorFX {
         let startOpacity: Float = 0.92
 
         let layer = createCursorLayer(override: config.cursorOverride, size: cursorSize)
-        layer.position = point
-        layer.opacity = startOpacity
-        parent.addSublayer(layer)
 
-        let record = CursorRecord(
-            layer: layer,
-            startX: point.x,
-            startY: point.y,
-            shake: shakeValue,
-            startOpacity: startOpacity,
-            duration: duration
-        )
-        driver.add(record)
+        animateCursor(layer: layer, startX: point.x, startY: point.y,
+                      shake: shakeValue, startOpacity: startOpacity, duration: duration,
+                      parent: parent)
 
         // ── Trail ghosts ──
         if hasTrail {
@@ -39,21 +27,68 @@ class OverlayCursorFX {
             for i in 0..<trailCount {
                 let ghostSize = cursorSize * (1.0 - CGFloat(i) * 0.06)
                 let ghostLayer = createTrailLayer(size: ghostSize, opacity: trailOpacity)
-                ghostLayer.position = point
-                parent.addSublayer(ghostLayer)
-
-                let ghostDuration: CFTimeInterval = 0.2 + Double(i) * 0.04
-                let ghostRecord = CursorRecord(
-                    layer: ghostLayer,
-                    startX: point.x,
-                    startY: point.y,
-                    shake: shakeValue * 0.5,
-                    startOpacity: Float(trailOpacity),
-                    duration: ghostDuration
-                )
-                driver.add(ghostRecord)
+                animateCursor(layer: ghostLayer, startX: point.x, startY: point.y,
+                              shake: shakeValue * 0.5, startOpacity: Float(trailOpacity),
+                              duration: 0.2 + Double(i) * 0.04, parent: parent)
             }
         }
+    }
+
+    // MARK: - Animation
+
+    private func animateCursor(layer: CALayer, startX: CGFloat, startY: CGFloat,
+                                shake: CGFloat, startOpacity: Float, duration: CFTimeInterval,
+                                parent: CALayer) {
+        // Pre-sample shake trajectory
+        let frameCount = max(Int(duration * 60), 20)
+        var positions: [NSPoint] = []
+        for i in 0...frameCount {
+            let t = Double(i) / Double(frameCount)
+            let shakeDecay = shake * CGFloat(1.0 - t)
+            let sx = CGFloat.random(in: -shakeDecay...shakeDecay)
+            let sy = CGFloat.random(in: -shakeDecay...shakeDecay)
+            positions.append(CGPoint(x: startX + sx, y: startY + sy))
+        }
+
+        // Scale: 0.86 → 1.0 (t<0.2) → 1.0 (0.2<t<0.5) → 0.9 (t>0.5)
+        let scaleValues: [CGFloat] = [0.86, 1.0, 1.0, 0.9]
+        let scaleKeyTimes: [NSNumber] = [0, 0.2, 0.5, 1.0]
+
+        // Opacity: hold → fade out (t>0.5)
+        let opacityValues: [Float] = [startOpacity, startOpacity, 0]
+        let opacityKeyTimes: [NSNumber] = [0, 0.5, 1.0]
+
+        // Model values = final state (set before addSublayer to avoid flicker)
+        if let lastPos = positions.last { layer.position = lastPos }
+        layer.transform = CATransform3DMakeScale(0.9, 0.9, 1)
+        layer.opacity = 0
+        parent.addSublayer(layer)
+
+        CATransaction.begin()
+        CATransaction.setCompletionBlock { layer.removeFromSuperlayer() }
+
+        let posAnim = CAKeyframeAnimation(keyPath: "position")
+        posAnim.values = positions
+        posAnim.duration = duration
+        posAnim.timingFunction = easingFunction("缓出")
+        posAnim.fillMode = .backwards
+        layer.add(posAnim, forKey: "position")
+
+        let scaleAnim = CAKeyframeAnimation(keyPath: "transform.scale")
+        scaleAnim.values = scaleValues
+        scaleAnim.keyTimes = scaleKeyTimes
+        scaleAnim.duration = duration
+        scaleAnim.fillMode = .backwards
+        layer.add(scaleAnim, forKey: "transform.scale")
+
+        let opacityAnim = CAKeyframeAnimation(keyPath: "opacity")
+        opacityAnim.values = opacityValues
+        opacityAnim.keyTimes = opacityKeyTimes
+        opacityAnim.duration = duration
+        opacityAnim.fillMode = .backwards
+        layer.add(opacityAnim, forKey: "opacity")
+
+        CATransaction.commit()
     }
 
     // MARK: - Layer creation
@@ -81,7 +116,6 @@ class OverlayCursorFX {
             return layer
         }
 
-        // Add shadow for depth
         layer.shadowOpacity = 0.3
         layer.shadowRadius = 6
         layer.shadowOffset = NSSize(width: 0, height: 2)

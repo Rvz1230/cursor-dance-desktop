@@ -147,7 +147,7 @@ struct KeyFeedbackConfigData: Decodable {
     let delay: Int?
 }
 
-// MARK: - Easing mapping — AnimationDriver uses its own ease()
+// MARK: - Color helpers
 
 func hexColor(_ hex: String?) -> NSColor {
     guard let hex = hex, !hex.isEmpty else { return NSColor.orange }
@@ -185,14 +185,8 @@ class OverlayManager {
     private var keyEventMonitor: Any?
     private var channel: FlutterMethodChannel?
     private var spaceObserver: Any?
-    private let driver = AnimationDriver()
 
-    private let particleFX = OverlayParticleFX()
-    private let textFX = OverlayTextFX()
-    private let rippleFX = OverlayRippleFX()
-    private let cursorFX = OverlayCursorFX()
-    private let animationFX = OverlayAnimationFX()
-    private let imageFX = OverlayImageFX()
+    private let renderer = EffectsRenderer()
     private let keyFeedbackFX = OverlayKeyFeedbackFX()
 
     private var currentConfig: ActionConfig?
@@ -286,8 +280,6 @@ class OverlayManager {
 
         overlayWindow = window
 
-        driver.start()
-
         eventMonitor = NSEvent.addGlobalMonitorForEvents(
             matching: .leftMouseDown
         ) { [weak self] _ in
@@ -318,8 +310,10 @@ class OverlayManager {
             keyEventMonitor = nil
         }
 
-        driver.clear()
-        driver.stop()
+        // Remove all animation layers from overlay
+        if let contentView = overlayWindow?.contentView, let layer = contentView.layer {
+            layer.sublayers?.removeAll()
+        }
 
         overlayWindow?.orderOut(nil)
         overlayWindow = nil
@@ -343,22 +337,7 @@ class OverlayManager {
         comboCounters[actionKey] = runIndex
         comboLock.unlock()
 
-        if c.textEnabled == true {
-            textFX.spawn(at: localPoint, config: c, parent: layer, driver: driver, runIndex: runIndex)
-        }
-        if c.particle == true {
-            particleFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
-        }
-        if c.ripple == true {
-            rippleFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
-        }
-        if c.animationEnabled == true {
-            animationFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
-        }
-        if c.imageEnabled == true {
-            imageFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
-        }
-        cursorFX.spawn(at: localPoint, config: c, parent: layer, driver: driver)
+        renderer.playClickEffects(at: localPoint, config: c, parent: layer, runIndex: runIndex)
     }
 
     private func handleKeyPress(_ event: NSEvent) {
@@ -392,7 +371,7 @@ class OverlayManager {
         lastKeyPressTime = now
 
         print("[KeyFeedback] keyCode=\(keyCode) char=\(character) style=\(config.animationStyle ?? "bounce")")
-        keyFeedbackFX.spawn(keyCode: keyCode, character: character, config: config, parent: layer, driver: driver)
+        keyFeedbackFX.spawn(keyCode: keyCode, character: character, config: config, parent: layer)
     }
 
     private func isModifierKey(_ keyCode: Int) -> Bool {

@@ -33,12 +33,13 @@
 			AAA00002 /* OverlayTextFX.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00002 /* OverlayTextFX.swift */; };
 			AAA00003 /* OverlayRippleFX.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00003 /* OverlayRippleFX.swift */; };
 			AAA00004 /* PreviewPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00004 /* PreviewPlatformView.swift */; };
-			AAA00005 /* AnimationDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00005 /* AnimationDriver.swift */; };
+
 			AAA00006 /* OverlayCursorFX.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00006 /* OverlayCursorFX.swift */; };
 			AAA00007 /* OverlayAnimationFX.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00007 /* OverlayAnimationFX.swift */; };
 			AAA00008 /* OverlayImageFX.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00008 /* OverlayImageFX.swift */; };
 				AAA00009 /* KeyLayoutMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00009 /* KeyLayoutMap.swift */; };
 				AAA00010 /* OverlayKeyFeedbackFX.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00010 /* OverlayKeyFeedbackFX.swift */; };
+				AAA00011 /* EffectsRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00011 /* EffectsRenderer.swift */; };
 		9A125C06F5AC9BED351665AC /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EC16B9F5335337E1F6AAD49 /* Pods_RunnerTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -91,12 +92,13 @@
 			BBB00002 /* OverlayTextFX.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayTextFX.swift; sourceTree = "<group>"; };
 			BBB00003 /* OverlayRippleFX.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayRippleFX.swift; sourceTree = "<group>"; };
 			BBB00004 /* PreviewPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewPlatformView.swift; sourceTree = "<group>"; };
-			BBB00005 /* AnimationDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationDriver.swift; sourceTree = "<group>"; };
+
 			BBB00006 /* OverlayCursorFX.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayCursorFX.swift; sourceTree = "<group>"; };
 			BBB00007 /* OverlayAnimationFX.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayAnimationFX.swift; sourceTree = "<group>"; };
 			BBB00008 /* OverlayImageFX.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayImageFX.swift; sourceTree = "<group>"; };
 			BBB00009 /* KeyLayoutMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyLayoutMap.swift; sourceTree = "<group>"; };
 			BBB00010 /* OverlayKeyFeedbackFX.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayKeyFeedbackFX.swift; sourceTree = "<group>"; };
+			BBB00011 /* EffectsRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectsRenderer.swift; sourceTree = "<group>"; };
 		33CEB47222A05771004F2AC0 /* Flutter-Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Flutter-Debug.xcconfig"; sourceTree = "<group>"; };
 		33CEB47422A05771004F2AC0 /* Flutter-Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Flutter-Release.xcconfig"; sourceTree = "<group>"; };
 		33CEB47722A0578A004F2AC0 /* Flutter-Generated.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Flutter-Generated.xcconfig"; path = "ephemeral/Flutter-Generated.xcconfig"; sourceTree = "<group>"; };
@@ -203,12 +205,12 @@
 				BBB00002 /* OverlayTextFX.swift */,
 				BBB00003 /* OverlayRippleFX.swift */,
 				BBB00004 /* PreviewPlatformView.swift */,
-				BBB00005 /* AnimationDriver.swift */,
 				BBB00006 /* OverlayCursorFX.swift */,
 				BBB00007 /* OverlayAnimationFX.swift */,
 				BBB00008 /* OverlayImageFX.swift */,
 				BBB00009 /* KeyLayoutMap.swift */,
 				BBB00010 /* OverlayKeyFeedbackFX.swift */,
+				BBB00011 /* EffectsRenderer.swift */,
 				33CC11122044BFA00003C045 /* MainFlutterWindow.swift */,
 				33E51913231747F40026EE4D /* DebugProfile.entitlements */,
 				33E51914231749380026EE4D /* Release.entitlements */,
@@ -458,12 +460,12 @@
 				AAA00002 /* OverlayTextFX.swift in Sources */,
 				AAA00003 /* OverlayRippleFX.swift in Sources */,
 				AAA00004 /* PreviewPlatformView.swift in Sources */,
-				AAA00005 /* AnimationDriver.swift in Sources */,
 				AAA00006 /* OverlayCursorFX.swift in Sources */,
 				AAA00007 /* OverlayAnimationFX.swift in Sources */,
 				AAA00008 /* OverlayImageFX.swift in Sources */,
 				AAA00009 /* KeyLayoutMap.swift in Sources */,
 				AAA00010 /* OverlayKeyFeedbackFX.swift in Sources */,
+				AAA00011 /* EffectsRenderer.swift in Sources */,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
 			);

@@ -1,72 +1,9 @@
 import Cocoa
 
-// MARK: - ImageRecord
-
-class ImageRecord: AnimatableRecord {
-    let layer: CALayer
-    let startX: CGFloat
-    let startY: CGFloat
-    let floatDistance: CGFloat
-    let startOpacity: Float
-    let duration: CFTimeInterval
-    let startDelay: CFTimeInterval
-    var elapsed: CFTimeInterval = 0
-    var finished = false
-
-    /// Phase timing: fadeIn = first 15%, hold = 15-65%, fadeOut = 65-100%
-    private let fadeInFraction: CGFloat = 0.15
-    private let fadeOutStartFraction: CGFloat = 0.65
-
-    init(layer: CALayer,
-         startX: CGFloat, startY: CGFloat,
-         floatDistance: CGFloat,
-         startOpacity: Float,
-         duration: CFTimeInterval,
-         startDelay: CFTimeInterval = 0)
-    {
-        self.layer = layer
-        self.startX = startX; self.startY = startY
-        self.floatDistance = floatDistance
-        self.startOpacity = startOpacity
-        self.duration = duration
-        self.startDelay = startDelay
-        layer.actions = ["position": NSNull(), "opacity": NSNull()]
-    }
-
-    func advance(by dt: CFTimeInterval) {
-        elapsed += dt
-        let effective = elapsed - startDelay
-        guard effective > 0 else { return }
-        let t = min(effective / duration, 1.0)
-
-        // Position: slight float upward
-        layer.position = CGPoint(
-            x: startX,
-            y: startY + floatDistance * CGFloat(t)
-        )
-
-        // Opacity: fade in → hold → fade out
-        if t < fadeInFraction {
-            // Fade in
-            layer.opacity = startOpacity * Float(CGFloat(t) / fadeInFraction)
-        } else if t < fadeOutStartFraction {
-            // Hold
-            layer.opacity = startOpacity
-        } else {
-            // Fade out
-            let fadeProgress = (CGFloat(t) - fadeOutStartFraction) / (1.0 - fadeOutStartFraction)
-            layer.opacity = startOpacity * Float(1.0 - fadeProgress)
-        }
-
-        if t >= 1.0 { finished = true }
-    }
-}
-
-// MARK: - OverlayImageFX
-
 /// Image sticker feedback — displays an image that fades in, holds, then fades out with a slight float.
+/// Uses CABasicAnimation for position + CAKeyframeAnimation for 3-phase opacity.
 class OverlayImageFX {
-    func spawn(at point: NSPoint, config: ActionConfig.ConfigData, parent: CALayer, driver: AnimationDriver) {
+    func spawn(at point: NSPoint, config: ActionConfig.ConfigData, parent: CALayer) {
         guard let urlString = config.imageDataUrl, !urlString.isEmpty else { return }
 
         let size = CGFloat(config.imageSize ?? 56)
@@ -82,30 +19,49 @@ class OverlayImageFX {
         let imageLayer = CALayer()
         imageLayer.contents = image
         imageLayer.contentsGravity = .resizeAspect
-        let imageSize = min(size, 120) // cap at 120
+        let imageSize = min(size, 120)
         imageLayer.frame = CGRect(
             x: point.x - imageSize / 2 + offsetX,
             y: point.y - imageSize / 2 + offsetY,
             width: imageSize,
             height: imageSize
         )
-        imageLayer.opacity = 0 // start invisible
+        let startPos = imageLayer.position
+        let floatDistance: CGFloat = -8
+        let endPos = CGPoint(x: startPos.x, y: startPos.y + floatDistance)
+        let startOpacity = Float(baseOpacity)
+
+        // Model values = final state (set before addSublayer to avoid flicker)
+        imageLayer.position = endPos
+        imageLayer.opacity = 0
         parent.addSublayer(imageLayer)
 
-        let record = ImageRecord(
-            layer: imageLayer,
-            startX: imageLayer.frame.midX,
-            startY: imageLayer.frame.midY,
-            floatDistance: -8, // slight upward float
-            startOpacity: Float(baseOpacity),
-            duration: duration,
-            startDelay: baseDelay
-        )
-        driver.add(record)
+        CATransaction.begin()
+        CATransaction.setCompletionBlock { imageLayer.removeFromSuperlayer() }
+
+        // Position: slight float upward
+        let posAnim = CABasicAnimation(keyPath: "position")
+        posAnim.fromValue = startPos
+        posAnim.toValue = endPos
+        posAnim.duration = duration
+        posAnim.beginTime = CACurrentMediaTime() + baseDelay
+        posAnim.timingFunction = CAMediaTimingFunction(name: .linear)
+        posAnim.fillMode = .backwards
+        imageLayer.add(posAnim, forKey: "position")
+
+        // Opacity: fade in → hold → fade out
+        let opacityAnim = CAKeyframeAnimation(keyPath: "opacity")
+        opacityAnim.values = [0, startOpacity, startOpacity, 0]
+        opacityAnim.keyTimes = [0, 0.15, 0.65, 1.0]
+        opacityAnim.duration = duration
+        opacityAnim.beginTime = CACurrentMediaTime() + baseDelay
+        opacityAnim.fillMode = .backwards
+        imageLayer.add(opacityAnim, forKey: "opacity")
+
+        CATransaction.commit()
     }
 
     private func decodeImage(from dataUrl: String) -> CGImage? {
-        // Support both base64 data URLs and raw base64 strings
         let base64: String
         if dataUrl.contains(",") {
             base64 = String(dataUrl.split(separator: ",").last ?? "")

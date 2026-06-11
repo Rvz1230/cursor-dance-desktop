@@ -2,8 +2,9 @@ import Cocoa
 
 /// Full text feedback implementation.
 /// Mirrors the plugin's renderText() + compute-specs.js getTextContent() pipeline.
+/// Uses CABasicAnimation for position + opacity.
 class OverlayTextFX {
-    func spawn(at point: NSPoint, config: ActionConfig.ConfigData, parent: CALayer, driver: AnimationDriver, runIndex: Int = 1) {
+    func spawn(at point: NSPoint, config: ActionConfig.ConfigData, parent: CALayer, runIndex: Int = 1) {
         let content = getTextContent(config: config, runIndex: runIndex)
         let fontSize = CGFloat(config.fontSize ?? 24)
         let duration = Double(config.textDuration ?? 1000) / 1000.0
@@ -71,26 +72,43 @@ class OverlayTextFX {
             gradientLayer.endPoint = CGPoint(x: 1, y: 1)
             gradientLayer.mask = textLayer
             gradientLayer.opacity = Float(opacity)
-            parent.addSublayer(gradientLayer)
             effectiveLayer = gradientLayer
         } else {
-            parent.addSublayer(textLayer)
             effectiveLayer = textLayer
         }
 
         let startPos = effectiveLayer.position
+        let endPos = CGPoint(x: startPos.x + offsetX, y: startPos.y + floatDistance)
+        let startOpacity = Float(opacity)
 
-        let record = TextRecord(
-            layer: effectiveLayer,
-            startX: startPos.x, startY: startPos.y,
-            offsetX: offsetX,
-            floatDistance: floatDistance,
-            startOpacity: Float(opacity),
-            duration: duration,
-            easing: config.textEasing ?? "缓出",
-            startDelay: startDelay
-        )
-        driver.add(record)
+        // Model values = final state (set before addSublayer to avoid flicker)
+        effectiveLayer.position = endPos
+        effectiveLayer.opacity = 0
+
+        parent.addSublayer(effectiveLayer)
+
+        CATransaction.begin()
+        CATransaction.setCompletionBlock { effectiveLayer.removeFromSuperlayer() }
+
+        let posAnim = CABasicAnimation(keyPath: "position")
+        posAnim.fromValue = startPos
+        posAnim.toValue = endPos
+        posAnim.duration = duration
+        posAnim.beginTime = CACurrentMediaTime() + startDelay
+        posAnim.timingFunction = easingFunction(config.textEasing ?? "缓出")
+        posAnim.fillMode = .backwards
+        effectiveLayer.add(posAnim, forKey: "position")
+
+        let opacityAnim = CABasicAnimation(keyPath: "opacity")
+        opacityAnim.fromValue = startOpacity
+        opacityAnim.toValue = 0
+        opacityAnim.duration = duration
+        opacityAnim.beginTime = CACurrentMediaTime() + startDelay
+        opacityAnim.timingFunction = CAMediaTimingFunction(name: .linear)
+        opacityAnim.fillMode = .backwards
+        effectiveLayer.add(opacityAnim, forKey: "opacity")
+
+        CATransaction.commit()
     }
 
     // MARK: - Text content computation
