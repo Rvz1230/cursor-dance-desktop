@@ -21,31 +21,30 @@ KeyFeedbackConfig _$KeyFeedbackConfigFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$KeyFeedbackConfig {
-  // ── 总开关 ──
-  bool get enabled => throw _privateConstructorUsedError; // ── 动画形式 ──
-  String get animationStyle => throw _privateConstructorUsedError; // ── 弹出位置 ──
+  bool get enabled => throw _privateConstructorUsedError;
+  String get animationStyle => throw _privateConstructorUsedError;
   String get originEdge => throw _privateConstructorUsedError;
   String get originMapping => throw _privateConstructorUsedError;
   double get globalOffsetX => throw _privateConstructorUsedError;
-  double get globalOffsetY => throw _privateConstructorUsedError; // ── 字符样式 ──
+  double get globalOffsetY => throw _privateConstructorUsedError;
   int get fontSize => throw _privateConstructorUsedError;
   String get fontWeight => throw _privateConstructorUsedError;
   String get fontFamily => throw _privateConstructorUsedError;
   String get color => throw _privateConstructorUsedError;
   int get opacity => throw _privateConstructorUsedError;
-  bool get uppercase => throw _privateConstructorUsedError; // ── 动画参数 ──
+  bool get uppercase => throw _privateConstructorUsedError;
   int get duration => throw _privateConstructorUsedError;
   String get easing => throw _privateConstructorUsedError;
   double get scale => throw _privateConstructorUsedError;
   int get bounceHeight => throw _privateConstructorUsedError;
   double get gravity => throw _privateConstructorUsedError;
-  double get wind => throw _privateConstructorUsedError; // ── 特效增强 ──
+  double get wind => throw _privateConstructorUsedError;
   bool get glow => throw _privateConstructorUsedError;
   String get glowColor => throw _privateConstructorUsedError;
   double get glowRadius => throw _privateConstructorUsedError;
   bool get trail => throw _privateConstructorUsedError;
   int get trailLength => throw _privateConstructorUsedError;
-  bool get splash => throw _privateConstructorUsedError; // ── 高级 ──
+  bool get splash => throw _privateConstructorUsedError;
   int get cooldownMs => throw _privateConstructorUsedError;
   int get maxSimultaneous => throw _privateConstructorUsedError;
   int get delay => throw _privateConstructorUsedError;
@@ -458,26 +457,26 @@ class __$$KeyFeedbackConfigImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$KeyFeedbackConfigImpl implements _KeyFeedbackConfig {
   const _$KeyFeedbackConfigImpl({
-    this.enabled = true,
+    this.enabled = false,
     this.animationStyle = 'bounce',
     this.originEdge = 'bottom',
-    this.originMapping = 'keyboardLayout',
-    this.globalOffsetX = 0.5,
-    this.globalOffsetY = 0.08,
-    this.fontSize = 48,
-    this.fontWeight = '加粗',
-    this.fontFamily = '系统默认',
+    this.originMapping = 'qwerty',
+    this.globalOffsetX = 0.0,
+    this.globalOffsetY = -20.0,
+    this.fontSize = 16,
+    this.fontWeight = 'medium',
+    this.fontFamily = '',
     this.color = '#F59E0B',
-    this.opacity = 90,
-    this.uppercase = false,
-    this.duration = 900,
-    this.easing = '弹跳',
+    this.opacity = 100,
+    this.uppercase = true,
+    this.duration = 800,
+    this.easing = '弹性',
     this.scale = 1.0,
-    this.bounceHeight = 140,
-    this.gravity = 0.3,
+    this.bounceHeight = 60,
+    this.gravity = 0.5,
     this.wind = 0.0,
     this.glow = false,
-    this.glowColor = '#FBBF24',
+    this.glowColor = '#F59E0B',
     this.glowRadius = 8.0,
     this.trail = false,
     this.trailLength = 3,
@@ -490,15 +489,12 @@ class _$KeyFeedbackConfigImpl implements _KeyFeedbackConfig {
   factory _$KeyFeedbackConfigImpl.fromJson(Map<String, dynamic> json) =>
       _$$KeyFeedbackConfigImplFromJson(json);
 
-  // ── 总开关 ──
   @override
   @JsonKey()
   final bool enabled;
-  // ── 动画形式 ──
   @override
   @JsonKey()
   final String animationStyle;
-  // ── 弹出位置 ──
   @override
   @JsonKey()
   final String originEdge;
@@ -511,7 +507,6 @@ class _$KeyFeedbackConfigImpl implements _KeyFeedbackConfig {
   @override
   @JsonKey()
   final double globalOffsetY;
-  // ── 字符样式 ──
   @override
   @JsonKey()
   final int fontSize;
@@ -530,7 +525,6 @@ class _$KeyFeedbackConfigImpl implements _KeyFeedbackConfig {
   @override
   @JsonKey()
   final bool uppercase;
-  // ── 动画参数 ──
   @override
   @JsonKey()
   final int duration;
@@ -549,7 +543,6 @@ class _$KeyFeedbackConfigImpl implements _KeyFeedbackConfig {
   @override
   @JsonKey()
   final double wind;
-  // ── 特效增强 ──
   @override
   @JsonKey()
   final bool glow;
@@ -568,7 +561,6 @@ class _$KeyFeedbackConfigImpl implements _KeyFeedbackConfig {
   @override
   @JsonKey()
   final bool splash;
-  // ── 高级 ──
   @override
   @JsonKey()
   final int cooldownMs;
@@ -718,11 +710,10 @@ abstract class _KeyFeedbackConfig implements KeyFeedbackConfig {
   factory _KeyFeedbackConfig.fromJson(Map<String, dynamic> json) =
       _$KeyFeedbackConfigImpl.fromJson;
 
-  // ── 总开关 ──
   @override
-  bool get enabled; // ── 动画形式 ──
+  bool get enabled;
   @override
-  String get animationStyle; // ── 弹出位置 ──
+  String get animationStyle;
   @override
   String get originEdge;
   @override
@@ -730,7 +721,7 @@ abstract class _KeyFeedbackConfig implements KeyFeedbackConfig {
   @override
   double get globalOffsetX;
   @override
-  double get globalOffsetY; // ── 字符样式 ──
+  double get globalOffsetY;
   @override
   int get fontSize;
   @override
@@ -742,7 +733,7 @@ abstract class _KeyFeedbackConfig implements KeyFeedbackConfig {
   @override
   int get opacity;
   @override
-  bool get uppercase; // ── 动画参数 ──
+  bool get uppercase;
   @override
   int get duration;
   @override
@@ -754,7 +745,7 @@ abstract class _KeyFeedbackConfig implements KeyFeedbackConfig {
   @override
   double get gravity;
   @override
-  double get wind; // ── 特效增强 ──
+  double get wind;
   @override
   bool get glow;
   @override
@@ -766,7 +757,7 @@ abstract class _KeyFeedbackConfig implements KeyFeedbackConfig {
   @override
   int get trailLength;
   @override
-  bool get splash; // ── 高级 ──
+  bool get splash;
   @override
   int get cooldownMs;
   @override

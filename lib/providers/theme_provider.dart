@@ -7,14 +7,6 @@ import '../models/theme_draft.dart';
 import '../repository/persistence_repository.dart';
 import '../services/theme_io_service.dart';
 
-/// 主题库状态管理 Provider
-///
-/// 负责：
-/// - 主题库 CRUD（create/delete/rename/duplicate）
-/// - 草稿管理（draftsByTheme）
-/// - 选中态（selectedThemeId / workspaceId）
-/// - 键盘反馈配置（keyFeedbackConfig）
-/// - 持久化（save/load）
 class ThemeProvider extends ChangeNotifier {
   final PersistenceRepository _repo;
 
@@ -55,8 +47,7 @@ class ThemeProvider extends ChangeNotifier {
   KeyFeedbackConfig get keyFeedbackConfig => _keyFeedbackConfig;
 
   // ── Derived ──
-  ThemeItem get activeTheme =>
-      _themeLibrary.firstWhere(
+  ThemeItem get activeTheme => _themeLibrary.firstWhere(
         (t) => t.id == _selectedThemeId,
         orElse: () => _themeLibrary.first,
       );
@@ -93,26 +84,19 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   // ═══════════════════════════════════════════════
-  // Config Updates (delegated from ConfigProvider)
+  // Config Updates
   // ═══════════════════════════════════════════════
 
-  void updateActionConfig(String actionId, ActionConfig Function(ActionConfig) updater) {
-    final draft = _draftsByTheme[_selectedThemeId] ?? ThemeDraft.create(_selectedThemeId);
+  void updateActionConfig(
+    String actionId,
+    ActionConfig Function(ActionConfig) updater,
+  ) {
+    final draft =
+        _draftsByTheme[_selectedThemeId] ?? ThemeDraft.create(_selectedThemeId);
     final actionConfigs = Map<String, ActionConfig>.from(draft.actionConfigs);
     actionConfigs[actionId] = updater(actionConfigs[actionId] ?? ActionConfig());
-    _draftsByTheme[_selectedThemeId] = draft.copyWith(actionConfigs: actionConfigs);
-    _unsaved = true;
-    _dirtyThemes[_selectedThemeId] = true;
-    notifyListeners();
-  }
-
-  void updateActionConfigs(Map<String, ActionConfig Function(ActionConfig)> updaters) {
-    final draft = _draftsByTheme[_selectedThemeId] ?? ThemeDraft.create(_selectedThemeId);
-    final actionConfigs = Map<String, ActionConfig>.from(draft.actionConfigs);
-    for (final entry in updaters.entries) {
-      actionConfigs[entry.key] = entry.value(actionConfigs[entry.key] ?? ActionConfig());
-    }
-    _draftsByTheme[_selectedThemeId] = draft.copyWith(actionConfigs: actionConfigs);
+    _draftsByTheme[_selectedThemeId] =
+        draft.copyWith(actionConfigs: actionConfigs);
     _unsaved = true;
     _dirtyThemes[_selectedThemeId] = true;
     notifyListeners();
@@ -253,7 +237,10 @@ class ThemeProvider extends ChangeNotifier {
   // Overlay payload
   // ═══════════════════════════════════════════════
 
-  Map<String, dynamic> buildOverlayPayload(String actionId, ActionConfig config) {
+  Map<String, dynamic> buildOverlayPayload(
+    String actionId,
+    ActionConfig config,
+  ) {
     return {
       'actionId': actionId,
       'config': config.toJson(),
@@ -328,14 +315,17 @@ class ThemeProvider extends ChangeNotifier {
           actionConfigs: actionConfigs,
           atmosphere: d['atmosphere'] != null
               ? AtmosphereConfig.fromJson(
-                  d['atmosphere'] as Map<String, dynamic>)
+                  d['atmosphere'] as Map<String, dynamic>,
+                )
               : const AtmosphereConfig(),
-          cursorModes: (d['cursorModes'] as Map<String, dynamic>?)
-                  ?.map((k, v) => MapEntry(k, v as String)) ??
-              const {},
-          cursorStateActions: (d['cursorStateActions'] as Map<String, dynamic>?)
-                  ?.map((k, v) => MapEntry(k, v as String)) ??
-              const {},
+          cursorModes:
+              (d['cursorModes'] as Map<String, dynamic>?)
+                      ?.map((k, v) => MapEntry(k, v as String)) ??
+                  const {},
+          cursorStateActions:
+              (d['cursorStateActions'] as Map<String, dynamic>?)
+                      ?.map((k, v) => MapEntry(k, v as String)) ??
+                  const {},
           cursorStateAssets:
               (d['cursorStateAssets'] as Map<String, dynamic>?)
                       ?.map((k, v) => MapEntry(

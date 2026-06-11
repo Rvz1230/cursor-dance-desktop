@@ -1,9 +1,4 @@
 # CursorDance Desktop — Static Analysis Configuration
-#
-# 三层防线之「验证层」：
-#   - flutter_lints（基础）
-#   - custom_lint 插件（设计令牌强制）
-#   - dart analyze（类型/语法）
 
 include: package:flutter_lints/flutter.yaml
 
@@ -16,7 +11,6 @@ analyzer:
     - lib/lints/**
 
   errors:
-    # 令牌 lint 规则 — 全部视为 error
     no_hardcoded_font_size: error
     no_hardcoded_border_radius: error
     no_hardcoded_spacing: error

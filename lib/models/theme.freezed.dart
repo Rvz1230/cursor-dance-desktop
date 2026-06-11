@@ -24,10 +24,9 @@ mixin _$ThemeItem {
   String get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String get kind => throw _privateConstructorUsedError;
+  String get icon => throw _privateConstructorUsedError;
   String get summary => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
-  String get tone => throw _privateConstructorUsedError;
-  String get icon => throw _privateConstructorUsedError;
 
   /// Serializes this ThemeItem to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -48,10 +47,9 @@ abstract class $ThemeItemCopyWith<$Res> {
     String id,
     String name,
     String kind,
+    String icon,
     String summary,
     String description,
-    String tone,
-    String icon,
   });
 }
 
@@ -73,10 +71,9 @@ class _$ThemeItemCopyWithImpl<$Res, $Val extends ThemeItem>
     Object? id = null,
     Object? name = null,
     Object? kind = null,
+    Object? icon = null,
     Object? summary = null,
     Object? description = null,
-    Object? tone = null,
-    Object? icon = null,
   }) {
     return _then(
       _value.copyWith(
@@ -92,6 +89,10 @@ class _$ThemeItemCopyWithImpl<$Res, $Val extends ThemeItem>
                 ? _value.kind
                 : kind // ignore: cast_nullable_to_non_nullable
                       as String,
+            icon: null == icon
+                ? _value.icon
+                : icon // ignore: cast_nullable_to_non_nullable
+                      as String,
             summary: null == summary
                 ? _value.summary
                 : summary // ignore: cast_nullable_to_non_nullable
@@ -99,14 +100,6 @@ class _$ThemeItemCopyWithImpl<$Res, $Val extends ThemeItem>
             description: null == description
                 ? _value.description
                 : description // ignore: cast_nullable_to_non_nullable
-                      as String,
-            tone: null == tone
-                ? _value.tone
-                : tone // ignore: cast_nullable_to_non_nullable
-                      as String,
-            icon: null == icon
-                ? _value.icon
-                : icon // ignore: cast_nullable_to_non_nullable
                       as String,
           )
           as $Val,
@@ -127,10 +120,9 @@ abstract class _$$ThemeItemImplCopyWith<$Res>
     String id,
     String name,
     String kind,
+    String icon,
     String summary,
     String description,
-    String tone,
-    String icon,
   });
 }
 
@@ -151,10 +143,9 @@ class __$$ThemeItemImplCopyWithImpl<$Res>
     Object? id = null,
     Object? name = null,
     Object? kind = null,
+    Object? icon = null,
     Object? summary = null,
     Object? description = null,
-    Object? tone = null,
-    Object? icon = null,
   }) {
     return _then(
       _$ThemeItemImpl(
@@ -170,6 +161,10 @@ class __$$ThemeItemImplCopyWithImpl<$Res>
             ? _value.kind
             : kind // ignore: cast_nullable_to_non_nullable
                   as String,
+        icon: null == icon
+            ? _value.icon
+            : icon // ignore: cast_nullable_to_non_nullable
+                  as String,
         summary: null == summary
             ? _value.summary
             : summary // ignore: cast_nullable_to_non_nullable
@@ -177,14 +172,6 @@ class __$$ThemeItemImplCopyWithImpl<$Res>
         description: null == description
             ? _value.description
             : description // ignore: cast_nullable_to_non_nullable
-                  as String,
-        tone: null == tone
-            ? _value.tone
-            : tone // ignore: cast_nullable_to_non_nullable
-                  as String,
-        icon: null == icon
-            ? _value.icon
-            : icon // ignore: cast_nullable_to_non_nullable
                   as String,
       ),
     );
@@ -197,11 +184,10 @@ class _$ThemeItemImpl implements _ThemeItem {
   const _$ThemeItemImpl({
     required this.id,
     required this.name,
-    this.kind = '自定义',
+    this.kind = '内置',
+    this.icon = 'Wand2',
     this.summary = '',
     this.description = '',
-    this.tone = 'teal',
-    this.icon = 'Wand2',
   });
 
   factory _$ThemeItemImpl.fromJson(Map<String, dynamic> json) =>
@@ -216,20 +202,17 @@ class _$ThemeItemImpl implements _ThemeItem {
   final String kind;
   @override
   @JsonKey()
+  final String icon;
+  @override
+  @JsonKey()
   final String summary;
   @override
   @JsonKey()
   final String description;
-  @override
-  @JsonKey()
-  final String tone;
-  @override
-  @JsonKey()
-  final String icon;
 
   @override
   String toString() {
-    return 'ThemeItem(id: $id, name: $name, kind: $kind, summary: $summary, description: $description, tone: $tone, icon: $icon)';
+    return 'ThemeItem(id: $id, name: $name, kind: $kind, icon: $icon, summary: $summary, description: $description)';
   }
 
   @override
@@ -240,25 +223,16 @@ class _$ThemeItemImpl implements _ThemeItem {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.kind, kind) || other.kind == kind) &&
+            (identical(other.icon, icon) || other.icon == icon) &&
             (identical(other.summary, summary) || other.summary == summary) &&
             (identical(other.description, description) ||
-                other.description == description) &&
-            (identical(other.tone, tone) || other.tone == tone) &&
-            (identical(other.icon, icon) || other.icon == icon));
+                other.description == description));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    name,
-    kind,
-    summary,
-    description,
-    tone,
-    icon,
-  );
+  int get hashCode =>
+      Object.hash(runtimeType, id, name, kind, icon, summary, description);
 
   /// Create a copy of ThemeItem
   /// with the given fields replaced by the non-null parameter values.
@@ -279,10 +253,9 @@ abstract class _ThemeItem implements ThemeItem {
     required final String id,
     required final String name,
     final String kind,
+    final String icon,
     final String summary,
     final String description,
-    final String tone,
-    final String icon,
   }) = _$ThemeItemImpl;
 
   factory _ThemeItem.fromJson(Map<String, dynamic> json) =
@@ -295,13 +268,11 @@ abstract class _ThemeItem implements ThemeItem {
   @override
   String get kind;
   @override
+  String get icon;
+  @override
   String get summary;
   @override
   String get description;
-  @override
-  String get tone;
-  @override
-  String get icon;
 
   /// Create a copy of ThemeItem
   /// with the given fields replaced by the non-null parameter values.

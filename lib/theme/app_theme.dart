@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import 'app_tokens.dart';
+import 'tokens.dart';
 import 'animations.dart';
 
-/// 浅色主题 — Soft-Minimal Linear
+// ── Light theme ──────────────────────────────────────────
+
 final appTheme = ShadThemeData(
   brightness: Brightness.light,
   radius: const BorderRadius.all(Radius.circular(RadiusTokens.xl)),
-  colorScheme: _appColorScheme,
-  textTheme: _appTextTheme,
+  colorScheme: _lightColorScheme,
+  textTheme: _textTheme,
   primaryToastTheme: ShadToastTheme(
     animateIn: AppAnimations.slideIn,
     animateOut: AppAnimations.slideOut,
@@ -21,7 +22,8 @@ final appTheme = ShadThemeData(
   cardTheme: _cardThemeLight,
 );
 
-/// 深色主题 — 反转亮度层级，保持相同色调映射
+// ── Dark theme ───────────────────────────────────────────
+
 final darkTheme = ShadThemeData(
   brightness: Brightness.dark,
   radius: const BorderRadius.all(Radius.circular(RadiusTokens.xl)),
@@ -30,44 +32,7 @@ final darkTheme = ShadThemeData(
     animateIn: AppAnimations.slideIn,
     animateOut: AppAnimations.slideOut,
   ),
-  textTheme: _appTextTheme.copyWith(
-    h2: const TextStyle(
-      fontSize: FontSizes.h2,
-      fontWeight: FontWeight.w700,
-      height: 1.3,
-      color: AppDarkColors.foreground,
-    ),
-    h3: const TextStyle(
-      fontSize: FontSizes.h3,
-      fontWeight: FontWeight.w600,
-      height: 1.4,
-      color: AppDarkColors.foreground,
-    ),
-    h4: const TextStyle(
-      fontSize: FontSizes.h4,
-      fontWeight: FontWeight.w600,
-      height: 1.4,
-      color: AppDarkColors.foreground,
-    ),
-    p: const TextStyle(
-      fontSize: FontSizes.body,
-      fontWeight: FontWeight.w400,
-      height: 1.5,
-      color: AppDarkColors.foreground,
-    ),
-    small: const TextStyle(
-      fontSize: FontSizes.small,
-      fontWeight: FontWeight.w400,
-      height: 1.4,
-      color: AppDarkColors.foreground,
-    ),
-    muted: const TextStyle(
-      fontSize: FontSizes.small,
-      fontWeight: FontWeight.w400,
-      color: AppDarkColors.mutedForeground,
-      height: 1.4,
-    ),
-  ),
+  textTheme: _darkTextTheme,
   popoverTheme: _popoverThemeDark,
   selectTheme: _selectThemeDark,
   optionTheme: _optionTheme,
@@ -75,9 +40,9 @@ final darkTheme = ShadThemeData(
   cardTheme: _cardThemeDark,
 );
 
-// ── 浅色配色 ──
+// ── Color schemes ────────────────────────────────────────
 
-final _appColorScheme = ShadColorScheme(
+final _lightColorScheme = ShadColorScheme(
   background: AppColors.background,
   foreground: AppColors.foreground,
   card: AppColors.card,
@@ -103,8 +68,6 @@ final _appColorScheme = ShadColorScheme(
     'warning': AppColors.warning,
   },
 );
-
-// ── 深色配色 ──
 
 final _darkColorScheme = ShadColorScheme(
   background: AppDarkColors.background,
@@ -133,135 +96,82 @@ final _darkColorScheme = ShadColorScheme(
   },
 );
 
-// ── 共享阴影 ──
+// ── Text themes ──────────────────────────────────────────
 
-final _popoverShadows = <BoxShadow>[
-  BoxShadow(
-    color: const Color(0x08000000),
-    blurRadius: 4,
-    offset: const Offset(0, 1),
+final _textTheme = ShadTextTheme(
+  h2: const TextStyle(
+    fontSize: FontSizes.h2,
+    fontWeight: FontWeight.w700,
+    height: 1.3,
   ),
-  BoxShadow(
-    color: const Color(0x14000000),
-    blurRadius: 12,
-    offset: const Offset(0, 4),
+  h3: const TextStyle(
+    fontSize: FontSizes.h3,
+    fontWeight: FontWeight.w600,
+    height: 1.4,
   ),
-];
-
-final _cardShadows = <BoxShadow>[
-  BoxShadow(
-    color: const Color(0x08000000),
-    blurRadius: 4,
-    offset: const Offset(0, 1),
+  h4: const TextStyle(
+    fontSize: FontSizes.h4,
+    fontWeight: FontWeight.w600,
+    height: 1.4,
   ),
-];
-
-final _darkPopoverShadows = <BoxShadow>[
-  BoxShadow(
-    color: const Color(0x20000000),
-    blurRadius: 4,
-    offset: const Offset(0, 1),
+  p: const TextStyle(
+    fontSize: FontSizes.body,
+    fontWeight: FontWeight.w400,
+    height: 1.5,
   ),
-  BoxShadow(
-    color: const Color(0x30000000),
-    blurRadius: 12,
-    offset: const Offset(0, 4),
+  small: const TextStyle(
+    fontSize: FontSizes.small,
+    fontWeight: FontWeight.w400,
+    height: 1.4,
   ),
-];
-
-final _darkCardShadows = <BoxShadow>[
-  BoxShadow(
-    color: const Color(0x20000000),
-    blurRadius: 4,
-    offset: const Offset(0, 1),
-  ),
-];
-
-// ── 浅色子主题 ──
-
-final _popoverThemeLight = ShadPopoverTheme(
-  shadows: _popoverShadows,
-  padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: 6),
-  decoration: const ShadDecoration(
-    border: _popoverBorder,
+  muted: const TextStyle(
+    fontSize: FontSizes.small,
+    fontWeight: FontWeight.w400,
+    color: AppColors.mutedForeground,
+    height: 1.4,
   ),
 );
 
-final _selectThemeLight = ShadSelectTheme(
-  decoration: const ShadDecoration(
-    border: _inputBorder,
+final _darkTextTheme = ShadTextTheme(
+  h2: const TextStyle(
+    fontSize: FontSizes.h2,
+    fontWeight: FontWeight.w700,
+    height: 1.3,
+    color: AppDarkColors.foreground,
   ),
-  padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
-  optionsPadding: const EdgeInsets.all(Spacing.xs),
-  anchor: const ShadAnchorAuto(
-    offset: Offset(0, Spacing.xs),
+  h3: const TextStyle(
+    fontSize: FontSizes.h3,
+    fontWeight: FontWeight.w600,
+    height: 1.4,
+    color: AppDarkColors.foreground,
   ),
-);
-
-final _contextMenuThemeLight = ShadContextMenuTheme(
-  decoration: const ShadDecoration(
-    border: _popoverBorder,
+  h4: const TextStyle(
+    fontSize: FontSizes.h4,
+    fontWeight: FontWeight.w600,
+    height: 1.4,
+    color: AppDarkColors.foreground,
   ),
-  shadows: _popoverShadows,
-  padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.xs),
-  itemPadding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
-  height: 32,
-);
-
-final _cardThemeLight = ShadCardTheme(
-  padding: EdgeInsets.zero,
-  radius: const BorderRadius.all(Radius.circular(RadiusTokens.xl)),
-  border: _cardBorder,
-  shadows: _cardShadows,
-);
-
-// ── 深色子主题 ──
-
-final _popoverThemeDark = ShadPopoverTheme(
-  shadows: _darkPopoverShadows,
-  padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: 6),
-  decoration: const ShadDecoration(
-    border: _darkPopoverBorder,
+  p: const TextStyle(
+    fontSize: FontSizes.body,
+    fontWeight: FontWeight.w400,
+    height: 1.5,
+    color: AppDarkColors.foreground,
   ),
-);
-
-final _selectThemeDark = ShadSelectTheme(
-  decoration: const ShadDecoration(
-    border: _darkInputBorder,
+  small: const TextStyle(
+    fontSize: FontSizes.small,
+    fontWeight: FontWeight.w400,
+    height: 1.4,
+    color: AppDarkColors.foreground,
   ),
-  padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
-  optionsPadding: const EdgeInsets.all(Spacing.xs),
-  anchor: const ShadAnchorAuto(
-    offset: Offset(0, Spacing.xs),
+  muted: const TextStyle(
+    fontSize: FontSizes.small,
+    fontWeight: FontWeight.w400,
+    color: AppDarkColors.mutedForeground,
+    height: 1.4,
   ),
 );
 
-final _contextMenuThemeDark = ShadContextMenuTheme(
-  decoration: const ShadDecoration(
-    border: _darkPopoverBorder,
-  ),
-  shadows: _darkPopoverShadows,
-  padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.xs),
-  itemPadding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
-  height: 32,
-);
-
-final _cardThemeDark = ShadCardTheme(
-  padding: EdgeInsets.zero,
-  radius: const BorderRadius.all(Radius.circular(RadiusTokens.xl)),
-  border: _darkCardBorder,
-  shadows: _darkCardShadows,
-);
-
-// ── 共享子主题（与色彩模式无关） ──
-
-final _optionTheme = ShadOptionTheme(
-  hoveredBackgroundColor: AppColors.muted,
-  padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
-  radius: const BorderRadius.all(Radius.circular(RadiusTokens.sm)),
-);
-
-// ── 边框常量 ──
+// ── Borders ──────────────────────────────────────────────
 
 const _popoverBorder = ShadBorder(
   top: ShadBorderSide(color: AppColors.border, width: 1),
@@ -295,41 +205,70 @@ const _darkInputBorder = ShadBorder(
   radius: BorderRadius.all(Radius.circular(RadiusTokens.xl)),
 );
 
-const _cardBorder = _inputBorder;
-final _darkCardBorder = _darkInputBorder;
+// ── Light sub-themes ─────────────────────────────────────
 
-// ── 共享文本主题 ──
+final _popoverThemeLight = ShadPopoverTheme(
+  shadows: ShadowTokens.cardElevated,
+  padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: 6),
+  decoration: const ShadDecoration(border: _popoverBorder),
+);
 
-final _appTextTheme = ShadTextTheme(
-  h2: const TextStyle(
-    fontSize: FontSizes.h2,
-    fontWeight: FontWeight.w700,
-    height: 1.3,
-  ),
-  h3: const TextStyle(
-    fontSize: FontSizes.h3,
-    fontWeight: FontWeight.w600,
-    height: 1.4,
-  ),
-  h4: const TextStyle(
-    fontSize: FontSizes.h4,
-    fontWeight: FontWeight.w600,
-    height: 1.4,
-  ),
-  p: const TextStyle(
-    fontSize: FontSizes.body,
-    fontWeight: FontWeight.w400,
-    height: 1.5,
-  ),
-  small: const TextStyle(
-    fontSize: FontSizes.small,
-    fontWeight: FontWeight.w400,
-    height: 1.4,
-  ),
-  muted: const TextStyle(
-    fontSize: FontSizes.small,
-    fontWeight: FontWeight.w400,
-    color: AppColors.mutedForeground,
-    height: 1.4,
-  ),
+final _selectThemeLight = ShadSelectTheme(
+  decoration: const ShadDecoration(border: _inputBorder),
+  padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
+  optionsPadding: const EdgeInsets.all(Spacing.xs),
+  anchor: const ShadAnchorAuto(offset: Offset(0, Spacing.xs)),
+);
+
+final _contextMenuThemeLight = ShadContextMenuTheme(
+  decoration: const ShadDecoration(border: _popoverBorder),
+  shadows: ShadowTokens.cardElevated,
+  padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.xs),
+  itemPadding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
+  height: 32,
+);
+
+final _cardThemeLight = ShadCardTheme(
+  padding: EdgeInsets.zero,
+  radius: const BorderRadius.all(Radius.circular(RadiusTokens.xl)),
+  border: _inputBorder,
+  shadows: ShadowTokens.card,
+);
+
+// ── Dark sub-themes ──────────────────────────────────────
+
+final _popoverThemeDark = ShadPopoverTheme(
+  shadows: ShadowTokens.darkCardElevated,
+  padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: 6),
+  decoration: const ShadDecoration(border: _darkPopoverBorder),
+);
+
+final _selectThemeDark = ShadSelectTheme(
+  decoration: const ShadDecoration(border: _darkInputBorder),
+  padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
+  optionsPadding: const EdgeInsets.all(Spacing.xs),
+  anchor: const ShadAnchorAuto(offset: Offset(0, Spacing.xs)),
+);
+
+final _contextMenuThemeDark = ShadContextMenuTheme(
+  decoration: const ShadDecoration(border: _darkPopoverBorder),
+  shadows: ShadowTokens.darkCardElevated,
+  padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: Spacing.xs),
+  itemPadding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
+  height: 32,
+);
+
+final _cardThemeDark = ShadCardTheme(
+  padding: EdgeInsets.zero,
+  radius: const BorderRadius.all(Radius.circular(RadiusTokens.xl)),
+  border: _darkInputBorder,
+  shadows: ShadowTokens.darkCard,
+);
+
+// ── Shared sub-themes ────────────────────────────────────
+
+final _optionTheme = ShadOptionTheme(
+  hoveredBackgroundColor: AppColors.muted,
+  padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
+  radius: const BorderRadius.all(Radius.circular(RadiusTokens.sm)),
 );

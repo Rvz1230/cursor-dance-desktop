@@ -7,8 +7,6 @@ import '../providers/overlay_provider.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/workbench_header.dart';
 import '../widgets/workbench_sidebar.dart';
-import 'workspaces/keyboard_workspace.dart';
-import 'workspaces/states_workspace.dart';
 import 'workspaces/workbench_workspace.dart';
 
 class ConfigPage extends StatefulWidget {
@@ -71,7 +69,6 @@ class ConfigPageState extends State<ConfigPage> {
 
     final theme = context.watch<ThemeProvider>();
     final config = context.watch<ConfigProvider>();
-    final overlay = context.watch<OverlayProvider>();
 
     return Column(
       children: [
@@ -83,27 +80,15 @@ class ConfigPageState extends State<ConfigPage> {
             children: [
               const WorkbenchSidebar(),
               Expanded(
-                child: _buildWorkspaceContent(theme, config, overlay),
+                child: WorkbenchWorkspace(
+                  config: config,
+                  theme: theme,
+                ),
               ),
             ],
           ),
         ),
       ],
     );
-  }
-
-  Widget _buildWorkspaceContent(
-      ThemeProvider theme, ConfigProvider config, OverlayProvider overlay) {
-    switch (theme.workspaceId) {
-      case 'states':
-        return const StatesWorkspace();
-      case 'keyboard':
-        return const KeyboardWorkspace();
-      default:
-        return WorkbenchWorkspace(
-          config: config,
-          theme: theme,
-        );
-    }
   }
 }

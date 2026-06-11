@@ -3,7 +3,6 @@ import 'package:analyzer/error/error.dart';
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
-/// 插件入口 — 注册所有 CursorDance 设计令牌规则
 class CursorDanceLintPlugin extends PluginBase {
   @override
   List<LintRule> getLintRules(CustomLintConfigs configs) => [
@@ -13,19 +12,16 @@ class CursorDanceLintPlugin extends PluginBase {
       ];
 }
 
-// ── 工具函数 ──
-
-/// 判断节点是否为一个 IntegerLiteral 或 DoubleLiteral
 bool _isNumericLiteral(Expression node) =>
     node is IntegerLiteral || node is DoubleLiteral;
 
-/// 检查 MethodInvocation 的 staticType 是否包含期望的类型名
 bool _returnsType(MethodInvocation node, String typeName) {
-  final type = node.staticType?.getDisplayString(withNullability: false) ?? '';
+  final type =
+      node.staticType?.getDisplayString(withNullability: false) ?? '';
   return type == typeName;
 }
 
-// ── 规则 1：禁止硬编码 fontSize ──
+// ── Rule 1: no_hardcoded_fontSize ──
 
 class _NoHardcodedFontSize extends DartLintRule {
   const _NoHardcodedFontSize() : super(code: _code);
@@ -65,7 +61,7 @@ class _NoHardcodedFontSize extends DartLintRule {
   }
 }
 
-// ── 规则 2：禁止硬编码圆角 ──
+// ── Rule 2: no_hardcoded_borderRadius ──
 
 class _NoHardcodedBorderRadius extends DartLintRule {
   const _NoHardcodedBorderRadius() : super(code: _code);
@@ -89,7 +85,6 @@ class _NoHardcodedBorderRadius extends DartLintRule {
     CustomLintContext context,
   ) {
     context.registry.addMethodInvocation((node) {
-      // 匹配 .circular(N) 调用（BorderRadius.circular / Radius.circular）
       if (node.methodName.name != 'circular') return;
 
       final type = node.staticType?.toString() ?? '';
@@ -104,7 +99,7 @@ class _NoHardcodedBorderRadius extends DartLintRule {
   }
 }
 
-// ── 规则 3：禁止硬编码间距 ──
+// ── Rule 3: no_hardcoded_spacing ──
 
 class _NoHardcodedSpacing extends DartLintRule {
   const _NoHardcodedSpacing() : super(code: _code);
@@ -117,10 +112,10 @@ class _NoHardcodedSpacing extends DartLintRule {
         '  4  → Spacing.xs\n'
         '  8  → Spacing.sm\n'
         ' 12  → Spacing.md\n'
-        ' 16  → Spacing.lg\n'
-        ' 24  → Spacing.xl\n'
+        ' 20  → Spacing.lg\n'
+        ' 28  → Spacing.xl\n'
         ' 32  → Spacing.xxl\n'
-        ' 48  → Spacing.xxxl',
+        ' 40  → Spacing.section',
   );
 
   @override
@@ -132,8 +127,6 @@ class _NoHardcodedSpacing extends DartLintRule {
     context.registry.addMethodInvocation((node) {
       final methodName = node.methodName.name;
 
-      // 匹配 EdgeInsets 静态方法
-      // EdgeInsets.all(N) / EdgeInsets.only(...) / EdgeInsets.symmetric(...) / EdgeInsets.fromLTRB(...)
       if (![
         'all',
         'only',
@@ -142,24 +135,18 @@ class _NoHardcodedSpacing extends DartLintRule {
         'fromWindowPadding',
       ].contains(methodName)) return;
 
-      // 验证返回值是 EdgeInsets 类型
       if (!_returnsType(node, 'EdgeInsets')) return;
 
       for (final arg in node.argumentList.arguments) {
         if (arg is NamedExpression) {
-          // EdgeInsets.symmetric(horizontal: 12, vertical: 8)
           final value = arg.expression;
           if (_isNumericLiteral(value)) {
             reporter.reportErrorForNode(_code, value);
           }
         } else if (_isNumericLiteral(arg)) {
-          // EdgeInsets.all(8)
           reporter.reportErrorForNode(_code, arg);
         }
       }
     });
-
-    // 也匹配 SizedBox / Container 中的硬编码 width/height
-    // SizedBox(width: 32) — 这个太宽泛，先只锁定 EdgeInsets
   }
 }

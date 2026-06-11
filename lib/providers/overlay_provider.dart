@@ -7,7 +7,6 @@ import '../bridge/overlay_bridge.dart';
 import 'config_provider.dart';
 import 'theme_provider.dart';
 
-/// 覆盖层启用/同步状态管理 Provider
 class OverlayProvider extends ChangeNotifier {
   final OverlayBridge _bridge;
   final ThemeProvider _themeProvider;
@@ -51,10 +50,12 @@ class OverlayProvider extends ChangeNotifier {
     final newConfigJson = jsonEncode(config.toJson());
     if (newConfigJson != _lastConfigJson) {
       _lastConfigJson = newConfigJson;
-      await _bridge.updateConfig(_themeProvider.buildOverlayPayload(
-        _configProvider.selectedActionId,
-        config,
-      ));
+      await _bridge.updateConfig(
+        _themeProvider.buildOverlayPayload(
+          _configProvider.selectedActionId,
+          config,
+        ),
+      );
     }
 
     final newKeyJson = jsonEncode(_themeProvider.keyFeedbackConfig.toJson());

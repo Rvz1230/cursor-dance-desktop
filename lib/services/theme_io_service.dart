@@ -4,7 +4,6 @@ import '../models/action_config.dart';
 import '../models/theme.dart';
 import '../models/theme_draft.dart';
 
-/// Result of importing a theme from JSON text.
 class ThemeImportResult {
   final String id;
   final String name;
@@ -27,7 +26,6 @@ class ThemeImportResult {
   });
 }
 
-/// Handles theme exporting (→ JSON string) and importing (← JSON string).
 class ThemeIoService {
   static String exportTheme(ThemeItem item, ThemeDraft draft) {
     final exportData = {
@@ -51,7 +49,8 @@ class ThemeIoService {
   static ThemeImportResult importTheme(String text, String fileName) {
     try {
       final data = jsonDecode(text) as Map<String, dynamic>;
-      final name = (data['name'] as String?) ?? fileName.replaceAll('.json', '');
+      final name =
+          (data['name'] as String?) ?? fileName.replaceAll('.json', '');
       final icon = (data['icon'] as String?) ?? 'Wand2';
       final id = 'theme-${DateTime.now().microsecondsSinceEpoch}';
 
@@ -66,19 +65,29 @@ class ThemeIoService {
       }
 
       final rawCursorModes = data['cursorModes'] as Map<String, dynamic>?;
-      final rawCursorActions = data['cursorStateActions'] as Map<String, dynamic>?;
-      final rawCursorAssets = data['cursorStateAssets'] as Map<String, dynamic>?;
+      final rawCursorActions =
+          data['cursorStateActions'] as Map<String, dynamic>?;
+      final rawCursorAssets =
+          data['cursorStateAssets'] as Map<String, dynamic>?;
 
       return ThemeImportResult(
         id: id,
         name: name,
         icon: icon,
         actionConfigs: actionConfigs,
-        cursorModes: rawCursorModes?.map((k, v) => MapEntry(k, v as String)) ?? const {},
-        cursorStateActions: rawCursorActions?.map((k, v) => MapEntry(k, v as String)) ?? const {},
+        cursorModes:
+            rawCursorModes?.map((k, v) => MapEntry(k, v as String)) ??
+                const {},
+        cursorStateActions:
+            rawCursorActions?.map((k, v) => MapEntry(k, v as String)) ??
+                const {},
         cursorStateAssets: rawCursorAssets?.map(
-          (k, v) => MapEntry(k, CursorStateAsset.fromJson(v as Map<String, dynamic>)),
-        ) ?? const {},
+              (k, v) => MapEntry(
+                k,
+                CursorStateAsset.fromJson(v as Map<String, dynamic>),
+              ),
+            ) ??
+            const {},
       );
     } catch (e) {
       return ThemeImportResult(id: '', name: '', icon: '', error: e.toString());

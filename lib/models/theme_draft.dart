@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'action_config.dart';
-import '../services/preset_loader.dart';
+import 'theme.dart';
 
 part 'theme_draft.freezed.dart';
 part 'theme_draft.g.dart';
@@ -31,9 +31,8 @@ class CursorStateAsset with _$CursorStateAsset {
 
 /// ThemeDraft: per-theme full config including all actions.
 ///
-/// This is NOT freezed because [ThemeDraft.create] contains logic
-/// (initializing cursor state defaults). copyWith is hand-written since
-/// it uses a const constructor.
+/// Hand-written copyWith (not @freezed) because [ThemeDraft.create]
+/// contains initialization logic.
 class ThemeDraft {
   final Map<String, ActionConfig> actionConfigs;
   final Map<String, String> cursorModes;
@@ -65,37 +64,69 @@ class ThemeDraft {
     );
   }
 
-  factory ThemeDraft.create(String themeId) {
+  static ThemeDraft create(String themeId) {
     return ThemeDraft(
-      actionConfigs: PresetRepository.instance.defaultActionConfigs(themeId),
-      cursorModes: {
-        'default': '源',
-        'pointer': '继承',
-        'text': '继承',
-        'help': '继承',
-        'wait': '覆盖',
-        'notAllowed': '继承',
-      },
-      cursorStateActions: {
-        'default': 'leftClick',
-        'pointer': 'leftClick',
-        'text': 'leftClick',
-        'help': 'leftClick',
-        'wait': 'leftClick',
-        'notAllowed': 'leftClick',
-      },
-      cursorStateAssets: {
-        for (final stateId in ['default', 'pointer', 'text', 'help', 'wait', 'notAllowed'])
-          stateId: const CursorStateAsset(),
-      },
-      atmosphere: const AtmosphereConfig(),
+      actionConfigs: _defaultActionConfigs(themeId),
     );
   }
 }
 
+Map<String, ActionConfig> _defaultActionConfigs(String themeId) {
+  return {
+    for (final id in kActionIds) id: const ActionConfig(),
+  };
+}
+
+const kActionIds = [
+  'leftClick',
+  'rightClick',
+  'doubleClick',
+  'longPress',
+  'wheel',
+  'hover',
+];
+
+const kActionLabels = {
+  'leftClick': '左键单击',
+  'rightClick': '右键单击',
+  'doubleClick': '双击',
+  'longPress': '长按',
+  'wheel': '滚轮',
+  'hover': '悬停',
+};
+
+const kActionHints = {
+  'leftClick': '最常用的触发入口',
+  'rightClick': '适合菜单或次要动作',
+  'doubleClick': '更强的强调反馈',
+  'longPress': '按住蓄力后触发',
+  'wheel': '轻反馈和页面尾迹',
+  'hover': '切状态或轻提示',
+};
+
 Map<String, ThemeDraft> buildDefaultDrafts() {
   return {
-    for (final themeId in ['mono-geo', 'drift', 'molten', 'sunset'])
-      themeId: ThemeDraft.create(themeId),
+    for (final t in kBuiltinThemes) t.id: ThemeDraft.create(t.id),
   };
+}
+
+String buildThemeSummary(Map<String, ActionConfig> configs) {
+  final enabled = configs.values.where((c) {
+    return c.textEnabled || c.particle || c.ripple || c.sound ||
+        c.animationEnabled || c.imageEnabled;
+  }).length;
+  return '$enabled 个动效';
+}
+
+List<String> conflictsForAction(
+  String actionId,
+  Map<String, ActionConfig> configs,
+) {
+  final current = configs[actionId];
+  if (current == null) return [];
+  final conflicts = <String>[];
+  if (current.holdMs > 0 && current.triggerTiming == '抬起时') {
+    conflicts.add('长按时长仅在"按下时"触发模式下有效');
+  }
+  return conflicts;
 }

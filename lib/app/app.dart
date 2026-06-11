@@ -5,8 +5,8 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../providers/config_provider.dart';
 import '../providers/overlay_provider.dart';
 import '../providers/theme_provider.dart';
-import '../theme/app_theme.dart';
 import '../theme/animations.dart';
+import '../theme/app_theme.dart';
 import 'router.dart';
 
 class CursorDanceApp extends StatelessWidget {
@@ -24,13 +24,15 @@ class CursorDanceApp extends StatelessWidget {
           update: (ctx, themeProvider, previous) =>
               previous ?? ConfigProvider(themeProvider: themeProvider),
         ),
-        ChangeNotifierProxyProvider2<ThemeProvider, ConfigProvider, OverlayProvider>(
+        ChangeNotifierProxyProvider2<ThemeProvider, ConfigProvider,
+            OverlayProvider>(
           create: (ctx) => OverlayProvider(
             themeProvider: ctx.read<ThemeProvider>(),
             configProvider: ctx.read<ConfigProvider>(),
           ),
           update: (ctx, themeProvider, configProvider, previous) =>
-              previous ?? OverlayProvider(
+              previous ??
+              OverlayProvider(
                 themeProvider: themeProvider,
                 configProvider: configProvider,
               ),

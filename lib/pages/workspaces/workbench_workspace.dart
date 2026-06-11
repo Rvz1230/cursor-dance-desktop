@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import '../../providers/config_provider.dart';
-import '../../providers/theme_provider.dart';
-import '../../theme/app_tokens.dart';
-import '../../theme/animations.dart';
+import '../../theme/tokens.dart';
 import '../../widgets/action_tabs.dart';
 import '../../widgets/config_panel.dart';
 import '../../widgets/preview_panel.dart';
+import '../../providers/config_provider.dart';
+import '../../providers/theme_provider.dart';
 
-/// 主工作台 — 配置面板 (左) + 预览面板 (右)，支持拖拽分割
 class WorkbenchWorkspace extends StatefulWidget {
   final ConfigProvider config;
   final ThemeProvider theme;
@@ -69,7 +67,7 @@ class _WorkbenchWorkspaceState extends State<WorkbenchWorkspace> {
               ),
             ),
 
-            // 可拖拽列分割条
+            // Draggable column divider
             MouseRegion(
               cursor: SystemMouseCursors.resizeColumn,
               onEnter: (_) => setState(() => _hovered = true),
@@ -78,22 +76,24 @@ class _WorkbenchWorkspaceState extends State<WorkbenchWorkspace> {
                 onHorizontalDragUpdate: (details) {
                   setState(() {
                     _splitRatio =
-                        (_splitRatio + details.delta.dx / totalWidth).clamp(0.25, 0.75);
+                        (_splitRatio + details.delta.dx / totalWidth)
+                            .clamp(0.25, 0.75);
                   });
                 },
                 child: Container(
-                  width: 12,
+                  width: Spacing.lg,
                   color: Colors.transparent,
                   child: Center(
                     child: AnimatedContainer(
-                      duration: AppAnimations.normal,
+                      duration: const Duration(milliseconds: 150),
                       width: 3,
                       height: _hovered ? 64 : 32,
                       decoration: BoxDecoration(
                         color: _hovered
                             ? cs.border
                             : cs.border.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                        borderRadius:
+                            BorderRadius.circular(RadiusTokens.sm),
                       ),
                     ),
                   ),

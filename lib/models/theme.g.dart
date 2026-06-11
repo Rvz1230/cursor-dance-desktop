@@ -10,11 +10,10 @@ _$ThemeItemImpl _$$ThemeItemImplFromJson(Map<String, dynamic> json) =>
     _$ThemeItemImpl(
       id: json['id'] as String,
       name: json['name'] as String,
-      kind: json['kind'] as String? ?? '自定义',
+      kind: json['kind'] as String? ?? '内置',
+      icon: json['icon'] as String? ?? 'Wand2',
       summary: json['summary'] as String? ?? '',
       description: json['description'] as String? ?? '',
-      tone: json['tone'] as String? ?? 'teal',
-      icon: json['icon'] as String? ?? 'Wand2',
     );
 
 Map<String, dynamic> _$$ThemeItemImplToJson(_$ThemeItemImpl instance) =>
@@ -22,8 +21,7 @@ Map<String, dynamic> _$$ThemeItemImplToJson(_$ThemeItemImpl instance) =>
       'id': instance.id,
       'name': instance.name,
       'kind': instance.kind,
+      'icon': instance.icon,
       'summary': instance.summary,
       'description': instance.description,
-      'tone': instance.tone,
-      'icon': instance.icon,
     };

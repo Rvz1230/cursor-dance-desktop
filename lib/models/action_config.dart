@@ -3,11 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'action_config.freezed.dart';
 part 'action_config.g.dart';
 
-/// ~85 字段平铺配置，覆盖 8 大类效果 + 触发器 + 光标反馈。
-/// 字段分组见下面的注释块。
-///
-/// 注意：所有 List/String/int/bool 都有默认值，
-/// 因此 fromJson 中缺失的字段会被自动填充为默认值。
 @freezed
 class ActionConfig with _$ActionConfig {
   const factory ActionConfig({
@@ -78,23 +73,23 @@ class ActionConfig with _$ActionConfig {
 
     // ── Audio ──
     @Default(false) bool sound,
-    @Default('woodfish-soft.wav') String soundFile,
-    @Default(72) int volume,
+    @Default('click.wav') String soundFile,
+    @Default(80) int volume,
     @Default(100) int playbackRate,
     @Default(0) int soundDelay,
-    @Default(80) int soundFadeOut,
+    @Default(0) int soundFadeOut,
     @Default('每次触发') String soundTriggerMode,
-    @Default('保持原音量') String soundBlendMode,
+    @Default('叠加') String soundBlendMode,
 
     // ── Animation ──
     @Default(false) bool animationEnabled,
-    @Default('聚焦脉冲') String animationStyle,
-    @Default(720) int animationDuration,
-    @Default('缓出') String animationEasing,
-    @Default(100) int animationScale,
+    @Default('缩放脉冲') String animationStyle,
+    @Default(600) int animationDuration,
+    @Default('弹性') String animationEasing,
+    @Default(120) int animationScale,
     @Default(100) int animationOpacity,
     @Default(0) int animationOffsetX,
-    @Default(-10) int animationOffsetY,
+    @Default(0) int animationOffsetY,
     @Default('#F59E0B') String animationColor,
     @Default(false) bool animationGlow,
     @Default(0) int animationDelay,
@@ -102,21 +97,21 @@ class ActionConfig with _$ActionConfig {
     // ── Image ──
     @Default(false) bool imageEnabled,
     @Default('') String imageDataUrl,
-    @Default(780) int imageDuration,
-    @Default(56) int imageSize,
+    @Default(1000) int imageDuration,
+    @Default(64) int imageSize,
     @Default(100) int imageOpacity,
     @Default(0) int imageOffsetX,
-    @Default(-18) int imageOffsetY,
+    @Default(0) int imageOffsetY,
     @Default(0) int imageDelay,
 
-    // ── Cursor Feedback ──
-    @Default(0) int shake,
-    @Default('跟随当前状态') String cursorOverride,
-    @Default(48) int cursorSize,
+    // ── Cursor ──
+    @Default('none') String cursorOverride,
+    @Default(32) int cursorSize,
     @Default(false) bool cursorTrailEnabled,
     @Default(5) int cursorTrailCount,
-    @Default(50) int cursorTrailOpacity,
+    @Default(30) int cursorTrailOpacity,
     @Default('') String cursorGlowColor,
+    @Default(0) int shake,
   }) = _ActionConfig;
 
   factory ActionConfig.fromJson(Map<String, dynamic> json) =>
