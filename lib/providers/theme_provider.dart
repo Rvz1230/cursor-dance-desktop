@@ -5,6 +5,7 @@ import '../models/key_feedback_config.dart';
 import '../models/theme.dart';
 import '../models/theme_draft.dart';
 import '../repository/persistence_repository.dart';
+import '../services/preset_loader.dart';
 import '../services/theme_io_service.dart';
 
 class ThemeProvider extends ChangeNotifier {
@@ -26,7 +27,7 @@ class ThemeProvider extends ChangeNotifier {
 
   // ── Data ──
   List<ThemeItem> _themeLibrary = [...kBuiltinThemes];
-  final Map<String, ThemeDraft> _draftsByTheme = buildDefaultDrafts();
+  final Map<String, ThemeDraft> _draftsByTheme = {};
 
   List<ThemeItem> get themeLibrary => _themeLibrary;
   Map<String, ThemeDraft> get draftsByTheme => _draftsByTheme;
@@ -53,9 +54,26 @@ class ThemeProvider extends ChangeNotifier {
       );
 
   ThemeDraft get currentDraft =>
-      _draftsByTheme[_selectedThemeId] ?? ThemeDraft.create(_selectedThemeId);
+      _draftsByTheme[_selectedThemeId] ?? _emptyDraft();
 
   bool get isWorkbench => _workspaceId == 'workbench';
+
+  // ═══════════════════════════════════════════════
+  // Helpers
+  // ═══════════════════════════════════════════════
+
+  ThemeDraft _emptyDraft() => ThemeDraft.create(
+        PresetRepository.instance.defaultActionConfigs(_selectedThemeId),
+      );
+
+  void _ensureDraft(String themeId) {
+    _draftsByTheme.putIfAbsent(
+      themeId,
+      () => ThemeDraft.create(
+        PresetRepository.instance.defaultActionConfigs(themeId),
+      ),
+    );
+  }
 
   // ═══════════════════════════════════════════════
   // Workspace
@@ -74,6 +92,7 @@ class ThemeProvider extends ChangeNotifier {
   void setThemeId(String id) {
     if (_selectedThemeId == id) return;
     _selectedThemeId = id;
+    _ensureDraft(id);
     notifyListeners();
   }
 
@@ -91,8 +110,8 @@ class ThemeProvider extends ChangeNotifier {
     String actionId,
     ActionConfig Function(ActionConfig) updater,
   ) {
-    final draft =
-        _draftsByTheme[_selectedThemeId] ?? ThemeDraft.create(_selectedThemeId);
+    _ensureDraft(_selectedThemeId);
+    final draft = _draftsByTheme[_selectedThemeId]!;
     final actionConfigs = Map<String, ActionConfig>.from(draft.actionConfigs);
     actionConfigs[actionId] = updater(actionConfigs[actionId] ?? ActionConfig());
     _draftsByTheme[_selectedThemeId] =
@@ -103,14 +122,18 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   void resetCurrentTheme() {
-    _draftsByTheme[_selectedThemeId] = ThemeDraft.create(_selectedThemeId);
+    _draftsByTheme[_selectedThemeId] = ThemeDraft.create(
+      PresetRepository.instance.defaultActionConfigs(_selectedThemeId),
+    );
     _unsaved = true;
     _dirtyThemes[_selectedThemeId] = true;
     notifyListeners();
   }
 
   void discardThemeChanges(String themeId) {
-    _draftsByTheme[themeId] = ThemeDraft.create(themeId);
+    _draftsByTheme[themeId] = ThemeDraft.create(
+      PresetRepository.instance.defaultActionConfigs(themeId),
+    );
     _dirtyThemes.remove(themeId);
     notifyListeners();
   }
@@ -122,7 +145,8 @@ class ThemeProvider extends ChangeNotifier {
   void createTheme(String name, {String? basedOnThemeId}) {
     final id = 'theme-${DateTime.now().microsecondsSinceEpoch}';
     final baseId = basedOnThemeId ?? _selectedThemeId;
-    final baseDraft = _draftsByTheme[baseId] ?? ThemeDraft.create(baseId);
+    _ensureDraft(baseId);
+    final baseDraft = _draftsByTheme[baseId]!;
     final newItem = ThemeItem(
       id: id,
       name: name,
@@ -143,7 +167,8 @@ class ThemeProvider extends ChangeNotifier {
       orElse: () => _themeLibrary.first,
     );
     final id = 'theme-${DateTime.now().microsecondsSinceEpoch}';
-    final baseDraft = _draftsByTheme[themeId] ?? ThemeDraft.create(themeId);
+    _ensureDraft(themeId);
+    final baseDraft = _draftsByTheme[themeId]!;
     final newItem = source.copyWith(
       id: id,
       name: '${source.name} 副本',
@@ -190,7 +215,8 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   String exportTheme(String themeId) {
-    final draft = _draftsByTheme[themeId] ?? ThemeDraft.create(themeId);
+    _ensureDraft(themeId);
+    final draft = _draftsByTheme[themeId]!;
     final item = _themeLibrary.firstWhere(
       (t) => t.id == themeId,
       orElse: () => _themeLibrary.first,
@@ -266,17 +292,7 @@ class ThemeProvider extends ChangeNotifier {
               })
           .toList(),
       'draftsByTheme': _draftsByTheme.map(
-        (key, draft) => MapEntry(key, {
-          'actionConfigs': draft.actionConfigs.map(
-            (k, v) => MapEntry(k, v.toJson()),
-          ),
-          'atmosphere': {'mode': draft.atmosphere.mode},
-          'cursorModes': draft.cursorModes,
-          'cursorStateActions': draft.cursorStateActions,
-          'cursorStateAssets': draft.cursorStateAssets.map(
-            (k, v) => MapEntry(k, v.toJson()),
-          ),
-        }),
+        (key, draft) => MapEntry(key, draft.toJson()),
       ),
     };
   }
@@ -301,38 +317,8 @@ class ThemeProvider extends ChangeNotifier {
     if (draftsData != null) {
       _draftsByTheme.clear();
       for (final entry in draftsData.entries) {
-        final d = entry.value as Map<String, dynamic>;
-        final rawConfigs = d['actionConfigs'] as Map<String, dynamic>?;
-        final actionConfigs = <String, ActionConfig>{};
-        if (rawConfigs != null) {
-          for (final ce in rawConfigs.entries) {
-            actionConfigs[ce.key] = ActionConfig.fromJson(
-              ce.value as Map<String, dynamic>,
-            );
-          }
-        }
-        _draftsByTheme[entry.key] = ThemeDraft(
-          actionConfigs: actionConfigs,
-          atmosphere: d['atmosphere'] != null
-              ? AtmosphereConfig.fromJson(
-                  d['atmosphere'] as Map<String, dynamic>,
-                )
-              : const AtmosphereConfig(),
-          cursorModes:
-              (d['cursorModes'] as Map<String, dynamic>?)
-                      ?.map((k, v) => MapEntry(k, v as String)) ??
-                  const {},
-          cursorStateActions:
-              (d['cursorStateActions'] as Map<String, dynamic>?)
-                      ?.map((k, v) => MapEntry(k, v as String)) ??
-                  const {},
-          cursorStateAssets:
-              (d['cursorStateAssets'] as Map<String, dynamic>?)
-                      ?.map((k, v) => MapEntry(
-                          k,
-                          CursorStateAsset.fromJson(
-                              v as Map<String, dynamic>))) ??
-                  const {},
+        _draftsByTheme[entry.key] = ThemeDraft.fromJson(
+          entry.value as Map<String, dynamic>,
         );
       }
     }
@@ -364,6 +350,10 @@ class ThemeProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('加载配置失败，使用默认值: $e');
+    }
+    // Ensure all builtin themes have drafts loaded
+    for (final t in _themeLibrary) {
+      _ensureDraft(t.id);
     }
     notifyListeners();
   }

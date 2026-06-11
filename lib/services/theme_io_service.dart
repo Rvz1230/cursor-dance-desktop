@@ -33,15 +33,7 @@ class ThemeIoService {
       'id': item.id,
       'name': item.name,
       'icon': item.icon,
-      'actionConfigs': draft.actionConfigs.map(
-        (key, value) => MapEntry(key, value.toJson()),
-      ),
-      'cursorModes': draft.cursorModes,
-      'cursorStateActions': draft.cursorStateActions,
-      'cursorStateAssets': draft.cursorStateAssets.map(
-        (k, v) => MapEntry(k, v.toJson()),
-      ),
-      'atmosphere': {'mode': draft.atmosphere.mode},
+      ...draft.toJson(),
     };
     return const JsonEncoder.withIndent('  ').convert(exportData);
   }
@@ -54,40 +46,16 @@ class ThemeIoService {
       final icon = (data['icon'] as String?) ?? 'Wand2';
       final id = 'theme-${DateTime.now().microsecondsSinceEpoch}';
 
-      final rawConfigs = data['actionConfigs'] as Map<String, dynamic>?;
-      final actionConfigs = <String, ActionConfig>{};
-      if (rawConfigs != null) {
-        for (final entry in rawConfigs.entries) {
-          actionConfigs[entry.key] = ActionConfig.fromJson(
-            entry.value as Map<String, dynamic>,
-          );
-        }
-      }
-
-      final rawCursorModes = data['cursorModes'] as Map<String, dynamic>?;
-      final rawCursorActions =
-          data['cursorStateActions'] as Map<String, dynamic>?;
-      final rawCursorAssets =
-          data['cursorStateAssets'] as Map<String, dynamic>?;
+      final draft = ThemeDraft.fromJson(data);
 
       return ThemeImportResult(
         id: id,
         name: name,
         icon: icon,
-        actionConfigs: actionConfigs,
-        cursorModes:
-            rawCursorModes?.map((k, v) => MapEntry(k, v as String)) ??
-                const {},
-        cursorStateActions:
-            rawCursorActions?.map((k, v) => MapEntry(k, v as String)) ??
-                const {},
-        cursorStateAssets: rawCursorAssets?.map(
-              (k, v) => MapEntry(
-                k,
-                CursorStateAsset.fromJson(v as Map<String, dynamic>),
-              ),
-            ) ??
-            const {},
+        actionConfigs: draft.actionConfigs,
+        cursorModes: draft.cursorModes,
+        cursorStateActions: draft.cursorStateActions,
+        cursorStateAssets: draft.cursorStateAssets,
       );
     } catch (e) {
       return ThemeImportResult(id: '', name: '', icon: '', error: e.toString());

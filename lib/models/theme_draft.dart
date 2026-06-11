@@ -1,7 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'action_config.dart';
-import 'theme.dart';
 
 part 'theme_draft.freezed.dart';
 part 'theme_draft.g.dart';
@@ -64,17 +63,53 @@ class ThemeDraft {
     );
   }
 
-  static ThemeDraft create(String themeId) {
+  factory ThemeDraft.create(Map<String, ActionConfig> actionConfigs) {
+    return ThemeDraft(actionConfigs: actionConfigs);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'actionConfigs': actionConfigs.map((k, v) => MapEntry(k, v.toJson())),
+      'atmosphere': atmosphere.toJson(),
+      'cursorModes': cursorModes,
+      'cursorStateActions': cursorStateActions,
+      'cursorStateAssets':
+          cursorStateAssets.map((k, v) => MapEntry(k, v.toJson())),
+    };
+  }
+
+  factory ThemeDraft.fromJson(Map<String, dynamic> json) {
+    final rawConfigs = json['actionConfigs'] as Map<String, dynamic>?;
+    final actionConfigs = <String, ActionConfig>{};
+    if (rawConfigs != null) {
+      for (final entry in rawConfigs.entries) {
+        actionConfigs[entry.key] =
+            ActionConfig.fromJson(entry.value as Map<String, dynamic>);
+      }
+    }
+
     return ThemeDraft(
-      actionConfigs: _defaultActionConfigs(themeId),
+      actionConfigs: actionConfigs,
+      atmosphere: json['atmosphere'] != null
+          ? AtmosphereConfig.fromJson(
+              json['atmosphere'] as Map<String, dynamic>,
+            )
+          : const AtmosphereConfig(),
+      cursorModes:
+          (json['cursorModes'] as Map<String, dynamic>?)
+                  ?.map((k, v) => MapEntry(k, v as String)) ??
+              const {},
+      cursorStateActions:
+          (json['cursorStateActions'] as Map<String, dynamic>?)
+                  ?.map((k, v) => MapEntry(k, v as String)) ??
+              const {},
+      cursorStateAssets:
+          (json['cursorStateAssets'] as Map<String, dynamic>?)
+                  ?.map((k, v) => MapEntry(
+                      k, CursorStateAsset.fromJson(v as Map<String, dynamic>))) ??
+              const {},
     );
   }
-}
-
-Map<String, ActionConfig> _defaultActionConfigs(String themeId) {
-  return {
-    for (final id in kActionIds) id: const ActionConfig(),
-  };
 }
 
 const kActionIds = [
@@ -103,12 +138,6 @@ const kActionHints = {
   'wheel': '轻反馈和页面尾迹',
   'hover': '切状态或轻提示',
 };
-
-Map<String, ThemeDraft> buildDefaultDrafts() {
-  return {
-    for (final t in kBuiltinThemes) t.id: ThemeDraft.create(t.id),
-  };
-}
 
 String buildThemeSummary(Map<String, ActionConfig> configs) {
   final enabled = configs.values.where((c) {

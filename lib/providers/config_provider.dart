@@ -23,17 +23,12 @@ class ConfigProvider extends ChangeNotifier {
   void _onThemeChanged() => notifyListeners();
 
   ActionConfig get currentActionConfig {
-    final draft = _themeProvider.draftsByTheme[_themeProvider.selectedThemeId] ??
-        ThemeDraft.create(_themeProvider.selectedThemeId);
-    return draft.actionConfigs[_selectedActionId] ?? ActionConfig();
+    return _themeProvider.currentDraft.actionConfigs[_selectedActionId] ??
+        const ActionConfig();
   }
 
   List<String> get currentConflicts =>
-      conflictsForAction(_selectedActionId, _getCurrentDraft().actionConfigs);
-
-  ThemeDraft _getCurrentDraft() =>
-      _themeProvider.draftsByTheme[_themeProvider.selectedThemeId] ??
-      ThemeDraft.create(_themeProvider.selectedThemeId);
+      conflictsForAction(_selectedActionId, _themeProvider.currentDraft.actionConfigs);
 
   void setActionId(String id) {
     if (_selectedActionId == id) return;

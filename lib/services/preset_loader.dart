@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../models/action_config.dart';
@@ -26,12 +27,16 @@ class PresetRepository {
         await rootBundle.loadString('assets/presets/factory_presets.json');
     final overrideRaw =
         await rootBundle.loadString('assets/presets/theme_overrides.json');
+    loadFromStrings(factoryRaw, overrideRaw);
+  }
 
+  void loadFromStrings(String factoryJson, String overrideJson) {
+    if (_loaded) return;
     _factoryPresets = Map<String, Map<String, dynamic>>.from(
-      jsonDecode(factoryRaw) as Map,
+      jsonDecode(factoryJson) as Map,
     );
     _themeOverrides = Map.fromEntries(
-      (jsonDecode(overrideRaw) as Map<String, dynamic>).entries.map(
+      (jsonDecode(overrideJson) as Map<String, dynamic>).entries.map(
         (e) => MapEntry(
           e.key,
           Map<String, Map<String, dynamic>>.from(
@@ -69,5 +74,13 @@ class PresetRepository {
           actionId,
         ),
     };
+  }
+
+  /// Reset internal state for testing.
+  @visibleForTesting
+  void reset() {
+    _factoryPresets = {};
+    _themeOverrides = {};
+    _loaded = false;
   }
 }

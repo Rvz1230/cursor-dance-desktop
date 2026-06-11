@@ -9,8 +9,13 @@ import 'package:path_provider/path_provider.dart';
 /// Read flow: parse → on failure try backup → on failure return null.
 class PersistenceRepository {
   static const _schemaVersion = 1;
+  final String? _configDirOverride;
+
+  PersistenceRepository({String? configDirOverride})
+      : _configDirOverride = configDirOverride;
 
   Future<String> get _configDir async {
+    if (_configDirOverride != null) return _configDirOverride;
     final dir = await getApplicationSupportDirectory();
     return '${dir.path}/.cursordance';
   }
