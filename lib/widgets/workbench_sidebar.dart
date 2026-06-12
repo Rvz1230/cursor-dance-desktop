@@ -7,6 +7,9 @@ import '../models/theme.dart';
 import '../providers/theme_provider.dart';
 import '../theme/tokens.dart';
 import 'icon_picker.dart';
+import 'sidebar_toast.dart';
+import 'theme_card.dart';
+import 'theme_composer_dialog.dart';
 
 // ═══════════════════════════════════════════════════════════
 // WorkbenchSidebar — 主题库侧边栏
@@ -83,7 +86,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
       return result;
     } catch (e) {
       setState(() => _actionError = e.toString());
-      _showToast(
+      showSidebarToast(
         context,
         title: '主题操作失败',
         description: e.toString().replaceFirst('Exception: ', ''),
@@ -121,12 +124,12 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
         if (!mounted) return;
         if (result.ok) {
           theme.setThemeId(_pendingSwitchThemeId!);
-          _showToast(
+          showSidebarToast(
             context,
             title: '已保存并切换主题',
           );
         } else {
-          _showToast(
+          showSidebarToast(
             context,
             title: '保存失败',
             description: result.error ?? '请稍后重试',
@@ -139,7 +142,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
       }
     } catch (e) {
       if (!mounted) return;
-      _showToast(
+      showSidebarToast(
         context,
         title: '保存失败',
         description: e.toString().replaceFirst('Exception: ', ''),
@@ -170,7 +173,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
   void _handleDuplicateTheme(String themeId, ThemeProvider theme) {
     final ok = _runThemeAction(() { theme.duplicateTheme(themeId); return true; });
     if (ok != null) {
-      _showToast(context, title: '已复制主题');
+      showSidebarToast(context, title: '已复制主题');
     }
   }
 
@@ -193,7 +196,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
                 return item.name;
               });
               if (ok != null) {
-                _showToast(
+                showSidebarToast(
                   context,
                   title: '已移除主题',
                   description: '$ok 将在保存后从配置中删除。',
@@ -204,27 +207,6 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
           ),
         ],
       ),
-    );
-  }
-
-  // ── Toast helper ────────────────────────────────────────
-
-  static void _showToast(
-    BuildContext context, {
-    required String title,
-    String? description,
-    bool destructive = false,
-  }) {
-    ShadToaster.of(context).show(
-      destructive
-          ? ShadToast.destructive(
-              title: Text(title),
-              description: description != null ? Text(description) : null,
-            )
-          : ShadToast(
-              title: Text(title),
-              description: description != null ? Text(description) : null,
-            ),
     );
   }
 
@@ -343,7 +325,6 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
       children: [
         // Header: collapse + search + new
         _SidebarHeader(
-          collapsed: false,
           searchController: _searchController,
           onCollapse: () => setState(() => _collapsed = true),
           onNewTheme: () => _openComposer('create'),
@@ -429,13 +410,11 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 // ═══════════════════════════════════════════════════════════
 
 class _SidebarHeader extends StatelessWidget {
-  final bool collapsed;
   final TextEditingController searchController;
   final VoidCallback onCollapse;
   final VoidCallback onNewTheme;
 
   const _SidebarHeader({
-    required this.collapsed,
     required this.searchController,
     required this.onCollapse,
     required this.onNewTheme,
@@ -625,722 +604,6 @@ class _CollapsedThemeIcon extends StatelessWidget {
                   ),
                 ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
-// ThemeCard — 完整功能卡片
-// ═══════════════════════════════════════════════════════════
-
-class ThemeCard extends StatefulWidget {
-  final ThemeItem item;
-  final bool selected;
-  final bool dirty;
-  final bool canDelete;
-  final VoidCallback onTap;
-  final VoidCallback onDuplicate;
-  final VoidCallback onExport;
-  final VoidCallback? onDelete;
-  final void Function(String id, String name)? onRename;
-  final void Function(String id, String icon)? onUpdateIcon;
-
-  const ThemeCard({
-    super.key,
-    required this.item,
-    required this.selected,
-    required this.dirty,
-    required this.canDelete,
-    required this.onTap,
-    required this.onDuplicate,
-    required this.onExport,
-    this.onDelete,
-    this.onRename,
-    this.onUpdateIcon,
-  });
-
-  @override
-  State<ThemeCard> createState() => _ThemeCardState();
-}
-
-class _ThemeCardState extends State<ThemeCard> {
-  bool _editingName = false;
-  final _menuController = ShadPopoverController();
-  final _nameController = TextEditingController();
-  final _nameFocusNode = FocusNode();
-
-  @override
-  void initState() {
-    super.initState();
-    _nameFocusNode.addListener(() {
-      if (!_nameFocusNode.hasFocus && _editingName) {
-        _commitRename();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _nameFocusNode.dispose();
-    _menuController.dispose();
-    super.dispose();
-  }
-
-  void _startRename() {
-    _nameController.text = widget.item.name;
-    setState(() => _editingName = true);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _nameFocusNode.requestFocus();
-    });
-  }
-
-  void _commitRename() {
-    if (!_editingName) return;
-    final trimmed = _nameController.text.trim();
-    setState(() => _editingName = false);
-    if (trimmed.isNotEmpty && trimmed != widget.item.name) {
-      widget.onRename?.call(widget.item.id, trimmed);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = ShadTheme.of(context).colorScheme;
-    final toneColor = resolveToneColor(widget.item.id);
-    final icon = resolveIcon(widget.item.icon);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: widget.selected ? cs.accent.withValues(alpha: 0.5) : Colors.transparent,
-        borderRadius: BorderRadius.circular(RadiusTokens.lg),
-        border: Border.all(
-          color: widget.selected
-              ? cs.accent
-              : Colors.transparent,
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Main clickable area
-          GestureDetector(
-            onTap: widget.onTap,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(Spacing.sm, Spacing.sm, Spacing.sm, Spacing.sm),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Icon (clickable for picker)
-                  GestureDetector(
-                    onTap: () {
-                      _showIconPicker(context, toneColor);
-                    },
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: widget.selected
-                            ? toneColor.withValues(alpha: 0.2)
-                            : toneColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(RadiusTokens.md),
-                      ),
-                      child: Icon(icon, size: IconSizes.sm, color: toneColor),
-                    ),
-                  ),
-                  const SizedBox(width: Spacing.sm),
-                  // Name + summary (fixed width, no Expanded in ListView)
-                  SizedBox(
-                    width: 152,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            if (_editingName)
-                              SizedBox(
-                                width: 120,
-                                height: 24,
-                                child: TextField(
-                                  controller: _nameController,
-                                  focusNode: _nameFocusNode,
-                                  maxLength: 30,
-                                  style: TextStyle(
-                                    fontSize: FontSizes.small,
-                                    fontWeight: FontWeight.w600,
-                                    color: cs.foreground,
-                                    decoration: TextDecoration.none,
-                                  ),
-                                  decoration: InputDecoration(
-                                    isDense: true,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: Spacing.xs,
-                                      vertical: 0,
-                                    ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                                      borderSide: BorderSide(color: cs.border),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                                      borderSide: BorderSide(color: cs.ring),
-                                    ),
-                                    counterText: '',
-                                  ),
-                                  onSubmitted: (_) => _commitRename(),
-                                ),
-                              )
-                            else ...[
-                              GestureDetector(
-                                onDoubleTap: _startRename,
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: 100),
-                                  child: Text(
-                                    widget.item.name,
-                                    style: TextStyle(
-                                      fontSize: FontSizes.small,
-                                      fontWeight: widget.selected
-                                          ? FontWeight.w600
-                                          : FontWeight.w400,
-                                      color: cs.foreground,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ),
-                              // Edit icon button
-                              GestureDetector(
-                                onTap: _startRename,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(2),
-                                  child: Icon(
-                                    LucideIcons.pencil,
-                                    size: 10,
-                                    color: cs.mutedForeground.withValues(alpha: 0.6),
-                                  ),
-                                ),
-                              ),
-                            ],
-                            if (!_editingName) ...[
-                              const SizedBox(width: Spacing.xs),
-                              // Kind badge
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                  vertical: 1,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: cs.muted.withValues(alpha: 0.5),
-                                  borderRadius: BorderRadius.circular(3),
-                                ),
-                                child: Text(
-                                  widget.item.kind,
-                                  style: TextStyle(
-                                    fontSize: FontSizes.micro,
-                                    color: cs.mutedForeground,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                        if (widget.item.summary.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 2),
-                            child: Text(
-                              widget.item.summary,
-                              style: TextStyle(
-                                fontSize: FontSizes.micro,
-                                color: cs.mutedForeground,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  // Dirty dot
-                  if (widget.dirty)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4),
-                      child: Container(
-                        width: IndicatorTokens.dirtyDot,
-                        height: IndicatorTokens.dirtyDot,
-                        decoration: BoxDecoration(
-                          color: toneColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                  // More menu
-                  ShadPopover(
-                    controller: _menuController,
-                    closeOnTapOutside: true,
-                    popover: (_) => Container(
-                      width: 140,
-                      padding: const EdgeInsets.all(Spacing.xs),
-                      decoration: BoxDecoration(
-                        color: cs.popover,
-                        borderRadius: BorderRadius.circular(RadiusTokens.lg),
-                        border: Border.all(color: cs.border),
-                        boxShadow: ShadowTokens.cardElevated,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _MenuButton(
-                            icon: LucideIcons.pencil,
-                            label: '重命名',
-                            onTap: () {
-                              _menuController.hide();
-                              _startRename();
-                            },
-                          ),
-                          _MenuButton(
-                            icon: LucideIcons.copy,
-                            label: '复制',
-                            onTap: () {
-                              _menuController.hide();
-                              widget.onDuplicate();
-                            },
-                          ),
-                          _MenuButton(
-                            icon: LucideIcons.download,
-                            label: '导出 JSON',
-                            onTap: () {
-                              _menuController.hide();
-                              widget.onExport();
-                            },
-                          ),
-                          if (widget.canDelete)
-                            _MenuButton(
-                              icon: LucideIcons.trash2,
-                              label: '删除',
-                              destructive: true,
-                              onTap: () {
-                                _menuController.hide();
-                                widget.onDelete?.call();
-                              },
-                            ),
-                        ],
-                      ),
-                    ),
-                    child: GestureDetector(
-                      onTap: () => _menuController.toggle(),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Icon(
-                          LucideIcons.moreHorizontal,
-                          size: IconSizes.md,
-                          color: cs.mutedForeground,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Divider
-          if (!widget.selected)
-            Divider(height: 0, thickness: 0.5, color: cs.border.withValues(alpha: 0.3)),
-        ],
-      ),
-    );
-  }
-
-  void _showIconPicker(BuildContext context, Color toneColor) {
-    showShadDialog(
-      context: context,
-      builder: (ctx) => ShadDialog(
-        title: const Text('更换图标'),
-        description: const Text('选择一个图标来代表这个主题'),
-        actions: [
-          ShadButton.ghost(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('取消'),
-          ),
-        ],
-        child: IconPicker(
-          selectedIcon: widget.item.icon,
-          toneColor: toneColor,
-          onSelect: (name) {
-            widget.onUpdateIcon?.call(widget.item.id, name);
-            Navigator.of(ctx).pop();
-          },
-        ),
-      ),
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
-// Menu Button (used by ThemeCard popover)
-// ═══════════════════════════════════════════════════════════
-
-class _MenuButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool destructive;
-  final VoidCallback onTap;
-
-  const _MenuButton({
-    required this.icon,
-    required this.label,
-    this.destructive = false,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = ShadTheme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.xs, vertical: 5),
-        child: Row(
-          children: [
-            Icon(icon, size: IconSizes.md, color: destructive ? cs.destructive : cs.foreground),
-            const SizedBox(width: Spacing.sm),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: FontSizes.small,
-                color: destructive ? cs.destructive : cs.foreground,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
-// ThemeComposerDialog — 新建 + 导入
-// ═══════════════════════════════════════════════════════════
-
-class ThemeComposerDialog extends StatefulWidget {
-  final String mode; // 'create' | 'import'
-  final VoidCallback onClose;
-
-  const ThemeComposerDialog({
-    super.key,
-    required this.mode,
-    required this.onClose,
-  });
-
-  @override
-  State<ThemeComposerDialog> createState() => _ThemeComposerDialogState();
-}
-
-class _ThemeComposerDialogState extends State<ThemeComposerDialog> {
-  String _mode = 'create';
-
-  // Create fields
-  final _nameController = TextEditingController();
-  String? _baseThemeId;
-  String? _createError;
-
-  // Import fields
-  final _importController = TextEditingController();
-  String? _importError;
-
-  @override
-  void initState() {
-    super.initState();
-    _mode = widget.mode;
-    final theme = context.read<ThemeProvider>();
-    _baseThemeId = theme.selectedThemeId;
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _importController.dispose();
-    super.dispose();
-  }
-
-  List<_TemplateOption> _templateOptions(BuildContext context) {
-    final theme = context.read<ThemeProvider>();
-    return [
-      const _TemplateOption(id: 'blank', label: '空白主题'),
-      ...theme.themeLibrary.map(
-        (t) => _TemplateOption(id: t.id, label: t.name),
-      ),
-    ];
-  }
-
-  void _handleCreate() {
-    final name = _nameController.text.trim();
-    if (name.isEmpty) return;
-    final theme = context.read<ThemeProvider>();
-    try {
-      theme.createTheme(name, basedOnThemeId: _baseThemeId);
-      setState(() => _createError = null);
-      widget.onClose();
-      _showToast(context, title: '已创建主题', description: name);
-    } catch (e) {
-      setState(() => _createError = e.toString());
-    }
-  }
-
-  void _handleImport() {
-    final text = _importController.text.trim();
-    if (text.isEmpty) return;
-    final theme = context.read<ThemeProvider>();
-    try {
-      final error = theme.importThemeFromText(text, 'imported');
-      if (error != null) {
-        setState(() => _importError = error);
-      } else {
-        widget.onClose();
-        _showToast(context, title: '已导入主题');
-      }
-    } catch (e) {
-      setState(() => _importError = e.toString());
-    }
-  }
-
-  static void _showToast(BuildContext context, {required String title, String? description}) {
-    ShadToaster.of(context).show(
-      ShadToast(title: Text(title), description: description != null ? Text(description) : null),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = ShadTheme.of(context).colorScheme;
-    final options = _templateOptions(context);
-
-    return ShadDialog(
-      title: Text(_mode == 'create' ? '新建主题' : '导入主题'),
-      description: Text(
-        _mode == 'create'
-            ? '新建一个可编辑主题'
-            : '粘贴主题 JSON 配置',
-      ),
-      actions: [
-        ShadButton.ghost(
-          onPressed: widget.onClose,
-          child: const Text('取消'),
-        ),
-      ],
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Tab bar
-          Container(
-            decoration: BoxDecoration(
-              color: cs.muted,
-              borderRadius: BorderRadius.circular(RadiusTokens.lg),
-            ),
-            child: Row(
-              children: [
-                _TabButton(
-                  label: '新建主题',
-                  selected: _mode == 'create',
-                  onTap: () => setState(() => _mode = 'create'),
-                ),
-                _TabButton(
-                  label: '导入 JSON',
-                  selected: _mode == 'import',
-                  onTap: () => setState(() => _mode = 'import'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: Spacing.md),
-
-          if (_mode == 'create') ...[
-            // Name
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('主题名称',
-                    style: TextStyle(fontSize: FontSizes.micro, fontWeight: FontWeight.w500, color: cs.mutedForeground)),
-                const SizedBox(height: 4),
-                ShadInput(
-                  controller: _nameController,
-                  placeholder: const Text('例如：Warm Click Studio'),
-                  autofocus: true,
-                ),
-              ],
-            ),
-            const SizedBox(height: Spacing.md),
-            // Template
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('起始模板',
-                    style: TextStyle(fontSize: FontSizes.micro, fontWeight: FontWeight.w500, color: cs.mutedForeground)),
-                const SizedBox(height: 4),
-                DropdownButton<String>(
-                  value: _baseThemeId,
-                  isExpanded: true,
-                  underline: const SizedBox.shrink(),
-                  items: options.map((opt) {
-                    return DropdownMenuItem(
-                      value: opt.id,
-                      child: Text(opt.label, style: const TextStyle(fontSize: FontSizes.small)),
-                    );
-                  }).toList(),
-                  onChanged: (v) {
-                    if (v != null) setState(() => _baseThemeId = v);
-                  },
-                ),
-              ],
-            ),
-            if (_createError != null) ...[
-              const SizedBox(height: Spacing.sm),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(Spacing.sm),
-                decoration: BoxDecoration(
-                  color: cs.destructive.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(RadiusTokens.lg),
-                ),
-                child: Text(_createError!, style: TextStyle(fontSize: FontSizes.micro, color: cs.destructive)),
-              ),
-            ],
-            const SizedBox(height: Spacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(Spacing.sm),
-                    decoration: BoxDecoration(
-                      color: cs.muted.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(RadiusTokens.lg),
-                    ),
-                    child: Text(
-                      '新主题会先进入工作台，保存后写入配置。',
-                      style: TextStyle(fontSize: FontSizes.micro, color: cs.mutedForeground),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: Spacing.sm),
-                ShadButton(
-                  onPressed: _handleCreate,
-                  leading: const Icon(LucideIcons.plus, size: IconSizes.md),
-                  child: const Text('创建主题'),
-                ),
-              ],
-            ),
-          ] else ...[
-            // Import tab
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(Spacing.md),
-              decoration: BoxDecoration(
-                border: Border.all(color: cs.border, style: BorderStyle.solid),
-                borderRadius: BorderRadius.circular(RadiusTokens.lg),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(Spacing.sm),
-                        decoration: BoxDecoration(
-                          color: cs.muted,
-                          borderRadius: BorderRadius.circular(RadiusTokens.lg),
-                        ),
-                        child: Icon(LucideIcons.fileJson, size: IconSizes.md, color: cs.foreground),
-                      ),
-                      const SizedBox(width: Spacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('粘贴本地 JSON 主题配置',
-                                style: TextStyle(fontSize: FontSizes.small, fontWeight: FontWeight.w500, color: cs.foreground)),
-                            const SizedBox(height: 2),
-                            Text('支持单个主题对象或带 themePack 包裹的 JSON。',
-                                style: TextStyle(fontSize: FontSizes.micro, color: cs.mutedForeground)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: Spacing.md),
-                  ShadInput(
-                    controller: _importController,
-                    placeholder: const Text('粘贴 JSON...'),
-                    maxLines: 4,
-                    minLines: 2,
-                  ),
-                  if (_importError != null) ...[
-                    const SizedBox(height: Spacing.sm),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(Spacing.sm),
-                      decoration: BoxDecoration(
-                        color: cs.destructive.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(RadiusTokens.lg),
-                      ),
-                      child: Text(_importError!, style: TextStyle(fontSize: FontSizes.micro, color: cs.destructive)),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: Spacing.md),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ShadButton(
-                onPressed: _handleImport,
-                leading: const Icon(LucideIcons.upload, size: IconSizes.md),
-                child: const Text('导入'),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _TemplateOption {
-  final String id;
-  final String label;
-  const _TemplateOption({required this.id, required this.label});
-}
-
-class _TabButton extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _TabButton({required this.label, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = ShadTheme.of(context).colorScheme;
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          decoration: BoxDecoration(
-            color: selected ? cs.card : Colors.transparent,
-            borderRadius: BorderRadius.circular(RadiusTokens.lg),
-            border: selected ? Border.all(color: cs.border) : null,
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: FontSizes.small,
-              fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
-              color: selected ? cs.foreground : cs.mutedForeground,
-            ),
           ),
         ),
       ),

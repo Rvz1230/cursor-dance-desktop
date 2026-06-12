@@ -27,6 +27,7 @@ class PreviewRenderer: NSView {
     func updateConfig(_ config: ActionConfig.ConfigData) {
         currentConfig = config
         comboCounter = 0
+        clearEffects()
     }
 
     /// Trigger effects at the given point (in Flutter top-left origin).
