@@ -230,7 +230,7 @@ class _ThemeCardState extends State<ThemeCard> {
                     ),
                   ),
                 ),
-              DropdownMenu(
+              ContextDropdown(
                 controller: _menuController,
                 items: [
                   DropdownItem(

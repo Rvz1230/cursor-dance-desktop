@@ -4,15 +4,15 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../theme/tokens.dart';
 
 // ═══════════════════════════════════════════════════════════
-// DropdownMenu — 轻量点击菜单
+// ContextDropdown — 轻量点击菜单
 // ═══════════════════════════════════════════════════════════
 
-class DropdownMenu extends StatelessWidget {
+class ContextDropdown extends StatelessWidget {
   final ShadPopoverController controller;
   final List<DropdownItem> items;
   final Widget child;
 
-  const DropdownMenu({
+  const ContextDropdown({
     super.key,
     required this.controller,
     required this.items,

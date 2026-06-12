@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../models/action_config.dart';
+import '../models/theme_draft.dart';
 import '../theme/tokens.dart';
 
 enum PreviewBackgroundMode { dark, light }
@@ -262,7 +263,7 @@ class _ToolbarIconButton extends StatelessWidget {
     final cs = ShadTheme.of(context).colorScheme;
 
     return ShadTooltip(
-      text: label,
+      builder: (_) => Text(label),
       child: GestureDetector(
         onTap: onPressed,
         child: Container(
