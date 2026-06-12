@@ -162,8 +162,6 @@ class AppColors {
   static const Color toneAnimationFg = Color(0xFF0E7490);
   static const Color toneImageBg = Color(0xFFFAE8FF);
   static const Color toneImageFg = Color(0xFFA21CAF);
-  static const Color toneCursorAppearanceBg = Color(0xFFF0F4FF);
-  static const Color toneCursorAppearanceFg = Color(0xFF3B5998);
   static const Color toneKeyboardBg = Color(0xFFE0E7FF);
   static const Color toneKeyboardFg = Color(0xFF4F46E5);
 }
@@ -213,8 +211,8 @@ class AppDarkColors {
   static const Color toneAnimationFg = Color(0xFF67E8F9);
   static const Color toneImageBg = Color(0xFF4A044E);
   static const Color toneImageFg = Color(0xFFF0ABFC);
-  static const Color toneCursorAppearanceBg = Color(0xFF1E3A5F);
-  static const Color toneCursorAppearanceFg = Color(0xFF93B5E1);
+  static const Color toneCursorBg = Color(0xFF334155);
+  static const Color toneCursorFg = Color(0xFFE2E8F0);
   static const Color toneKeyboardBg = Color(0xFF312E81);
   static const Color toneKeyboardFg = Color(0xFFA5B4FC);
 }
