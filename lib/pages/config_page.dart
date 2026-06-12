@@ -53,6 +53,33 @@ class ConfigPageState extends State<ConfigPage> {
     }
   }
 
+  Future<AsyncSaveResult> _saveChanges() async {
+    final theme = context.read<ThemeProvider>();
+    final result = await theme.saveChanges();
+    if (!mounted) return result;
+    if (result.ok) {
+      ShadToaster.of(context).show(
+        const ShadToast(title: Text('已保存到配置')),
+      );
+    } else {
+      ShadToaster.of(context).show(
+        ShadToast.destructive(
+          title: const Text('保存失败'),
+          description: Text(result.error ?? '请稍后重试'),
+        ),
+      );
+    }
+    return result;
+  }
+
+  void _resetCurrentTheme() {
+    final theme = context.read<ThemeProvider>();
+    theme.resetCurrentTheme();
+    ShadToaster.of(context).show(
+      const ShadToast(title: Text('已恢复当前主题默认配置')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_isLoaded) {
@@ -69,16 +96,22 @@ class ConfigPageState extends State<ConfigPage> {
 
     final theme = context.watch<ThemeProvider>();
     final config = context.watch<ConfigProvider>();
+    final overlay = context.watch<OverlayProvider>();
 
     return Column(
       children: [
         WorkbenchHeader(
-          onGlobalToggle: (_) => _toggleEnabled(),
+          overlayEnabled: overlay.enabled,
+          unsaved: theme.unsaved,
+          isSaving: theme.isSaving,
+          onToggleOverlay: _toggleEnabled,
+          onSave: () => _saveChanges(),
+          onReset: _resetCurrentTheme,
         ),
         Expanded(
           child: Row(
             children: [
-              const WorkbenchSidebar(),
+              WorkbenchSidebar(onSave: _saveChanges),
               Expanded(
                 child: WorkbenchWorkspace(
                   config: config,

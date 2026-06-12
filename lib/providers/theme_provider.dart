@@ -8,6 +8,14 @@ import '../repository/persistence_repository.dart';
 import '../services/preset_loader.dart';
 import '../services/theme_io_service.dart';
 
+// ── Save result ───────────────────────────────────────────
+
+class AsyncSaveResult {
+  final bool ok;
+  final String? error;
+  const AsyncSaveResult({required this.ok, this.error});
+}
+
 class ThemeProvider extends ChangeNotifier {
   final PersistenceRepository _repo;
 
@@ -20,10 +28,8 @@ class ThemeProvider extends ChangeNotifier {
 
   // ── Selection ──
   String _selectedThemeId = kBuiltinThemes.first.id;
-  String _selectedCursorStateId = 'default';
 
   String get selectedThemeId => _selectedThemeId;
-  String get selectedCursorStateId => _selectedCursorStateId;
 
   // ── Data ──
   List<ThemeItem> _themeLibrary = [...kBuiltinThemes];
@@ -96,12 +102,6 @@ class ThemeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setCursorStateId(String id) {
-    if (_selectedCursorStateId == id) return;
-    _selectedCursorStateId = id;
-    notifyListeners();
-  }
-
   // ═══════════════════════════════════════════════
   // Config Updates
   // ═══════════════════════════════════════════════
@@ -116,6 +116,30 @@ class ThemeProvider extends ChangeNotifier {
     actionConfigs[actionId] = updater(actionConfigs[actionId] ?? ActionConfig());
     _draftsByTheme[_selectedThemeId] =
         draft.copyWith(actionConfigs: actionConfigs);
+    _unsaved = true;
+    _dirtyThemes[_selectedThemeId] = true;
+    notifyListeners();
+  }
+
+  void updateCursorState(String stateId, CursorStateEntry entry) {
+    _ensureDraft(_selectedThemeId);
+    final draft = _draftsByTheme[_selectedThemeId]!;
+    final cursorStates = Map<String, CursorStateEntry>.from(draft.cursorStates);
+    cursorStates[stateId] = entry;
+    _draftsByTheme[_selectedThemeId] =
+        draft.copyWith(cursorStates: cursorStates);
+    _unsaved = true;
+    _dirtyThemes[_selectedThemeId] = true;
+    notifyListeners();
+  }
+
+  void removeCursorState(String stateId) {
+    _ensureDraft(_selectedThemeId);
+    final draft = _draftsByTheme[_selectedThemeId]!;
+    final cursorStates = Map<String, CursorStateEntry>.from(draft.cursorStates);
+    cursorStates.remove(stateId);
+    _draftsByTheme[_selectedThemeId] =
+        draft.copyWith(cursorStates: cursorStates);
     _unsaved = true;
     _dirtyThemes[_selectedThemeId] = true;
     notifyListeners();
@@ -144,6 +168,22 @@ class ThemeProvider extends ChangeNotifier {
 
   void createTheme(String name, {String? basedOnThemeId}) {
     final id = 'theme-${DateTime.now().microsecondsSinceEpoch}';
+    if (basedOnThemeId == 'blank') {
+      // blank template: empty action configs
+      final blankItem = ThemeItem(
+        id: id,
+        name: name,
+        kind: '自定义',
+        summary: '0 个动效',
+      );
+      _themeLibrary = [blankItem, ..._themeLibrary];
+      _draftsByTheme[id] = ThemeDraft.create({});
+      _selectedThemeId = id;
+      _unsaved = true;
+      _dirtyThemes[id] = true;
+      notifyListeners();
+      return;
+    }
     final baseId = basedOnThemeId ?? _selectedThemeId;
     _ensureDraft(baseId);
     final baseDraft = _draftsByTheme[baseId]!;
@@ -153,7 +193,7 @@ class ThemeProvider extends ChangeNotifier {
       kind: '自定义',
       summary: buildThemeSummary(baseDraft.actionConfigs),
     );
-    _themeLibrary = [..._themeLibrary, newItem];
+    _themeLibrary = [newItem, ..._themeLibrary];
     _draftsByTheme[id] = baseDraft.copyWith();
     _selectedThemeId = id;
     _unsaved = true;
@@ -174,7 +214,7 @@ class ThemeProvider extends ChangeNotifier {
       name: '${source.name} 副本',
       kind: '自定义',
     );
-    _themeLibrary = [..._themeLibrary, newItem];
+    _themeLibrary = [newItem, ..._themeLibrary];
     _draftsByTheme[id] = baseDraft.copyWith();
     _selectedThemeId = id;
     _unsaved = true;
@@ -224,11 +264,10 @@ class ThemeProvider extends ChangeNotifier {
     return ThemeIoService.exportTheme(item, draft);
   }
 
-  void importThemeFromText(String text, String fileName) {
+  String? importThemeFromText(String text, String fileName) {
     final result = ThemeIoService.importTheme(text, fileName);
     if (result.error != null) {
-      debugPrint('导入主题失败: ${result.error}');
-      return;
+      return result.error;
     }
     final newItem = ThemeItem(
       id: result.id,
@@ -236,18 +275,17 @@ class ThemeProvider extends ChangeNotifier {
       kind: '自定义',
       icon: result.icon,
     );
-    _themeLibrary = [..._themeLibrary, newItem];
+    _themeLibrary = [newItem, ..._themeLibrary];
     _draftsByTheme[result.id] = ThemeDraft(
       actionConfigs: result.actionConfigs,
       atmosphere: const AtmosphereConfig(),
-      cursorModes: result.cursorModes,
-      cursorStateActions: result.cursorStateActions,
-      cursorStateAssets: result.cursorStateAssets,
+      cursorStates: result.cursorStates,
     );
     _selectedThemeId = result.id;
     _unsaved = true;
     _dirtyThemes[result.id] = true;
     notifyListeners();
+    return null;
   }
 
   // ═══════════════════════════════════════════════
@@ -324,7 +362,7 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> saveChanges() async {
+  Future<AsyncSaveResult> saveChanges() async {
     _isSaving = true;
     _saveError = '';
     notifyListeners();
@@ -333,9 +371,11 @@ class ThemeProvider extends ChangeNotifier {
       await _repo.save(toPersistenceJson());
       _unsaved = false;
       _dirtyThemes.clear();
+      return const AsyncSaveResult(ok: true);
     } catch (e) {
       _saveError = e.toString();
       debugPrint('保存配置失败: $e');
+      return AsyncSaveResult(ok: false, error: e.toString());
     } finally {
       _isSaving = false;
       notifyListeners();
