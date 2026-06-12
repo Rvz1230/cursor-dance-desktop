@@ -11,7 +11,7 @@ class OverlayProvider extends ChangeNotifier {
   final OverlayBridge _bridge;
   final ThemeProvider _themeProvider;
   final ConfigProvider _configProvider;
-  String _lastConfigJson = '';
+  String _lastActionsJson = '';
   String _lastKeyConfigJson = '';
 
   bool _enabled = true;
@@ -21,19 +21,27 @@ class OverlayProvider extends ChangeNotifier {
     required this._themeProvider,
     required this._configProvider,
     OverlayBridge? bridge,
-  }) : _bridge = bridge ?? OverlayBridge();
+  }) : _bridge = bridge ?? OverlayBridge() {
+    _themeProvider.addListener(_onDependencyChanged);
+    _configProvider.addListener(_onDependencyChanged);
+  }
+
+  @override
+  void dispose() {
+    _themeProvider.removeListener(_onDependencyChanged);
+    _configProvider.removeListener(_onDependencyChanged);
+    _bridge.stop();
+    _bridge.dispose();
+    super.dispose();
+  }
 
   void setOverlayStateChangedHandler(void Function(bool enabled) handler) {
     _bridge.onOverlayStateChanged = handler;
   }
 
   Future<void> start() async {
-    final config = _configProvider.currentActionConfig;
-    final payload = _themeProvider.buildOverlayPayload(
-      _configProvider.selectedActionId,
-      config,
-    );
-    _lastConfigJson = jsonEncode(config.toJson());
+    final payload = _themeProvider.buildFullOverlayPayload();
+    _lastActionsJson = jsonEncode(payload);
     _lastKeyConfigJson = jsonEncode(_themeProvider.keyFeedbackConfig.toJson());
     await _bridge.start(payload);
     await _bridge.updateKeyFeedbackConfig(
@@ -46,24 +54,25 @@ class OverlayProvider extends ChangeNotifier {
   Future<void> sync() async {
     if (!_enabled) return;
 
-    final config = _configProvider.currentActionConfig;
-    final newConfigJson = jsonEncode(config.toJson());
-    if (newConfigJson != _lastConfigJson) {
-      _lastConfigJson = newConfigJson;
-      await _bridge.updateConfig(
-        _themeProvider.buildOverlayPayload(
-          _configProvider.selectedActionId,
-          config,
-        ),
-      );
+    final payload = _themeProvider.buildFullOverlayPayload();
+    final newActionsJson = jsonEncode(payload);
+    if (newActionsJson != _lastActionsJson) {
+      _lastActionsJson = newActionsJson;
+      final result = await _bridge.updateAllConfigs(payload);
+      if (result == BridgeResult.error) {
+        debugPrint('OverlayProvider.sync: updateAllConfigs failed');
+      }
     }
 
     final newKeyJson = jsonEncode(_themeProvider.keyFeedbackConfig.toJson());
     if (newKeyJson != _lastKeyConfigJson) {
       _lastKeyConfigJson = newKeyJson;
-      await _bridge.updateKeyFeedbackConfig(
+      final result = await _bridge.updateKeyFeedbackConfig(
         _themeProvider.keyFeedbackConfig.toJson(),
       );
+      if (result == BridgeResult.error) {
+        debugPrint('OverlayProvider.sync: updateKeyFeedbackConfig failed');
+      }
     }
   }
 
@@ -80,16 +89,11 @@ class OverlayProvider extends ChangeNotifier {
     }
   }
 
+  void _onDependencyChanged() => syncIfNeeded();
+
   void setEnabled(bool value) {
     if (_enabled == value) return;
     _enabled = value;
     notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _bridge.stop();
-    _bridge.dispose();
-    super.dispose();
   }
 }

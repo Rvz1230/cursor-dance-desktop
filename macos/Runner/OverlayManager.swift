@@ -107,6 +107,11 @@ struct ActionConfig: Decodable {
     }
 }
 
+/// Wrapper for decoding the full actions payload from Flutter.
+struct ActionsPayload: Decodable {
+    let actions: [String: ActionConfig.ConfigData]
+}
+
 // MARK: - KeyFeedbackConfigData (decoded from Flutter JSON)
 
 struct KeyFeedbackConfigData: Decodable {
@@ -173,7 +178,9 @@ func hexColor(_ hex: String?) -> NSColor {
 
 class OverlayManager {
     private var overlayWindow: NSWindow?
-    private var eventMonitor: Any?
+    private var leftDownMonitor: Any?
+    private var leftUpMonitor: Any?
+    private var rightDownMonitor: Any?
     private var keyEventMonitor: Any?
     private var channel: FlutterMethodChannel?
     private var spaceObserver: Any?
@@ -181,13 +188,16 @@ class OverlayManager {
     private let renderer = EffectsRenderer()
     private let keyFeedbackFX = OverlayKeyFeedbackFX()
 
-    private var currentConfig: ActionConfig?
+    /// Per-action configs keyed by actionId (e.g. "leftClick", "rightClick", "doubleClick").
+    private var actionConfigs: [String: ActionConfig.ConfigData] = [:]
     private var keyFeedbackConfig: KeyFeedbackConfigData?
     /// Per-action combo counters for text feedback
     private var comboCounters: [String: Int] = [:]
     private let comboLock = NSLock()
     /// Cooldown tracker for keyboard feedback
     private var lastKeyPressTime: CFTimeInterval = 0
+    /// Timestamp of last left-mouse-down for long-press detection
+    private var lastLeftDownTime: CFTimeInterval = 0
 
     var isRunning: Bool { overlayWindow != nil }
 
@@ -205,14 +215,18 @@ class OverlayManager {
         channel?.setMethodCallHandler { [weak self] call, result in
             switch call.method {
             case "startOverlay":
-                self?.applyArgs(call.arguments)
+                self?.applyAllArgs(call.arguments)
                 self?.start()
                 result(nil)
             case "stopOverlay":
                 self?.stop()
                 result(nil)
             case "updateConfig":
-                self?.applyArgs(call.arguments)
+                // Legacy single-action update — merge into actionConfigs
+                self?.applySingleArgs(call.arguments)
+                result(nil)
+            case "updateAllConfigs":
+                self?.applyAllArgs(call.arguments)
                 result(nil)
             case "updateKeyFeedbackConfig":
                 self?.applyKeyFeedbackArgs(call.arguments)
@@ -233,11 +247,22 @@ class OverlayManager {
         }
     }
 
-    private func applyArgs(_ args: Any?) {
+    // MARK: - Config deserialization
+
+    private func applyAllArgs(_ args: Any?) {
         guard let dict = args as? [String: Any],
               let jsonString = dict["config"] as? String,
               let data = jsonString.data(using: .utf8) else { return }
-        currentConfig = try? JSONDecoder().decode(ActionConfig.self, from: data)
+        guard let payload = try? JSONDecoder().decode(ActionsPayload.self, from: data) else { return }
+        actionConfigs = payload.actions
+    }
+
+    private func applySingleArgs(_ args: Any?) {
+        guard let dict = args as? [String: Any],
+              let jsonString = dict["config"] as? String,
+              let data = jsonString.data(using: .utf8) else { return }
+        guard let config = try? JSONDecoder().decode(ActionConfig.self, from: data) else { return }
+        actionConfigs[config.actionId] = config.config
     }
 
     private func applyKeyFeedbackArgs(_ args: Any?) {
@@ -246,6 +271,8 @@ class OverlayManager {
               let data = jsonString.data(using: .utf8) else { return }
         keyFeedbackConfig = try? JSONDecoder().decode(KeyFeedbackConfigData.self, from: data)
     }
+
+    // MARK: - Overlay lifecycle
 
     func start() {
         guard overlayWindow == nil else { return }
@@ -272,10 +299,25 @@ class OverlayManager {
 
         overlayWindow = window
 
-        eventMonitor = NSEvent.addGlobalMonitorForEvents(
+        // Left click (with double-click detection)
+        leftDownMonitor = NSEvent.addGlobalMonitorForEvents(
             matching: .leftMouseDown
+        ) { [weak self] event in
+            self?.handleLeftDown(event)
+        }
+
+        // Left mouse up (for long-press detection future use)
+        leftUpMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: .leftMouseUp
         ) { [weak self] _ in
-            self?.handleClick()
+            self?.lastLeftDownTime = 0
+        }
+
+        // Right click
+        rightDownMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: .rightMouseDown
+        ) { [weak self] _ in
+            self?.handleAction("rightClick")
         }
 
         keyEventMonitor = NSEvent.addGlobalMonitorForEvents(
@@ -292,11 +334,18 @@ class OverlayManager {
         comboCounters.removeAll()
         comboLock.unlock()
 
-        if let monitor = eventMonitor {
+        if let monitor = leftDownMonitor {
             NSEvent.removeMonitor(monitor)
-            eventMonitor = nil
+            leftDownMonitor = nil
         }
-
+        if let monitor = leftUpMonitor {
+            NSEvent.removeMonitor(monitor)
+            leftUpMonitor = nil
+        }
+        if let monitor = rightDownMonitor {
+            NSEvent.removeMonitor(monitor)
+            rightDownMonitor = nil
+        }
         if let monitor = keyEventMonitor {
             NSEvent.removeMonitor(monitor)
             keyEventMonitor = nil
@@ -313,24 +362,35 @@ class OverlayManager {
         channel?.invokeMethod("overlayStateChanged", arguments: ["enabled": false])
     }
 
-    private func handleClick() {
+    // MARK: - Click handlers
+
+    private func handleLeftDown(_ event: NSEvent) {
+        lastLeftDownTime = CACurrentMediaTime()
+        if event.clickCount >= 2 {
+            handleAction("doubleClick")
+        } else {
+            handleAction("leftClick")
+        }
+    }
+
+    private func handleAction(_ actionId: String) {
         let point = NSEvent.mouseLocation
         guard let contentView = overlayWindow?.contentView,
               let layer = contentView.layer,
-              let config = currentConfig else { return }
+              let config = actionConfigs[actionId] else { return }
 
-        let c = config.config
         let localPoint = contentView.convert(point, from: nil)
 
-        // Increment combo counter for this action (used by text feedback)
-        let actionKey = config.actionId
+        // Increment combo counter for this action
         comboLock.lock()
-        let runIndex = (comboCounters[actionKey] ?? 0) + 1
-        comboCounters[actionKey] = runIndex
+        let runIndex = (comboCounters[actionId] ?? 0) + 1
+        comboCounters[actionId] = runIndex
         comboLock.unlock()
 
-        renderer.playClickEffects(at: localPoint, config: c, parent: layer, runIndex: runIndex)
+        renderer.playClickEffects(at: localPoint, config: config, parent: layer, runIndex: runIndex)
     }
+
+    // MARK: - Key press handler
 
     private func handleKeyPress(_ event: NSEvent) {
         guard let config = keyFeedbackConfig, config.enabled == true else { return }
@@ -362,7 +422,6 @@ class OverlayManager {
         if now - lastKeyPressTime < cooldownSec { return }
         lastKeyPressTime = now
 
-        print("[KeyFeedback] keyCode=\(keyCode) char=\(character) style=\(config.animationStyle ?? "bounce")")
         keyFeedbackFX.spawn(keyCode: keyCode, character: character, config: config, parent: layer)
     }
 
@@ -380,4 +439,3 @@ class OverlayManager {
         }
     }
 }
-

@@ -11,6 +11,7 @@ class ThemeImportResult {
   final Map<String, ActionConfig> actionConfigs;
   final Map<String, CursorStateEntry> cursorStates;
   final String? error;
+  final bool hasCursorStates;
 
   const ThemeImportResult({
     required this.id,
@@ -19,6 +20,7 @@ class ThemeImportResult {
     this.actionConfigs = const {},
     this.cursorStates = const {},
     this.error,
+    this.hasCursorStates = false,
   });
 }
 
@@ -31,6 +33,10 @@ class ThemeIoService {
       'icon': item.icon,
       ...draft.toJson(),
     };
+    if (draft.cursorStates.isNotEmpty) {
+      exportData['_warning'] = 'Cursor image files are not included in export. '
+          'Re-upload cursor images after importing.';
+    }
     return const JsonEncoder.withIndent('  ').convert(exportData);
   }
 
@@ -43,6 +49,7 @@ class ThemeIoService {
       final id = 'theme-${DateTime.now().microsecondsSinceEpoch}';
 
       final draft = ThemeDraft.fromJson(data);
+      final hasCursorStates = draft.cursorStates.isNotEmpty;
 
       return ThemeImportResult(
         id: id,
@@ -50,6 +57,7 @@ class ThemeIoService {
         icon: icon,
         actionConfigs: draft.actionConfigs,
         cursorStates: draft.cursorStates,
+        hasCursorStates: hasCursorStates,
       );
     } catch (e) {
       return ThemeImportResult(id: '', name: '', icon: '', error: e.toString());

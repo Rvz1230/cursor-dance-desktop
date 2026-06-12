@@ -66,17 +66,26 @@ class PreviewPlatformViewFactory: NSObject, FlutterPlatformViewFactory {
         channel.setMethodCallHandler { call, result in
             switch call.method {
             case "updateConfig":
-                guard let dict = call.arguments as? [String: Any],
-                      let configDict = dict["config"] as? [String: Any],
-                      let jsonData = try? JSONSerialization.data(withJSONObject: configDict),
-                      let configData = try? JSONDecoder().decode(
-                        ActionConfig.ConfigData.self, from: jsonData)
-                else {
-                    result(FlutterError(code: "INVALID_ARGS", message: nil, details: nil))
-                    return
+                if let dict = call.arguments as? [String: Any] {
+                    // Try JSON string format first (matches overlay channel)
+                    if let jsonString = dict["config"] as? String,
+                       let data = jsonString.data(using: .utf8),
+                       let actionConfig = try? JSONDecoder().decode(ActionConfig.self, from: data) {
+                        renderer.updateConfig(actionConfig.config)
+                        result(nil)
+                        return
+                    }
+                    // Fallback: raw map format (legacy)
+                    if let configDict = dict["config"] as? [String: Any],
+                       let jsonData = try? JSONSerialization.data(withJSONObject: configDict),
+                       let configData = try? JSONDecoder().decode(
+                        ActionConfig.ConfigData.self, from: jsonData) {
+                        renderer.updateConfig(configData)
+                        result(nil)
+                        return
+                    }
                 }
-                renderer.updateConfig(configData)
-                result(nil)
+                result(FlutterError(code: "INVALID_ARGS", message: nil, details: nil))
 
             case "trigger":
                 guard let dict = call.arguments as? [String: Any],

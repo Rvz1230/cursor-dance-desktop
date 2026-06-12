@@ -80,7 +80,17 @@ class _ThemeComposerDialogState extends State<ThemeComposerDialog> {
     try {
       final error = theme.importThemeFromText(text, 'imported');
       if (error != null) {
-        setState(() => _importError = error);
+        if (error == '__cursor_hint__') {
+          // Import succeeded but cursor images need re-upload
+          widget.onClose();
+          showSidebarToast(
+            context,
+            title: '已导入主题',
+            description: '光标图片需要重新上传',
+          );
+        } else {
+          setState(() => _importError = error);
+        }
       } else {
         widget.onClose();
         showSidebarToast(context, title: '已导入主题');

@@ -161,9 +161,18 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   void discardThemeChanges(String themeId) {
+    final oldDraft = _draftsByTheme[themeId];
     _draftsByTheme[themeId] = ThemeDraft.create(
       PresetRepository.instance.defaultActionConfigs(themeId),
     );
+    // Clean up orphaned cursor files
+    if (oldDraft != null) {
+      for (final entry in oldDraft.cursorStates.values) {
+        if (entry.imagePath.isNotEmpty) {
+          CursorStorageService.instance.delete(entry.imagePath);
+        }
+      }
+    }
     _dirtyThemes.remove(themeId);
     notifyListeners();
   }
@@ -291,6 +300,10 @@ class ThemeProvider extends ChangeNotifier {
     _unsaved = true;
     _dirtyThemes[result.id] = true;
     notifyListeners();
+    // Return a hint if cursor states were present (images need re-upload)
+    if (result.hasCursorStates) {
+      return '__cursor_hint__';
+    }
     return null;
   }
 
@@ -307,7 +320,14 @@ class ThemeProvider extends ChangeNotifier {
   // Overlay payload
   // ═══════════════════════════════════════════════
 
-  Map<String, dynamic> buildOverlayPayload(
+  Map<String, dynamic> buildFullOverlayPayload() {
+    final draft = currentDraft;
+    return {
+      'actions': draft.actionConfigs.map((k, v) => MapEntry(k, v.toJson())),
+    };
+  }
+
+  Map<String, dynamic> buildSingleOverlayPayload(
     String actionId,
     ActionConfig config,
   ) {

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../pages/workspaces/workbench_workspace.dart';
 import '../theme/tokens.dart';
 
 class WorkbenchHeader extends StatelessWidget {
   final bool overlayEnabled;
   final bool unsaved;
   final bool isSaving;
+  final WorkspaceTab workspaceTab;
+  final ValueChanged<WorkspaceTab>? onWorkspaceTabChanged;
   final VoidCallback? onToggleOverlay;
   final VoidCallback? onSave;
   final VoidCallback? onReset;
@@ -16,6 +20,8 @@ class WorkbenchHeader extends StatelessWidget {
     this.overlayEnabled = false,
     this.unsaved = false,
     this.isSaving = false,
+    this.workspaceTab = WorkspaceTab.actions,
+    this.onWorkspaceTabChanged,
     this.onToggleOverlay,
     this.onSave,
     this.onReset,
@@ -41,6 +47,21 @@ class WorkbenchHeader extends StatelessWidget {
               fontWeight: FontWeight.w700,
               color: cs.foreground,
             ),
+          ),
+          const SizedBox(width: Spacing.lg),
+          // Workspace tabs
+          _HeaderTabButton(
+            label: '动作配置',
+            icon: LucideIcons.sparkles,
+            selected: workspaceTab == WorkspaceTab.actions,
+            onTap: () => onWorkspaceTabChanged?.call(WorkspaceTab.actions),
+          ),
+          const SizedBox(width: Spacing.xs),
+          _HeaderTabButton(
+            label: '光标外观',
+            icon: LucideIcons.mousePointer2,
+            selected: workspaceTab == WorkspaceTab.cursorAppearance,
+            onTap: () => onWorkspaceTabChanged?.call(WorkspaceTab.cursorAppearance),
           ),
           const SizedBox(width: Spacing.lg),
           // Save button with unsaved indicator
@@ -77,11 +98,9 @@ class WorkbenchHeader extends StatelessWidget {
             ),
           if (onReset != null) ...[
             const SizedBox(width: Spacing.xs),
-            ShadButton.ghost(
+            ShadIconButton.ghost(
               onPressed: onReset,
-              size: ShadButtonSize.sm,
-              leading: Icon(LucideIcons.rotateCcw, size: IconSizes.md),
-              child: const SizedBox.shrink(),
+              icon: const Icon(LucideIcons.rotateCcw),
             ),
           ],
           const Spacer(),
@@ -90,6 +109,39 @@ class WorkbenchHeader extends StatelessWidget {
             onChanged: (v) => onToggleOverlay?.call(),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HeaderTabButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _HeaderTabButton({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ShadButton.ghost(
+      onPressed: onTap,
+      size: ShadButtonSize.sm,
+      backgroundColor: selected
+          ? ShadTheme.of(context).colorScheme.accent
+          : Colors.transparent,
+      leading: Icon(icon, size: IconSizes.md),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: FontSizes.small,
+          fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+        ),
       ),
     );
   }

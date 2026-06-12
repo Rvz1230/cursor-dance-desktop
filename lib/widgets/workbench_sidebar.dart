@@ -237,7 +237,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
-      width: _collapsed ? 76.0 : 304.0,
+      width: _collapsed ? 76.0 : 260.0,
       decoration: BoxDecoration(
         color: cs.card,
         border: Border(right: BorderSide(color: cs.border)),
@@ -246,9 +246,9 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
       child: Column(
         children: [
           Expanded(child: sidebar),
-          _ImportFooter(
+          _SidebarFooter(
             collapsed: _collapsed,
-            onImport: () => _openComposer('import'),
+            onNewTheme: () => _openComposer('create'),
           ),
         ],
       ),
@@ -261,51 +261,47 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
     BuildContext context,
     ShadColorScheme cs,
     ThemeProvider theme,
-    List<ThemeItem> library,
+    List<ThemeItem> filtered,
     String selectedId,
   ) {
     return Column(
       children: [
         const SizedBox(height: Spacing.sm),
         // Expand button
-        ShadButton.ghost(
+        ShadIconButton.ghost(
           onPressed: () => setState(() => _collapsed = false),
-          size: ShadButtonSize.sm,
-          padding: const EdgeInsets.all(Spacing.sm),
-          leading: const Icon(LucideIcons.panelLeftOpen, size: IconSizes.md),
-          child: const SizedBox.shrink(),
+          icon: const Icon(LucideIcons.panelLeftOpen),
         ),
         const SizedBox(height: Spacing.xs),
         // New theme button
-        ShadButton.ghost(
+        ShadIconButton.ghost(
           onPressed: () => _openComposer('create'),
-          size: ShadButtonSize.sm,
-          padding: const EdgeInsets.all(Spacing.sm),
-          leading: const Icon(LucideIcons.plus, size: IconSizes.md),
-          child: const SizedBox.shrink(),
+          icon: const Icon(LucideIcons.plus),
         ),
         const SizedBox(height: Spacing.sm),
         // Theme icons
         Expanded(
-          child: ListView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
-            itemCount: library.length,
-            itemBuilder: (context, index) {
-              final item = library[index];
-              final selected = item.id == selectedId;
-              final dirty = theme.dirtyThemes[item.id] ?? false;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: Spacing.xs),
-                child: _CollapsedThemeIcon(
-                  item: item,
-                  selected: selected,
-                  dirty: dirty,
-                  onTap: () => _handleThemeClick(item.id, theme),
+          child: filtered.isEmpty
+              ? const SizedBox.shrink()
+              : ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    final item = filtered[index];
+                    final selected = item.id == selectedId;
+                    final dirty = theme.dirtyThemes[item.id] ?? false;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: Spacing.xs),
+                      child: _CollapsedThemeIcon(
+                        item: item,
+                        selected: selected,
+                        dirty: dirty,
+                        onTap: () => _handleThemeClick(item.id, theme),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
         ),
       ],
     );
@@ -327,7 +323,6 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
         _SidebarHeader(
           searchController: _searchController,
           onCollapse: () => setState(() => _collapsed = true),
-          onNewTheme: () => _openComposer('create'),
         ),
 
         // Action error banner
@@ -412,12 +407,10 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
 class _SidebarHeader extends StatelessWidget {
   final TextEditingController searchController;
   final VoidCallback onCollapse;
-  final VoidCallback onNewTheme;
 
   const _SidebarHeader({
     required this.searchController,
     required this.onCollapse,
-    required this.onNewTheme,
   });
 
   @override
@@ -426,12 +419,9 @@ class _SidebarHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(Spacing.sm, Spacing.sm, Spacing.sm, Spacing.sm),
       child: Row(
         children: [
-          ShadButton.ghost(
+          ShadIconButton.ghost(
             onPressed: onCollapse,
-            size: ShadButtonSize.sm,
-            padding: const EdgeInsets.all(Spacing.sm),
-            leading: const Icon(LucideIcons.panelLeftClose, size: IconSizes.md),
-            child: const SizedBox.shrink(),
+            icon: const Icon(LucideIcons.panelLeftClose),
           ),
           const SizedBox(width: Spacing.xs),
           Expanded(
@@ -440,14 +430,6 @@ class _SidebarHeader extends StatelessWidget {
               placeholder: const Text('搜索主题包'),
               padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
             ),
-          ),
-          const SizedBox(width: Spacing.xs),
-          ShadButton(
-            onPressed: onNewTheme,
-            size: ShadButtonSize.sm,
-            padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
-            leading: const Icon(LucideIcons.plus, size: IconSizes.md),
-            child: const Text('新建', style: TextStyle(fontSize: FontSizes.small)),
           ),
         ],
       ),
@@ -459,11 +441,11 @@ class _SidebarHeader extends StatelessWidget {
 // Import Footer
 // ═══════════════════════════════════════════════════════════
 
-class _ImportFooter extends StatelessWidget {
+class _SidebarFooter extends StatelessWidget {
   final bool collapsed;
-  final VoidCallback onImport;
+  final VoidCallback onNewTheme;
 
-  const _ImportFooter({required this.collapsed, required this.onImport});
+  const _SidebarFooter({required this.collapsed, required this.onNewTheme});
 
   @override
   Widget build(BuildContext context) {
@@ -474,12 +456,12 @@ class _ImportFooter extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(top: BorderSide(color: cs.border)),
       ),
-      child: ShadButton.outline(
-        onPressed: onImport,
+      child: ShadButton(
+        onPressed: onNewTheme,
         width: double.infinity,
         size: ShadButtonSize.sm,
-        leading: const Icon(LucideIcons.upload, size: IconSizes.md),
-        child: const Text('导入主题', style: TextStyle(fontSize: FontSizes.small)),
+        leading: const Icon(LucideIcons.plus, size: IconSizes.md),
+        child: const Text('新建主题', style: TextStyle(fontSize: FontSizes.small)),
       ),
     );
   }

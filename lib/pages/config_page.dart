@@ -18,6 +18,7 @@ class ConfigPage extends StatefulWidget {
 
 class ConfigPageState extends State<ConfigPage> {
   bool _isLoaded = false;
+  WorkspaceTab _workspaceTab = WorkspaceTab.actions;
 
   @override
   void initState() {
@@ -104,6 +105,8 @@ class ConfigPageState extends State<ConfigPage> {
           overlayEnabled: overlay.enabled,
           unsaved: theme.unsaved,
           isSaving: theme.isSaving,
+          workspaceTab: _workspaceTab,
+          onWorkspaceTabChanged: (tab) => setState(() => _workspaceTab = tab),
           onToggleOverlay: _toggleEnabled,
           onSave: () => _saveChanges(),
           onReset: _resetCurrentTheme,
@@ -116,6 +119,7 @@ class ConfigPageState extends State<ConfigPage> {
                 child: WorkbenchWorkspace(
                   config: config,
                   theme: theme,
+                  tab: _workspaceTab,
                 ),
               ),
             ],

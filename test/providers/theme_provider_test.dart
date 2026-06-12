@@ -101,7 +101,7 @@ void main() {
 
     test('duplicateTheme copies and renames', () {
       provider.duplicateTheme(kBuiltinThemes.first.id);
-      final newTheme = provider.themeLibrary.last;
+      final newTheme = provider.themeLibrary.first;
       expect(newTheme.name, contains('副本'));
       expect(provider.selectedThemeId, newTheme.id);
     });

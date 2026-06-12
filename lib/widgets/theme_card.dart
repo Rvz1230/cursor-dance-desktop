@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../models/theme.dart';
 import '../theme/tokens.dart';
+import 'controls/dropdown_menu.dart';
 import 'icon_picker.dart';
 
 // ═══════════════════════════════════════════════════════════
@@ -44,15 +46,20 @@ class _ThemeCardState extends State<ThemeCard> {
   final _menuController = ShadPopoverController();
   final _nameController = TextEditingController();
   final _nameFocusNode = FocusNode();
+  bool _renameCommitted = false;
 
   @override
   void initState() {
     super.initState();
-    _nameFocusNode.addListener(() {
-      if (!_nameFocusNode.hasFocus && _editingName) {
-        _commitRename();
-      }
-    });
+  }
+
+  @override
+  void didUpdateWidget(covariant ThemeCard old) {
+    super.didUpdateWidget(old);
+    // If the item name changed externally while editing, sync the controller
+    if (_editingName && widget.item.name != old.item.name) {
+      _nameController.text = widget.item.name;
+    }
   }
 
   @override
@@ -64,20 +71,27 @@ class _ThemeCardState extends State<ThemeCard> {
   }
 
   void _startRename() {
+    _renameCommitted = false;
     _nameController.text = widget.item.name;
     setState(() => _editingName = true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _nameFocusNode.requestFocus();
+      if (mounted) _nameFocusNode.requestFocus();
     });
   }
 
   void _commitRename() {
-    if (!_editingName) return;
+    if (!_editingName || _renameCommitted) return;
+    _renameCommitted = true;
     final trimmed = _nameController.text.trim();
     setState(() => _editingName = false);
     if (trimmed.isNotEmpty && trimmed != widget.item.name) {
       widget.onRename?.call(widget.item.id, trimmed);
     }
+  }
+
+  void _cancelRename() {
+    if (!_editingName) return;
+    setState(() => _editingName = false);
   }
 
   @override
@@ -88,7 +102,7 @@ class _ThemeCardState extends State<ThemeCard> {
 
     return Container(
       decoration: BoxDecoration(
-        color: widget.selected ? cs.accent.withValues(alpha: 0.5) : Colors.transparent,
+        color: widget.selected ? cs.accent.withValues(alpha: 0.35) : Colors.transparent,
         borderRadius: BorderRadius.circular(RadiusTokens.lg),
         border: Border.all(
           color: widget.selected ? cs.accent : Colors.transparent,
@@ -97,30 +111,33 @@ class _ThemeCardState extends State<ThemeCard> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          GestureDetector(
-            onTap: widget.onTap,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(Spacing.sm, Spacing.sm, Spacing.sm, Spacing.sm),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    onTap: () => _showIconPicker(context, toneColor),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: widget.selected
-                            ? toneColor.withValues(alpha: 0.2)
-                            : toneColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(RadiusTokens.md),
-                      ),
-                      child: Icon(icon, size: IconSizes.sm, color: toneColor),
-                    ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(width: Spacing.sm),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _showIconPicker(context, toneColor),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  margin: const EdgeInsets.only(top: Spacing.sm),
+                  decoration: BoxDecoration(
+                    color: widget.selected
+                        ? toneColor.withValues(alpha: 0.25)
+                        : toneColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
                   ),
-                  const SizedBox(width: Spacing.sm),
-                  SizedBox(
-                    width: 152,
+                  child: Icon(icon, size: IconSizes.sm, color: toneColor),
+                ),
+              ),
+              const SizedBox(width: Spacing.sm),
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: widget.onTap,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -129,65 +146,48 @@ class _ThemeCardState extends State<ThemeCard> {
                             if (_editingName)
                               SizedBox(
                                 width: 120,
-                                height: 24,
-                                child: TextField(
-                                  controller: _nameController,
+                                child: Focus(
                                   focusNode: _nameFocusNode,
-                                  maxLength: 30,
-                                  style: TextStyle(
-                                    fontSize: FontSizes.small,
-                                    fontWeight: FontWeight.w600,
-                                    color: cs.foreground,
-                                    decoration: TextDecoration.none,
-                                  ),
-                                  decoration: InputDecoration(
-                                    isDense: true,
-                                    contentPadding: const EdgeInsets.symmetric(
+                                  onFocusChange: (hasFocus) {
+                                    if (!hasFocus) _commitRename();
+                                  },
+                                  onKeyEvent: (node, event) {
+                                    if (event is KeyDownEvent &&
+                                        event.logicalKey == LogicalKeyboardKey.escape) {
+                                      _cancelRename();
+                                      return KeyEventResult.handled;
+                                    }
+                                    return KeyEventResult.ignored;
+                                  },
+                                  child: ShadInput(
+                                    controller: _nameController,
+                                    maxLength: 30,
+                                    padding: const EdgeInsets.symmetric(
                                       horizontal: Spacing.xs,
-                                      vertical: 0,
+                                      vertical: 2,
                                     ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                                      borderSide: BorderSide(color: cs.border),
+                                    style: TextStyle(
+                                      fontSize: FontSizes.small,
+                                      fontWeight: FontWeight.w600,
+                                      color: cs.foreground,
                                     ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                                      borderSide: BorderSide(color: cs.ring),
-                                    ),
-                                    counterText: '',
+                                    onSubmitted: (_) => _commitRename(),
                                   ),
-                                  onSubmitted: (_) => _commitRename(),
                                 ),
                               )
                             else ...[
-                              GestureDetector(
-                                onDoubleTap: _startRename,
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: 100),
-                                  child: Text(
-                                    widget.item.name,
-                                    style: TextStyle(
-                                      fontSize: FontSizes.small,
-                                      fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w400,
-                                      color: cs.foreground,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 120),
+                                child: Text(
+                                  widget.item.name,
+                                  style: TextStyle(
+                                    fontSize: FontSizes.small,
+                                    fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w400,
+                                    color: cs.foreground,
                                   ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              GestureDetector(
-                                onTap: _startRename,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(2),
-                                  child: Icon(
-                                    LucideIcons.pencil,
-                                    size: 10,
-                                    color: cs.mutedForeground.withValues(alpha: 0.6),
-                                  ),
-                                ),
-                              ),
-                            ],
-                            if (!_editingName) ...[
                               const SizedBox(width: Spacing.xs),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
@@ -216,88 +216,57 @@ class _ThemeCardState extends State<ThemeCard> {
                       ],
                     ),
                   ),
-                  if (widget.dirty)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4),
-                      child: Container(
-                        width: IndicatorTokens.dirtyDot,
-                        height: IndicatorTokens.dirtyDot,
-                        decoration: BoxDecoration(
-                          color: toneColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                  ShadPopover(
-                    controller: _menuController,
-                    closeOnTapOutside: true,
-                    popover: (_) => Container(
-                      width: 140,
-                      padding: const EdgeInsets.all(Spacing.xs),
-                      decoration: BoxDecoration(
-                        color: cs.popover,
-                        borderRadius: BorderRadius.circular(RadiusTokens.lg),
-                        border: Border.all(color: cs.border),
-                        boxShadow: ShadowTokens.cardElevated,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _MenuButton(
-                            icon: LucideIcons.pencil,
-                            label: '重命名',
-                            onTap: () {
-                              _menuController.hide();
-                              _startRename();
-                            },
-                          ),
-                          _MenuButton(
-                            icon: LucideIcons.copy,
-                            label: '复制',
-                            onTap: () {
-                              _menuController.hide();
-                              widget.onDuplicate();
-                            },
-                          ),
-                          _MenuButton(
-                            icon: LucideIcons.download,
-                            label: '导出 JSON',
-                            onTap: () {
-                              _menuController.hide();
-                              widget.onExport();
-                            },
-                          ),
-                          if (widget.canDelete)
-                            _MenuButton(
-                              icon: LucideIcons.trash2,
-                              label: '删除',
-                              destructive: true,
-                              onTap: () {
-                                _menuController.hide();
-                                widget.onDelete?.call();
-                              },
-                            ),
-                        ],
-                      ),
-                    ),
-                    child: GestureDetector(
-                      onTap: () => _menuController.toggle(),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Icon(
-                          LucideIcons.moreHorizontal,
-                          size: IconSizes.md,
-                          color: cs.mutedForeground,
-                        ),
-                      ),
+                ),
+              ),
+              if (widget.dirty)
+                Padding(
+                  padding: const EdgeInsets.only(top: Spacing.sm, left: 4),
+                  child: Container(
+                    width: IndicatorTokens.dirtyDot,
+                    height: IndicatorTokens.dirtyDot,
+                    decoration: BoxDecoration(
+                      color: toneColor,
+                      shape: BoxShape.circle,
                     ),
                   ),
+                ),
+              DropdownMenu(
+                controller: _menuController,
+                items: [
+                  DropdownItem(
+                    icon: LucideIcons.pencil,
+                    label: '重命名',
+                    onTap: _startRename,
+                  ),
+                  DropdownItem(
+                    icon: LucideIcons.copy,
+                    label: '复制',
+                    onTap: widget.onDuplicate,
+                  ),
+                  DropdownItem(
+                    icon: LucideIcons.download,
+                    label: '导出 JSON',
+                    onTap: widget.onExport,
+                  ),
+                  if (widget.canDelete)
+                    DropdownItem(
+                      icon: LucideIcons.trash2,
+                      label: '删除',
+                      destructive: true,
+                      onTap: () => widget.onDelete?.call(),
+                    ),
                 ],
+                child: Padding(
+                  padding: const EdgeInsets.only(top: Spacing.sm, right: Spacing.sm, left: 4),
+                  child: Icon(
+                    LucideIcons.moreHorizontal,
+                    size: IconSizes.md,
+                    color: cs.mutedForeground,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-          if (!widget.selected)
-            Divider(height: 0, thickness: 0.5, color: cs.border.withValues(alpha: 0.3)),
         ],
       ),
     );
@@ -322,48 +291,6 @@ class _ThemeCardState extends State<ThemeCard> {
             widget.onUpdateIcon?.call(widget.item.id, name);
             Navigator.of(ctx).pop();
           },
-        ),
-      ),
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
-// Menu Button (used by ThemeCard popover)
-// ═══════════════════════════════════════════════════════════
-
-class _MenuButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool destructive;
-  final VoidCallback onTap;
-
-  const _MenuButton({
-    required this.icon,
-    required this.label,
-    this.destructive = false,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = ShadTheme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.xs, vertical: 5),
-        child: Row(
-          children: [
-            Icon(icon, size: IconSizes.md, color: destructive ? cs.destructive : cs.foreground),
-            const SizedBox(width: Spacing.sm),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: FontSizes.small,
-                color: destructive ? cs.destructive : cs.foreground,
-              ),
-            ),
-          ],
         ),
       ),
     );

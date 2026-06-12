@@ -13,6 +13,7 @@ import '../../services/cursor_storage_service.dart';
 import '../../theme/tokens.dart';
 import '../base/panel_card.dart';
 import '../base/panel_meta.dart';
+import '../controls/wip_badge.dart';
 
 class CursorAppearanceCard extends StatelessWidget {
   const CursorAppearanceCard({super.key});
@@ -32,11 +33,15 @@ class CursorAppearanceCard extends StatelessWidget {
       summary: customizedCount == 0
           ? '系统默认'
           : '$customizedCount/${kCursorStates.length} 已自定义',
+      badge: const WipBadge(),
       defaultOpen: true,
-      child: _CursorGrid(
-        cursorStates: draft.cursorStates,
-        onUpload: (stateId, entry) => theme.updateCursorState(stateId, entry),
-        onRemove: (stateId) => theme.removeCursorState(stateId),
+      child: Opacity(
+        opacity: 0.5,
+        child: _CursorGrid(
+          cursorStates: draft.cursorStates,
+          onUpload: null,
+          onRemove: null,
+        ),
       ),
     );
   }
@@ -44,8 +49,8 @@ class CursorAppearanceCard extends StatelessWidget {
 
 class _CursorGrid extends StatelessWidget {
   final Map<String, CursorStateEntry> cursorStates;
-  final void Function(String stateId, CursorStateEntry entry) onUpload;
-  final void Function(String stateId) onRemove;
+  final void Function(String stateId, CursorStateEntry entry)? onUpload;
+  final void Function(String stateId)? onRemove;
 
   const _CursorGrid({
     required this.cursorStates,
@@ -73,8 +78,8 @@ class _CursorGrid extends StatelessWidget {
           cursorEntry: entry,
           brightness: brightness,
           colorScheme: cs,
-          onTap: () => _showDetailSheet(context, e.key, e.value, entry),
-          onRemove: entry != null ? () => onRemove(e.key) : null,
+          onTap: onUpload != null ? () => _showDetailSheet(context, e.key, e.value, entry) : null,
+          onRemove: (entry != null && onRemove != null) ? () => onRemove!(e.key) : null,
         );
       }).toList(),
     );
@@ -94,11 +99,11 @@ class _CursorGrid extends StatelessWidget {
         label: label,
         entry: existing,
         onUpload: (entry) {
-          onUpload(stateId, entry);
+          onUpload?.call(stateId, entry);
           Navigator.of(sheetContext).pop();
         },
         onRemove: () {
-          onRemove(stateId);
+          onRemove?.call(stateId);
           Navigator.of(sheetContext).pop();
         },
       ),
@@ -112,7 +117,7 @@ class _CursorCell extends StatelessWidget {
   final CursorStateEntry? cursorEntry;
   final Brightness brightness;
   final ShadColorScheme colorScheme;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final VoidCallback? onRemove;
 
   const _CursorCell({
@@ -121,7 +126,7 @@ class _CursorCell extends StatelessWidget {
     this.cursorEntry,
     required this.brightness,
     required this.colorScheme,
-    required this.onTap,
+    this.onTap,
     this.onRemove,
   });
 

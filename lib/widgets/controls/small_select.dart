@@ -66,6 +66,9 @@ class _SmallSelectState extends State<SmallSelect> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
+    final isDark = ShadTheme.of(context).brightness == Brightness.dark;
+
     return ShadSelect<String>(
       controller: _selectController,
       popoverController: _popoverController,
@@ -80,6 +83,15 @@ class _SmallSelectState extends State<SmallSelect> {
       padding: const EdgeInsets.symmetric(
         horizontal: Spacing.sm,
         vertical: 5,
+      ),
+      decoration: ShadDecoration(
+        border: ShadBorder(
+          top: ShadBorderSide(color: cs.border, width: 1),
+          right: ShadBorderSide(color: cs.border, width: 1),
+          bottom: ShadBorderSide(color: cs.border, width: 1),
+          left: ShadBorderSide(color: cs.border, width: 1),
+          radius: const BorderRadius.all(Radius.circular(RadiusTokens.xl)),
+        ),
       ),
     );
   }

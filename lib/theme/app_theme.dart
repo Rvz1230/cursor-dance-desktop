@@ -270,5 +270,5 @@ final _cardThemeDark = ShadCardTheme(
 final _optionTheme = ShadOptionTheme(
   hoveredBackgroundColor: AppColors.muted,
   padding: const EdgeInsets.symmetric(horizontal: Spacing.sm, vertical: 6),
-  radius: const BorderRadius.all(Radius.circular(RadiusTokens.sm)),
+  radius: const BorderRadius.all(Radius.circular(RadiusTokens.lg)),
 );

@@ -9,7 +9,7 @@ class ControlSlider extends StatefulWidget {
   final int max;
   final int? divisions;
   final String? suffix;
-  final ValueChanged<int> onChanged;
+  final ValueChanged<int>? onChanged;
 
   const ControlSlider({
     super.key,
@@ -18,7 +18,7 @@ class ControlSlider extends StatefulWidget {
     required this.max,
     this.divisions,
     this.suffix,
-    required this.onChanged,
+    this.onChanged,
   });
 
   @override
@@ -62,7 +62,7 @@ class _ControlSliderState extends State<ControlSlider> {
       final clamped = parsed.clamp(widget.min, widget.max);
       _textController.text = clamped.toString();
       _sliderController.value = (clamped - widget.min) / (widget.max - widget.min);
-      if (clamped != widget.value) widget.onChanged(clamped);
+      if (clamped != widget.value) widget.onChanged?.call(clamped);
     } else {
       _textController.text = widget.value.toString();
     }
@@ -100,11 +100,11 @@ class _ControlSliderState extends State<ControlSlider> {
               min: 0,
               max: 1,
               divisions: widget.divisions,
-              onChanged: (v) {
+              onChanged: widget.onChanged != null ? (v) {
                 final intVal = (v * range + widget.min).round();
                 _textController.text = intVal.toString();
-                widget.onChanged(intVal);
-              },
+                widget.onChanged?.call(intVal);
+              } : null,
             ),
           ),
           const SizedBox(width: Spacing.sm),

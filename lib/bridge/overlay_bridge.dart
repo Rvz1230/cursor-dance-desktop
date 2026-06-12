@@ -22,10 +22,10 @@ class OverlayBridge {
     }
   }
 
-  Future<BridgeResult> start(Map<String, dynamic> config) async {
+  Future<BridgeResult> start(Map<String, dynamic> payload) async {
     try {
       await _channel.invokeMethod('startOverlay', {
-        'config': jsonEncode(config),
+        'config': jsonEncode(payload),
       });
       return BridgeResult.success;
     } on PlatformException catch (e) {
@@ -61,6 +61,21 @@ class OverlayBridge {
       return BridgeResult.error;
     } catch (e) {
       debugPrint('OverlayBridge.updateConfig error: $e');
+      return BridgeResult.error;
+    }
+  }
+
+  Future<BridgeResult> updateAllConfigs(Map<String, dynamic> payload) async {
+    try {
+      await _channel.invokeMethod('updateAllConfigs', {
+        'config': jsonEncode(payload),
+      });
+      return BridgeResult.success;
+    } on PlatformException catch (e) {
+      debugPrint('OverlayBridge.updateAllConfigs error: ${e.message}');
+      return BridgeResult.error;
+    } catch (e) {
+      debugPrint('OverlayBridge.updateAllConfigs error: $e');
       return BridgeResult.error;
     }
   }
