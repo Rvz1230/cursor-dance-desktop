@@ -104,14 +104,6 @@ class ActionConfig with _$ActionConfig {
     @Default(0) int imageOffsetY,
     @Default(0) int imageDelay,
 
-    // ── Cursor ──
-    @Default('none') String cursorOverride,
-    @Default(32) int cursorSize,
-    @Default(false) bool cursorTrailEnabled,
-    @Default(5) int cursorTrailCount,
-    @Default(30) int cursorTrailOpacity,
-    @Default('') String cursorGlowColor,
-    @Default(0) int shake,
   }) = _ActionConfig;
 
   factory ActionConfig.fromJson(Map<String, dynamic> json) =>

@@ -105,14 +105,7 @@ mixin _$ActionConfig {
   int get imageOpacity => throw _privateConstructorUsedError;
   int get imageOffsetX => throw _privateConstructorUsedError;
   int get imageOffsetY => throw _privateConstructorUsedError;
-  int get imageDelay => throw _privateConstructorUsedError; // ── Cursor ──
-  String get cursorOverride => throw _privateConstructorUsedError;
-  int get cursorSize => throw _privateConstructorUsedError;
-  bool get cursorTrailEnabled => throw _privateConstructorUsedError;
-  int get cursorTrailCount => throw _privateConstructorUsedError;
-  int get cursorTrailOpacity => throw _privateConstructorUsedError;
-  String get cursorGlowColor => throw _privateConstructorUsedError;
-  int get shake => throw _privateConstructorUsedError;
+  int get imageDelay => throw _privateConstructorUsedError;
 
   /// Serializes this ActionConfig to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -215,13 +208,6 @@ abstract class $ActionConfigCopyWith<$Res> {
     int imageOffsetX,
     int imageOffsetY,
     int imageDelay,
-    String cursorOverride,
-    int cursorSize,
-    bool cursorTrailEnabled,
-    int cursorTrailCount,
-    int cursorTrailOpacity,
-    String cursorGlowColor,
-    int shake,
   });
 }
 
@@ -323,13 +309,6 @@ class _$ActionConfigCopyWithImpl<$Res, $Val extends ActionConfig>
     Object? imageOffsetX = null,
     Object? imageOffsetY = null,
     Object? imageDelay = null,
-    Object? cursorOverride = null,
-    Object? cursorSize = null,
-    Object? cursorTrailEnabled = null,
-    Object? cursorTrailCount = null,
-    Object? cursorTrailOpacity = null,
-    Object? cursorGlowColor = null,
-    Object? shake = null,
   }) {
     return _then(
       _value.copyWith(
@@ -665,34 +644,6 @@ class _$ActionConfigCopyWithImpl<$Res, $Val extends ActionConfig>
                 ? _value.imageDelay
                 : imageDelay // ignore: cast_nullable_to_non_nullable
                       as int,
-            cursorOverride: null == cursorOverride
-                ? _value.cursorOverride
-                : cursorOverride // ignore: cast_nullable_to_non_nullable
-                      as String,
-            cursorSize: null == cursorSize
-                ? _value.cursorSize
-                : cursorSize // ignore: cast_nullable_to_non_nullable
-                      as int,
-            cursorTrailEnabled: null == cursorTrailEnabled
-                ? _value.cursorTrailEnabled
-                : cursorTrailEnabled // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            cursorTrailCount: null == cursorTrailCount
-                ? _value.cursorTrailCount
-                : cursorTrailCount // ignore: cast_nullable_to_non_nullable
-                      as int,
-            cursorTrailOpacity: null == cursorTrailOpacity
-                ? _value.cursorTrailOpacity
-                : cursorTrailOpacity // ignore: cast_nullable_to_non_nullable
-                      as int,
-            cursorGlowColor: null == cursorGlowColor
-                ? _value.cursorGlowColor
-                : cursorGlowColor // ignore: cast_nullable_to_non_nullable
-                      as String,
-            shake: null == shake
-                ? _value.shake
-                : shake // ignore: cast_nullable_to_non_nullable
-                      as int,
           )
           as $Val,
     );
@@ -792,13 +743,6 @@ abstract class _$$ActionConfigImplCopyWith<$Res>
     int imageOffsetX,
     int imageOffsetY,
     int imageDelay,
-    String cursorOverride,
-    int cursorSize,
-    bool cursorTrailEnabled,
-    int cursorTrailCount,
-    int cursorTrailOpacity,
-    String cursorGlowColor,
-    int shake,
   });
 }
 
@@ -899,13 +843,6 @@ class __$$ActionConfigImplCopyWithImpl<$Res>
     Object? imageOffsetX = null,
     Object? imageOffsetY = null,
     Object? imageDelay = null,
-    Object? cursorOverride = null,
-    Object? cursorSize = null,
-    Object? cursorTrailEnabled = null,
-    Object? cursorTrailCount = null,
-    Object? cursorTrailOpacity = null,
-    Object? cursorGlowColor = null,
-    Object? shake = null,
   }) {
     return _then(
       _$ActionConfigImpl(
@@ -1241,34 +1178,6 @@ class __$$ActionConfigImplCopyWithImpl<$Res>
             ? _value.imageDelay
             : imageDelay // ignore: cast_nullable_to_non_nullable
                   as int,
-        cursorOverride: null == cursorOverride
-            ? _value.cursorOverride
-            : cursorOverride // ignore: cast_nullable_to_non_nullable
-                  as String,
-        cursorSize: null == cursorSize
-            ? _value.cursorSize
-            : cursorSize // ignore: cast_nullable_to_non_nullable
-                  as int,
-        cursorTrailEnabled: null == cursorTrailEnabled
-            ? _value.cursorTrailEnabled
-            : cursorTrailEnabled // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        cursorTrailCount: null == cursorTrailCount
-            ? _value.cursorTrailCount
-            : cursorTrailCount // ignore: cast_nullable_to_non_nullable
-                  as int,
-        cursorTrailOpacity: null == cursorTrailOpacity
-            ? _value.cursorTrailOpacity
-            : cursorTrailOpacity // ignore: cast_nullable_to_non_nullable
-                  as int,
-        cursorGlowColor: null == cursorGlowColor
-            ? _value.cursorGlowColor
-            : cursorGlowColor // ignore: cast_nullable_to_non_nullable
-                  as String,
-        shake: null == shake
-            ? _value.shake
-            : shake // ignore: cast_nullable_to_non_nullable
-                  as int,
       ),
     );
   }
@@ -1367,13 +1276,6 @@ class _$ActionConfigImpl implements _ActionConfig {
     this.imageOffsetX = 0,
     this.imageOffsetY = 0,
     this.imageDelay = 0,
-    this.cursorOverride = 'none',
-    this.cursorSize = 32,
-    this.cursorTrailEnabled = false,
-    this.cursorTrailCount = 5,
-    this.cursorTrailOpacity = 30,
-    this.cursorGlowColor = '',
-    this.shake = 0,
   }) : _textTags = textTags,
        _particlePalette = particlePalette;
 
@@ -1648,32 +1550,10 @@ class _$ActionConfigImpl implements _ActionConfig {
   @override
   @JsonKey()
   final int imageDelay;
-  // ── Cursor ──
-  @override
-  @JsonKey()
-  final String cursorOverride;
-  @override
-  @JsonKey()
-  final int cursorSize;
-  @override
-  @JsonKey()
-  final bool cursorTrailEnabled;
-  @override
-  @JsonKey()
-  final int cursorTrailCount;
-  @override
-  @JsonKey()
-  final int cursorTrailOpacity;
-  @override
-  @JsonKey()
-  final String cursorGlowColor;
-  @override
-  @JsonKey()
-  final int shake;
 
   @override
   String toString() {
-    return 'ActionConfig(triggerTiming: $triggerTiming, triggerZone: $triggerZone, holdMs: $holdMs, textEnabled: $textEnabled, textKind: $textKind, textStyle: $textStyle, textMode: $textMode, textTemplate: $textTemplate, textContent: $textContent, textTags: $textTags, textTagPlayMode: $textTagPlayMode, textColor: $textColor, textDuration: $textDuration, textEasing: $textEasing, textOpacity: $textOpacity, textFontFamily: $textFontFamily, textWeight: $textWeight, textOutlineWidth: $textOutlineWidth, textShadow: $textShadow, comboEnabled: $comboEnabled, comboWindowMs: $comboWindowMs, textOffsetX: $textOffsetX, textOffsetY: $textOffsetY, fontSize: $fontSize, textGradient: $textGradient, textGradientStart: $textGradientStart, textGradientEnd: $textGradientEnd, textDelay: $textDelay, particle: $particle, particleCount: $particleCount, particleSpread: $particleSpread, particleStyle: $particleStyle, particleDirection: $particleDirection, particleColorMode: $particleColorMode, particleDuration: $particleDuration, particleSize: $particleSize, particleOpacity: $particleOpacity, particlePalette: $particlePalette, particleGravity: $particleGravity, particleWind: $particleWind, particleBounce: $particleBounce, particleTrail: $particleTrail, particleDelay: $particleDelay, particleMotionMode: $particleMotionMode, orbitalCount: $orbitalCount, orbitalRadius: $orbitalRadius, orbitalSpeed: $orbitalSpeed, ripple: $ripple, rippleSize: $rippleSize, rippleDuration: $rippleDuration, rippleStyle: $rippleStyle, rippleEasing: $rippleEasing, rippleLineWidth: $rippleLineWidth, rippleOpacity: $rippleOpacity, rippleColor: $rippleColor, rippleDelay: $rippleDelay, sound: $sound, soundFile: $soundFile, volume: $volume, playbackRate: $playbackRate, soundDelay: $soundDelay, soundFadeOut: $soundFadeOut, soundTriggerMode: $soundTriggerMode, soundBlendMode: $soundBlendMode, animationEnabled: $animationEnabled, animationStyle: $animationStyle, animationDuration: $animationDuration, animationEasing: $animationEasing, animationScale: $animationScale, animationOpacity: $animationOpacity, animationOffsetX: $animationOffsetX, animationOffsetY: $animationOffsetY, animationColor: $animationColor, animationGlow: $animationGlow, animationDelay: $animationDelay, imageEnabled: $imageEnabled, imageDataUrl: $imageDataUrl, imageDuration: $imageDuration, imageSize: $imageSize, imageOpacity: $imageOpacity, imageOffsetX: $imageOffsetX, imageOffsetY: $imageOffsetY, imageDelay: $imageDelay, cursorOverride: $cursorOverride, cursorSize: $cursorSize, cursorTrailEnabled: $cursorTrailEnabled, cursorTrailCount: $cursorTrailCount, cursorTrailOpacity: $cursorTrailOpacity, cursorGlowColor: $cursorGlowColor, shake: $shake)';
+    return 'ActionConfig(triggerTiming: $triggerTiming, triggerZone: $triggerZone, holdMs: $holdMs, textEnabled: $textEnabled, textKind: $textKind, textStyle: $textStyle, textMode: $textMode, textTemplate: $textTemplate, textContent: $textContent, textTags: $textTags, textTagPlayMode: $textTagPlayMode, textColor: $textColor, textDuration: $textDuration, textEasing: $textEasing, textOpacity: $textOpacity, textFontFamily: $textFontFamily, textWeight: $textWeight, textOutlineWidth: $textOutlineWidth, textShadow: $textShadow, comboEnabled: $comboEnabled, comboWindowMs: $comboWindowMs, textOffsetX: $textOffsetX, textOffsetY: $textOffsetY, fontSize: $fontSize, textGradient: $textGradient, textGradientStart: $textGradientStart, textGradientEnd: $textGradientEnd, textDelay: $textDelay, particle: $particle, particleCount: $particleCount, particleSpread: $particleSpread, particleStyle: $particleStyle, particleDirection: $particleDirection, particleColorMode: $particleColorMode, particleDuration: $particleDuration, particleSize: $particleSize, particleOpacity: $particleOpacity, particlePalette: $particlePalette, particleGravity: $particleGravity, particleWind: $particleWind, particleBounce: $particleBounce, particleTrail: $particleTrail, particleDelay: $particleDelay, particleMotionMode: $particleMotionMode, orbitalCount: $orbitalCount, orbitalRadius: $orbitalRadius, orbitalSpeed: $orbitalSpeed, ripple: $ripple, rippleSize: $rippleSize, rippleDuration: $rippleDuration, rippleStyle: $rippleStyle, rippleEasing: $rippleEasing, rippleLineWidth: $rippleLineWidth, rippleOpacity: $rippleOpacity, rippleColor: $rippleColor, rippleDelay: $rippleDelay, sound: $sound, soundFile: $soundFile, volume: $volume, playbackRate: $playbackRate, soundDelay: $soundDelay, soundFadeOut: $soundFadeOut, soundTriggerMode: $soundTriggerMode, soundBlendMode: $soundBlendMode, animationEnabled: $animationEnabled, animationStyle: $animationStyle, animationDuration: $animationDuration, animationEasing: $animationEasing, animationScale: $animationScale, animationOpacity: $animationOpacity, animationOffsetX: $animationOffsetX, animationOffsetY: $animationOffsetY, animationColor: $animationColor, animationGlow: $animationGlow, animationDelay: $animationDelay, imageEnabled: $imageEnabled, imageDataUrl: $imageDataUrl, imageDuration: $imageDuration, imageSize: $imageSize, imageOpacity: $imageOpacity, imageOffsetX: $imageOffsetX, imageOffsetY: $imageOffsetY, imageDelay: $imageDelay)';
   }
 
   @override
@@ -1843,20 +1723,7 @@ class _$ActionConfigImpl implements _ActionConfig {
             (identical(other.imageOffsetY, imageOffsetY) ||
                 other.imageOffsetY == imageOffsetY) &&
             (identical(other.imageDelay, imageDelay) ||
-                other.imageDelay == imageDelay) &&
-            (identical(other.cursorOverride, cursorOverride) ||
-                other.cursorOverride == cursorOverride) &&
-            (identical(other.cursorSize, cursorSize) ||
-                other.cursorSize == cursorSize) &&
-            (identical(other.cursorTrailEnabled, cursorTrailEnabled) ||
-                other.cursorTrailEnabled == cursorTrailEnabled) &&
-            (identical(other.cursorTrailCount, cursorTrailCount) ||
-                other.cursorTrailCount == cursorTrailCount) &&
-            (identical(other.cursorTrailOpacity, cursorTrailOpacity) ||
-                other.cursorTrailOpacity == cursorTrailOpacity) &&
-            (identical(other.cursorGlowColor, cursorGlowColor) ||
-                other.cursorGlowColor == cursorGlowColor) &&
-            (identical(other.shake, shake) || other.shake == shake));
+                other.imageDelay == imageDelay));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1946,13 +1813,6 @@ class _$ActionConfigImpl implements _ActionConfig {
     imageOffsetX,
     imageOffsetY,
     imageDelay,
-    cursorOverride,
-    cursorSize,
-    cursorTrailEnabled,
-    cursorTrailCount,
-    cursorTrailOpacity,
-    cursorGlowColor,
-    shake,
   ]);
 
   /// Create a copy of ActionConfig
@@ -2054,13 +1914,6 @@ abstract class _ActionConfig implements ActionConfig {
     final int imageOffsetX,
     final int imageOffsetY,
     final int imageDelay,
-    final String cursorOverride,
-    final int cursorSize,
-    final bool cursorTrailEnabled,
-    final int cursorTrailCount,
-    final int cursorTrailOpacity,
-    final String cursorGlowColor,
-    final int shake,
   }) = _$ActionConfigImpl;
 
   factory _ActionConfig.fromJson(Map<String, dynamic> json) =
@@ -2232,21 +2085,7 @@ abstract class _ActionConfig implements ActionConfig {
   @override
   int get imageOffsetY;
   @override
-  int get imageDelay; // ── Cursor ──
-  @override
-  String get cursorOverride;
-  @override
-  int get cursorSize;
-  @override
-  bool get cursorTrailEnabled;
-  @override
-  int get cursorTrailCount;
-  @override
-  int get cursorTrailOpacity;
-  @override
-  String get cursorGlowColor;
-  @override
-  int get shake;
+  int get imageDelay;
 
   /// Create a copy of ActionConfig
   /// with the given fields replaced by the non-null parameter values.

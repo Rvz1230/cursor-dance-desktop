@@ -9,9 +9,7 @@ class ThemeImportResult {
   final String name;
   final String icon;
   final Map<String, ActionConfig> actionConfigs;
-  final Map<String, String> cursorModes;
-  final Map<String, String> cursorStateActions;
-  final Map<String, CursorStateAsset> cursorStateAssets;
+  final Map<String, CursorStateEntry> cursorStates;
   final String? error;
 
   const ThemeImportResult({
@@ -19,9 +17,7 @@ class ThemeImportResult {
     required this.name,
     required this.icon,
     this.actionConfigs = const {},
-    this.cursorModes = const {},
-    this.cursorStateActions = const {},
-    this.cursorStateAssets = const {},
+    this.cursorStates = const {},
     this.error,
   });
 }
@@ -53,9 +49,7 @@ class ThemeIoService {
         name: name,
         icon: icon,
         actionConfigs: draft.actionConfigs,
-        cursorModes: draft.cursorModes,
-        cursorStateActions: draft.cursorStateActions,
-        cursorStateAssets: draft.cursorStateAssets,
+        cursorStates: draft.cursorStates,
       );
     } catch (e) {
       return ThemeImportResult(id: '', name: '', icon: '', error: e.toString());

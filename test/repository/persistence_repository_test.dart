@@ -35,9 +35,7 @@ void main() {
               'leftClick': {'textEnabled': true, 'particle': true},
             },
             'atmosphere': {'mode': 'none'},
-            'cursorModes': <String, dynamic>{},
-            'cursorStateActions': <String, dynamic>{},
-            'cursorStateAssets': <String, dynamic>{},
+            'cursorStates': <String, dynamic>{},
           },
         },
       };

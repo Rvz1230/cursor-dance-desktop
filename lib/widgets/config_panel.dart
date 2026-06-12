@@ -12,7 +12,6 @@ import 'panels/ripple_feedback_card.dart';
 import 'panels/audio_feedback_card.dart';
 import 'panels/animation_feedback_card.dart';
 import 'panels/image_feedback_card.dart';
-import 'panels/cursor_feedback_card.dart';
 
 class ConfigPanel extends StatelessWidget {
   final String actionId;
@@ -78,8 +77,6 @@ class ConfigPanel extends StatelessWidget {
         AnimationFeedbackCard(config: config, onUpdate: onUpdateConfig),
         const SizedBox(height: Spacing.md),
         ImageFeedbackCard(config: config, onUpdate: onUpdateConfig),
-        const SizedBox(height: Spacing.md),
-        CursorFeedbackCard(config: config, onUpdate: onUpdateConfig),
         const SizedBox(height: Spacing.xl),
       ],
     );

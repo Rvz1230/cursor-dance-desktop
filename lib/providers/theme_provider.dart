@@ -5,6 +5,7 @@ import '../models/key_feedback_config.dart';
 import '../models/theme.dart';
 import '../models/theme_draft.dart';
 import '../repository/persistence_repository.dart';
+import '../services/cursor_storage_service.dart';
 import '../services/preset_loader.dart';
 import '../services/theme_io_service.dart';
 
@@ -136,12 +137,17 @@ class ThemeProvider extends ChangeNotifier {
   void removeCursorState(String stateId) {
     _ensureDraft(_selectedThemeId);
     final draft = _draftsByTheme[_selectedThemeId]!;
+    final old = draft.cursorStates[stateId];
     final cursorStates = Map<String, CursorStateEntry>.from(draft.cursorStates);
     cursorStates.remove(stateId);
     _draftsByTheme[_selectedThemeId] =
         draft.copyWith(cursorStates: cursorStates);
     _unsaved = true;
     _dirtyThemes[_selectedThemeId] = true;
+    // Clean up file
+    if (old != null) {
+      CursorStorageService.instance.delete(old.imagePath);
+    }
     notifyListeners();
   }
 

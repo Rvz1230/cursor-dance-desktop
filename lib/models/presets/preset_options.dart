@@ -55,11 +55,6 @@ const kAnimationEasingOptions = ['线性', '缓入', '缓出', '缓入缓出', '
 // ── Image options ─────────────────────────────────────────
 // (imageDataUrl uses file picker, no preset list)
 
-// ── Cursor options ────────────────────────────────────────
-
-const kCursorOverrideOptions = ['none', 'pointer', 'crosshair', 'beam'];
-const kCursorSizeOptions = ['24', '32', '48', '64'];
-
 // ── Easing options (shared) ───────────────────────────────
 
 const kEasingOptions = ['线性', '缓入', '缓出', '缓入缓出', '弹跳', '弹性'];

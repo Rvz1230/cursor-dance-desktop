@@ -15,18 +15,36 @@ class AtmosphereConfig with _$AtmosphereConfig {
       _$AtmosphereConfigFromJson(json);
 }
 
+/// Single cursor state customization.
 @freezed
-class CursorStateAsset with _$CursorStateAsset {
-  const factory CursorStateAsset({
-    @Default('') String imageDataUrl,
-    @Default(16) int hotspotX,
-    @Default(32) int hotspotY,
+class CursorStateEntry with _$CursorStateEntry {
+  const factory CursorStateEntry({
+    /// Relative path under cursordance/cursors/ (e.g. "arrow.png")
+    @Default('') String imagePath,
+    @Default('') String imageFormat,
+    @Default(0) int hotspotX,
+    @Default(0) int hotspotY,
     @Default(48) int size,
-  }) = _CursorStateAsset;
+    @Default(false) bool isAnimated,
+    @Default(0) int frameCount,
+    @Default(0) int fps,
+  }) = _CursorStateEntry;
 
-  factory CursorStateAsset.fromJson(Map<String, dynamic> json) =>
-      _$CursorStateAssetFromJson(json);
+  factory CursorStateEntry.fromJson(Map<String, dynamic> json) =>
+      _$CursorStateEntryFromJson(json);
 }
+
+/// Fixed cursor state IDs and their labels.
+const kCursorStates = <String, String>{
+  'arrow': '默认箭头',
+  'pointer': '指向手',
+  'ibeam': '文本插入',
+  'crosshair': '十字准星',
+  'openHand': '抓取手',
+  'closedHand': '拖拽中',
+  'resize': '调整大小',
+  'forbidden': '禁止',
+};
 
 /// ThemeDraft: per-theme full config including all actions.
 ///
@@ -34,31 +52,23 @@ class CursorStateAsset with _$CursorStateAsset {
 /// contains initialization logic.
 class ThemeDraft {
   final Map<String, ActionConfig> actionConfigs;
-  final Map<String, String> cursorModes;
-  final Map<String, String> cursorStateActions;
-  final Map<String, CursorStateAsset> cursorStateAssets;
+  final Map<String, CursorStateEntry> cursorStates;
   final AtmosphereConfig atmosphere;
 
   const ThemeDraft({
     required this.actionConfigs,
-    this.cursorModes = const {},
-    this.cursorStateActions = const {},
-    this.cursorStateAssets = const {},
+    this.cursorStates = const {},
     this.atmosphere = const AtmosphereConfig(),
   });
 
   ThemeDraft copyWith({
     Map<String, ActionConfig>? actionConfigs,
-    Map<String, String>? cursorModes,
-    Map<String, String>? cursorStateActions,
-    Map<String, CursorStateAsset>? cursorStateAssets,
+    Map<String, CursorStateEntry>? cursorStates,
     AtmosphereConfig? atmosphere,
   }) {
     return ThemeDraft(
       actionConfigs: actionConfigs ?? this.actionConfigs,
-      cursorModes: cursorModes ?? this.cursorModes,
-      cursorStateActions: cursorStateActions ?? this.cursorStateActions,
-      cursorStateAssets: cursorStateAssets ?? this.cursorStateAssets,
+      cursorStates: cursorStates ?? this.cursorStates,
       atmosphere: atmosphere ?? this.atmosphere,
     );
   }
@@ -71,10 +81,8 @@ class ThemeDraft {
     return {
       'actionConfigs': actionConfigs.map((k, v) => MapEntry(k, v.toJson())),
       'atmosphere': atmosphere.toJson(),
-      'cursorModes': cursorModes,
-      'cursorStateActions': cursorStateActions,
-      'cursorStateAssets':
-          cursorStateAssets.map((k, v) => MapEntry(k, v.toJson())),
+      'cursorStates':
+          cursorStates.map((k, v) => MapEntry(k, v.toJson())),
     };
   }
 
@@ -88,6 +96,14 @@ class ThemeDraft {
       }
     }
 
+    // Migrate old cursor fields if present
+    Map<String, CursorStateEntry> cursorStates = {};
+    final rawCursorStates = json['cursorStates'] as Map<String, dynamic>?;
+    if (rawCursorStates != null) {
+      cursorStates = rawCursorStates.map((k, v) => MapEntry(
+          k, CursorStateEntry.fromJson(v as Map<String, dynamic>)));
+    }
+
     return ThemeDraft(
       actionConfigs: actionConfigs,
       atmosphere: json['atmosphere'] != null
@@ -95,19 +111,7 @@ class ThemeDraft {
               json['atmosphere'] as Map<String, dynamic>,
             )
           : const AtmosphereConfig(),
-      cursorModes:
-          (json['cursorModes'] as Map<String, dynamic>?)
-                  ?.map((k, v) => MapEntry(k, v as String)) ??
-              const {},
-      cursorStateActions:
-          (json['cursorStateActions'] as Map<String, dynamic>?)
-                  ?.map((k, v) => MapEntry(k, v as String)) ??
-              const {},
-      cursorStateAssets:
-          (json['cursorStateAssets'] as Map<String, dynamic>?)
-                  ?.map((k, v) => MapEntry(
-                      k, CursorStateAsset.fromJson(v as Map<String, dynamic>))) ??
-              const {},
+      cursorStates: cursorStates,
     );
   }
 }

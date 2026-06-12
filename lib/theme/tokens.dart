@@ -26,6 +26,23 @@ class IconSizes {
   static const double xxl = 32;
 }
 
+// ── Indicator tokens ─────────────────────────────────────
+
+class IndicatorTokens {
+  IndicatorTokens._();
+  static const double dirtyDot = 6;
+  static const double badgePaddingV = 1;
+}
+
+// ── Layout tokens ────────────────────────────────────────
+
+class LayoutTokens {
+  LayoutTokens._();
+  static const double sidebarWidth = 220;
+  static const double sidebarHeaderHeight = 40;
+  static const double previewToolbarHeight = 34;
+}
+
 // ── Radius ───────────────────────────────────────────────
 // Soft-Minimal Linear 风格
 
@@ -145,8 +162,8 @@ class AppColors {
   static const Color toneAnimationFg = Color(0xFF0E7490);
   static const Color toneImageBg = Color(0xFFFAE8FF);
   static const Color toneImageFg = Color(0xFFA21CAF);
-  static const Color toneCursorBg = Color(0xFFF1F5F9);
-  static const Color toneCursorFg = Color(0xFF334155);
+  static const Color toneCursorAppearanceBg = Color(0xFFF0F4FF);
+  static const Color toneCursorAppearanceFg = Color(0xFF3B5998);
   static const Color toneKeyboardBg = Color(0xFFE0E7FF);
   static const Color toneKeyboardFg = Color(0xFF4F46E5);
 }
@@ -196,8 +213,8 @@ class AppDarkColors {
   static const Color toneAnimationFg = Color(0xFF67E8F9);
   static const Color toneImageBg = Color(0xFF4A044E);
   static const Color toneImageFg = Color(0xFFF0ABFC);
-  static const Color toneCursorBg = Color(0xFF334155);
-  static const Color toneCursorFg = Color(0xFFE2E8F0);
+  static const Color toneCursorAppearanceBg = Color(0xFF1E3A5F);
+  static const Color toneCursorAppearanceFg = Color(0xFF93B5E1);
   static const Color toneKeyboardBg = Color(0xFF312E81);
   static const Color toneKeyboardFg = Color(0xFFA5B4FC);
 }
@@ -212,5 +229,14 @@ const kToneColors = <String, Color>{
   'sky': Color(0xFF0EA5E9),
 };
 
-Color resolveToneColor(String tone) =>
-    kToneColors[tone] ?? kToneColors['teal']!;
+Color resolveToneColor(String tone) {
+  final match = kToneColors[tone];
+  if (match != null) return match;
+  // Custom themes: deterministic hash-based pick
+  var hash = 0;
+  for (var i = 0; i < tone.length; i++) {
+    hash = (hash * 31 + tone.codeUnitAt(i)) & 0x7FFFFFFF;
+  }
+  final colors = kToneColors.values.toList();
+  return colors[hash % colors.length];
+}

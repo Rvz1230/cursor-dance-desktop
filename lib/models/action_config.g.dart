@@ -99,13 +99,6 @@ _$ActionConfigImpl _$$ActionConfigImplFromJson(Map<String, dynamic> json) =>
       imageOffsetX: (json['imageOffsetX'] as num?)?.toInt() ?? 0,
       imageOffsetY: (json['imageOffsetY'] as num?)?.toInt() ?? 0,
       imageDelay: (json['imageDelay'] as num?)?.toInt() ?? 0,
-      cursorOverride: json['cursorOverride'] as String? ?? 'none',
-      cursorSize: (json['cursorSize'] as num?)?.toInt() ?? 32,
-      cursorTrailEnabled: json['cursorTrailEnabled'] as bool? ?? false,
-      cursorTrailCount: (json['cursorTrailCount'] as num?)?.toInt() ?? 5,
-      cursorTrailOpacity: (json['cursorTrailOpacity'] as num?)?.toInt() ?? 30,
-      cursorGlowColor: json['cursorGlowColor'] as String? ?? '',
-      shake: (json['shake'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$$ActionConfigImplToJson(_$ActionConfigImpl instance) =>
@@ -193,11 +186,4 @@ Map<String, dynamic> _$$ActionConfigImplToJson(_$ActionConfigImpl instance) =>
       'imageOffsetX': instance.imageOffsetX,
       'imageOffsetY': instance.imageOffsetY,
       'imageDelay': instance.imageDelay,
-      'cursorOverride': instance.cursorOverride,
-      'cursorSize': instance.cursorSize,
-      'cursorTrailEnabled': instance.cursorTrailEnabled,
-      'cursorTrailCount': instance.cursorTrailCount,
-      'cursorTrailOpacity': instance.cursorTrailOpacity,
-      'cursorGlowColor': instance.cursorGlowColor,
-      'shake': instance.shake,
     };

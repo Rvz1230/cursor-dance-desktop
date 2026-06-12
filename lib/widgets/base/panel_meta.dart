@@ -86,9 +86,9 @@ class PanelMetaRegistry {
 
   static const cursor = PanelMeta(
     icon: LucideIcons.mousePointer2,
-    lightBg: AppColors.toneCursorBg,
-    lightFg: AppColors.toneCursorFg,
-    darkBg: AppDarkColors.toneCursorBg,
-    darkFg: AppDarkColors.toneCursorFg,
+    lightBg: AppColors.toneCursorAppearanceBg,
+    lightFg: AppColors.toneCursorAppearanceFg,
+    darkBg: AppDarkColors.toneCursorAppearanceBg,
+    darkFg: AppDarkColors.toneCursorAppearanceFg,
   );
 }

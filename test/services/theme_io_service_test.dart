@@ -29,10 +29,11 @@ void main() {
           ),
           'rightClick': const ActionConfig(ripple: true),
         },
-        cursorModes: {'default': 'pointer'},
-        cursorStateActions: {'click': 'leftClick'},
-        cursorStateAssets: {
-          'press': CursorStateAsset(imageDataUrl: 'data:png', size: 32),
+        cursorStates: {
+          'arrow': const CursorStateEntry(
+            imagePath: 'arrow.png',
+            size: 32,
+          ),
         },
         atmosphere: const AtmosphereConfig(mode: 'rain'),
       );
@@ -44,9 +45,7 @@ void main() {
       expect(result.actionConfigs['leftClick']!.textEnabled, true);
       expect(result.actionConfigs['leftClick']!.particleCount, 30);
       expect(result.actionConfigs['rightClick']!.ripple, true);
-      expect(result.cursorModes, {'default': 'pointer'});
-      expect(result.cursorStateActions, {'click': 'leftClick'});
-      expect(result.cursorStateAssets['press']!.imageDataUrl, 'data:png');
+      expect(result.cursorStates['arrow']!.imagePath, 'arrow.png');
     });
 
     test('importTheme returns error for invalid JSON', () {

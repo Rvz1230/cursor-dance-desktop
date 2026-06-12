@@ -29,8 +29,6 @@ void main() {
     });
 
     test('action_config_leftClick.json matches leftClick preset output', () {
-      // Simulate what a leftClick config looks like after factory preset
-      // merge (ActionConfig defaults + factory override)
       const config = ActionConfig(
         textKind: '数字飘字',
         textEnabled: true,
@@ -62,12 +60,6 @@ void main() {
         volume: 72,
         soundFadeOut: 80,
         soundTriggerMode: '每次触发',
-        shake: 48,
-        cursorOverride: '木鱼（继承默认）',
-        cursorTrailEnabled: true,
-        cursorTrailCount: 4,
-        cursorTrailOpacity: 36,
-        cursorGlowColor: '#F59E0B',
       );
       final json = config.toJson();
       final pretty = const JsonEncoder.withIndent('  ').convert(json);
@@ -82,11 +74,9 @@ void main() {
           'leftClick': const ActionConfig(textEnabled: true, particle: true),
           'rightClick': const ActionConfig(ripple: true),
         },
-        cursorModes: {'default': 'pointer'},
-        cursorStateActions: {'click': 'leftClick'},
-        cursorStateAssets: {
-          'press': CursorStateAsset(
-            imageDataUrl: 'data:image/png;base64,abc',
+        cursorStates: {
+          'arrow': const CursorStateEntry(
+            imagePath: 'arrow.png',
             hotspotX: 8,
             hotspotY: 16,
             size: 32,

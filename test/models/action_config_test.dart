@@ -14,7 +14,6 @@ void main() {
       expect(config.sound, false);
       expect(config.animationEnabled, false);
       expect(config.imageEnabled, false);
-      expect(config.cursorOverride, 'none');
       expect(config.comboEnabled, false);
     });
 
@@ -37,9 +36,6 @@ void main() {
         animationStyle: '缩放脉冲',
         imageEnabled: true,
         imageDataUrl: 'data:image/png;base64,abc',
-        cursorOverride: 'custom',
-        cursorSize: 48,
-        shake: 20,
         comboEnabled: true,
         comboWindowMs: 1000,
       );

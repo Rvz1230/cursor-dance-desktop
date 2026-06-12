@@ -14,20 +14,28 @@ Map<String, dynamic> _$$AtmosphereConfigImplToJson(
   _$AtmosphereConfigImpl instance,
 ) => <String, dynamic>{'mode': instance.mode};
 
-_$CursorStateAssetImpl _$$CursorStateAssetImplFromJson(
+_$CursorStateEntryImpl _$$CursorStateEntryImplFromJson(
   Map<String, dynamic> json,
-) => _$CursorStateAssetImpl(
-  imageDataUrl: json['imageDataUrl'] as String? ?? '',
-  hotspotX: (json['hotspotX'] as num?)?.toInt() ?? 16,
-  hotspotY: (json['hotspotY'] as num?)?.toInt() ?? 32,
+) => _$CursorStateEntryImpl(
+  imagePath: json['imagePath'] as String? ?? '',
+  imageFormat: json['imageFormat'] as String? ?? '',
+  hotspotX: (json['hotspotX'] as num?)?.toInt() ?? 0,
+  hotspotY: (json['hotspotY'] as num?)?.toInt() ?? 0,
   size: (json['size'] as num?)?.toInt() ?? 48,
+  isAnimated: json['isAnimated'] as bool? ?? false,
+  frameCount: (json['frameCount'] as num?)?.toInt() ?? 0,
+  fps: (json['fps'] as num?)?.toInt() ?? 0,
 );
 
-Map<String, dynamic> _$$CursorStateAssetImplToJson(
-  _$CursorStateAssetImpl instance,
+Map<String, dynamic> _$$CursorStateEntryImplToJson(
+  _$CursorStateEntryImpl instance,
 ) => <String, dynamic>{
-  'imageDataUrl': instance.imageDataUrl,
+  'imagePath': instance.imagePath,
+  'imageFormat': instance.imageFormat,
   'hotspotX': instance.hotspotX,
   'hotspotY': instance.hotspotY,
   'size': instance.size,
+  'isAnimated': instance.isAnimated,
+  'frameCount': instance.frameCount,
+  'fps': instance.fps,
 };

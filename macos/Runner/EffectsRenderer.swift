@@ -59,7 +59,6 @@ class EffectsRenderer {
     private let particleFX = OverlayParticleFX()
     private let textFX = OverlayTextFX()
     private let rippleFX = OverlayRippleFX()
-    private let cursorFX = OverlayCursorFX()
     private let animationFX = OverlayAnimationFX()
     private let imageFX = OverlayImageFX()
 
@@ -81,6 +80,5 @@ class EffectsRenderer {
         if config.imageEnabled == true {
             imageFX.spawn(at: point, config: config, parent: parent)
         }
-        cursorFX.spawn(at: point, config: config, parent: parent)
     }
 }

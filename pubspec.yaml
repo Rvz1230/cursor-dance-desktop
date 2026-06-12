@@ -47,6 +47,8 @@ dependencies:
 
   go_router: ^17.3.0
 
+  file_picker: ^9.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -170,62 +170,84 @@ abstract class _AtmosphereConfig implements AtmosphereConfig {
       throw _privateConstructorUsedError;
 }
 
-CursorStateAsset _$CursorStateAssetFromJson(Map<String, dynamic> json) {
-  return _CursorStateAsset.fromJson(json);
+CursorStateEntry _$CursorStateEntryFromJson(Map<String, dynamic> json) {
+  return _CursorStateEntry.fromJson(json);
 }
 
 /// @nodoc
-mixin _$CursorStateAsset {
-  String get imageDataUrl => throw _privateConstructorUsedError;
+mixin _$CursorStateEntry {
+  /// Relative path under cursordance/cursors/ (e.g. "arrow.png")
+  String get imagePath => throw _privateConstructorUsedError;
+  String get imageFormat => throw _privateConstructorUsedError;
   int get hotspotX => throw _privateConstructorUsedError;
   int get hotspotY => throw _privateConstructorUsedError;
   int get size => throw _privateConstructorUsedError;
+  bool get isAnimated => throw _privateConstructorUsedError;
+  int get frameCount => throw _privateConstructorUsedError;
+  int get fps => throw _privateConstructorUsedError;
 
-  /// Serializes this CursorStateAsset to a JSON map.
+  /// Serializes this CursorStateEntry to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of CursorStateAsset
+  /// Create a copy of CursorStateEntry
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $CursorStateAssetCopyWith<CursorStateAsset> get copyWith =>
+  $CursorStateEntryCopyWith<CursorStateEntry> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $CursorStateAssetCopyWith<$Res> {
-  factory $CursorStateAssetCopyWith(
-    CursorStateAsset value,
-    $Res Function(CursorStateAsset) then,
-  ) = _$CursorStateAssetCopyWithImpl<$Res, CursorStateAsset>;
+abstract class $CursorStateEntryCopyWith<$Res> {
+  factory $CursorStateEntryCopyWith(
+    CursorStateEntry value,
+    $Res Function(CursorStateEntry) then,
+  ) = _$CursorStateEntryCopyWithImpl<$Res, CursorStateEntry>;
   @useResult
-  $Res call({String imageDataUrl, int hotspotX, int hotspotY, int size});
+  $Res call({
+    String imagePath,
+    String imageFormat,
+    int hotspotX,
+    int hotspotY,
+    int size,
+    bool isAnimated,
+    int frameCount,
+    int fps,
+  });
 }
 
 /// @nodoc
-class _$CursorStateAssetCopyWithImpl<$Res, $Val extends CursorStateAsset>
-    implements $CursorStateAssetCopyWith<$Res> {
-  _$CursorStateAssetCopyWithImpl(this._value, this._then);
+class _$CursorStateEntryCopyWithImpl<$Res, $Val extends CursorStateEntry>
+    implements $CursorStateEntryCopyWith<$Res> {
+  _$CursorStateEntryCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of CursorStateAsset
+  /// Create a copy of CursorStateEntry
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? imageDataUrl = null,
+    Object? imagePath = null,
+    Object? imageFormat = null,
     Object? hotspotX = null,
     Object? hotspotY = null,
     Object? size = null,
+    Object? isAnimated = null,
+    Object? frameCount = null,
+    Object? fps = null,
   }) {
     return _then(
       _value.copyWith(
-            imageDataUrl: null == imageDataUrl
-                ? _value.imageDataUrl
-                : imageDataUrl // ignore: cast_nullable_to_non_nullable
+            imagePath: null == imagePath
+                ? _value.imagePath
+                : imagePath // ignore: cast_nullable_to_non_nullable
+                      as String,
+            imageFormat: null == imageFormat
+                ? _value.imageFormat
+                : imageFormat // ignore: cast_nullable_to_non_nullable
                       as String,
             hotspotX: null == hotspotX
                 ? _value.hotspotX
@@ -239,6 +261,18 @@ class _$CursorStateAssetCopyWithImpl<$Res, $Val extends CursorStateAsset>
                 ? _value.size
                 : size // ignore: cast_nullable_to_non_nullable
                       as int,
+            isAnimated: null == isAnimated
+                ? _value.isAnimated
+                : isAnimated // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            frameCount: null == frameCount
+                ? _value.frameCount
+                : frameCount // ignore: cast_nullable_to_non_nullable
+                      as int,
+            fps: null == fps
+                ? _value.fps
+                : fps // ignore: cast_nullable_to_non_nullable
+                      as int,
           )
           as $Val,
     );
@@ -246,41 +280,58 @@ class _$CursorStateAssetCopyWithImpl<$Res, $Val extends CursorStateAsset>
 }
 
 /// @nodoc
-abstract class _$$CursorStateAssetImplCopyWith<$Res>
-    implements $CursorStateAssetCopyWith<$Res> {
-  factory _$$CursorStateAssetImplCopyWith(
-    _$CursorStateAssetImpl value,
-    $Res Function(_$CursorStateAssetImpl) then,
-  ) = __$$CursorStateAssetImplCopyWithImpl<$Res>;
+abstract class _$$CursorStateEntryImplCopyWith<$Res>
+    implements $CursorStateEntryCopyWith<$Res> {
+  factory _$$CursorStateEntryImplCopyWith(
+    _$CursorStateEntryImpl value,
+    $Res Function(_$CursorStateEntryImpl) then,
+  ) = __$$CursorStateEntryImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String imageDataUrl, int hotspotX, int hotspotY, int size});
+  $Res call({
+    String imagePath,
+    String imageFormat,
+    int hotspotX,
+    int hotspotY,
+    int size,
+    bool isAnimated,
+    int frameCount,
+    int fps,
+  });
 }
 
 /// @nodoc
-class __$$CursorStateAssetImplCopyWithImpl<$Res>
-    extends _$CursorStateAssetCopyWithImpl<$Res, _$CursorStateAssetImpl>
-    implements _$$CursorStateAssetImplCopyWith<$Res> {
-  __$$CursorStateAssetImplCopyWithImpl(
-    _$CursorStateAssetImpl _value,
-    $Res Function(_$CursorStateAssetImpl) _then,
+class __$$CursorStateEntryImplCopyWithImpl<$Res>
+    extends _$CursorStateEntryCopyWithImpl<$Res, _$CursorStateEntryImpl>
+    implements _$$CursorStateEntryImplCopyWith<$Res> {
+  __$$CursorStateEntryImplCopyWithImpl(
+    _$CursorStateEntryImpl _value,
+    $Res Function(_$CursorStateEntryImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of CursorStateAsset
+  /// Create a copy of CursorStateEntry
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? imageDataUrl = null,
+    Object? imagePath = null,
+    Object? imageFormat = null,
     Object? hotspotX = null,
     Object? hotspotY = null,
     Object? size = null,
+    Object? isAnimated = null,
+    Object? frameCount = null,
+    Object? fps = null,
   }) {
     return _then(
-      _$CursorStateAssetImpl(
-        imageDataUrl: null == imageDataUrl
-            ? _value.imageDataUrl
-            : imageDataUrl // ignore: cast_nullable_to_non_nullable
+      _$CursorStateEntryImpl(
+        imagePath: null == imagePath
+            ? _value.imagePath
+            : imagePath // ignore: cast_nullable_to_non_nullable
+                  as String,
+        imageFormat: null == imageFormat
+            ? _value.imageFormat
+            : imageFormat // ignore: cast_nullable_to_non_nullable
                   as String,
         hotspotX: null == hotspotX
             ? _value.hotspotX
@@ -294,6 +345,18 @@ class __$$CursorStateAssetImplCopyWithImpl<$Res>
             ? _value.size
             : size // ignore: cast_nullable_to_non_nullable
                   as int,
+        isAnimated: null == isAnimated
+            ? _value.isAnimated
+            : isAnimated // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        frameCount: null == frameCount
+            ? _value.frameCount
+            : frameCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+        fps: null == fps
+            ? _value.fps
+            : fps // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -301,20 +364,28 @@ class __$$CursorStateAssetImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$CursorStateAssetImpl implements _CursorStateAsset {
-  const _$CursorStateAssetImpl({
-    this.imageDataUrl = '',
-    this.hotspotX = 16,
-    this.hotspotY = 32,
+class _$CursorStateEntryImpl implements _CursorStateEntry {
+  const _$CursorStateEntryImpl({
+    this.imagePath = '',
+    this.imageFormat = '',
+    this.hotspotX = 0,
+    this.hotspotY = 0,
     this.size = 48,
+    this.isAnimated = false,
+    this.frameCount = 0,
+    this.fps = 0,
   });
 
-  factory _$CursorStateAssetImpl.fromJson(Map<String, dynamic> json) =>
-      _$$CursorStateAssetImplFromJson(json);
+  factory _$CursorStateEntryImpl.fromJson(Map<String, dynamic> json) =>
+      _$$CursorStateEntryImplFromJson(json);
 
+  /// Relative path under cursordance/cursors/ (e.g. "arrow.png")
   @override
   @JsonKey()
-  final String imageDataUrl;
+  final String imagePath;
+  @override
+  @JsonKey()
+  final String imageFormat;
   @override
   @JsonKey()
   final int hotspotX;
@@ -324,72 +395,110 @@ class _$CursorStateAssetImpl implements _CursorStateAsset {
   @override
   @JsonKey()
   final int size;
+  @override
+  @JsonKey()
+  final bool isAnimated;
+  @override
+  @JsonKey()
+  final int frameCount;
+  @override
+  @JsonKey()
+  final int fps;
 
   @override
   String toString() {
-    return 'CursorStateAsset(imageDataUrl: $imageDataUrl, hotspotX: $hotspotX, hotspotY: $hotspotY, size: $size)';
+    return 'CursorStateEntry(imagePath: $imagePath, imageFormat: $imageFormat, hotspotX: $hotspotX, hotspotY: $hotspotY, size: $size, isAnimated: $isAnimated, frameCount: $frameCount, fps: $fps)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$CursorStateAssetImpl &&
-            (identical(other.imageDataUrl, imageDataUrl) ||
-                other.imageDataUrl == imageDataUrl) &&
+            other is _$CursorStateEntryImpl &&
+            (identical(other.imagePath, imagePath) ||
+                other.imagePath == imagePath) &&
+            (identical(other.imageFormat, imageFormat) ||
+                other.imageFormat == imageFormat) &&
             (identical(other.hotspotX, hotspotX) ||
                 other.hotspotX == hotspotX) &&
             (identical(other.hotspotY, hotspotY) ||
                 other.hotspotY == hotspotY) &&
-            (identical(other.size, size) || other.size == size));
+            (identical(other.size, size) || other.size == size) &&
+            (identical(other.isAnimated, isAnimated) ||
+                other.isAnimated == isAnimated) &&
+            (identical(other.frameCount, frameCount) ||
+                other.frameCount == frameCount) &&
+            (identical(other.fps, fps) || other.fps == fps));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, imageDataUrl, hotspotX, hotspotY, size);
+  int get hashCode => Object.hash(
+    runtimeType,
+    imagePath,
+    imageFormat,
+    hotspotX,
+    hotspotY,
+    size,
+    isAnimated,
+    frameCount,
+    fps,
+  );
 
-  /// Create a copy of CursorStateAsset
+  /// Create a copy of CursorStateEntry
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$CursorStateAssetImplCopyWith<_$CursorStateAssetImpl> get copyWith =>
-      __$$CursorStateAssetImplCopyWithImpl<_$CursorStateAssetImpl>(
+  _$$CursorStateEntryImplCopyWith<_$CursorStateEntryImpl> get copyWith =>
+      __$$CursorStateEntryImplCopyWithImpl<_$CursorStateEntryImpl>(
         this,
         _$identity,
       );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$CursorStateAssetImplToJson(this);
+    return _$$CursorStateEntryImplToJson(this);
   }
 }
 
-abstract class _CursorStateAsset implements CursorStateAsset {
-  const factory _CursorStateAsset({
-    final String imageDataUrl,
+abstract class _CursorStateEntry implements CursorStateEntry {
+  const factory _CursorStateEntry({
+    final String imagePath,
+    final String imageFormat,
     final int hotspotX,
     final int hotspotY,
     final int size,
-  }) = _$CursorStateAssetImpl;
+    final bool isAnimated,
+    final int frameCount,
+    final int fps,
+  }) = _$CursorStateEntryImpl;
 
-  factory _CursorStateAsset.fromJson(Map<String, dynamic> json) =
-      _$CursorStateAssetImpl.fromJson;
+  factory _CursorStateEntry.fromJson(Map<String, dynamic> json) =
+      _$CursorStateEntryImpl.fromJson;
 
+  /// Relative path under cursordance/cursors/ (e.g. "arrow.png")
   @override
-  String get imageDataUrl;
+  String get imagePath;
+  @override
+  String get imageFormat;
   @override
   int get hotspotX;
   @override
   int get hotspotY;
   @override
   int get size;
+  @override
+  bool get isAnimated;
+  @override
+  int get frameCount;
+  @override
+  int get fps;
 
-  /// Create a copy of CursorStateAsset
+  /// Create a copy of CursorStateEntry
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$CursorStateAssetImplCopyWith<_$CursorStateAssetImpl> get copyWith =>
+  _$$CursorStateEntryImplCopyWith<_$CursorStateEntryImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

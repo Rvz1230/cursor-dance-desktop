@@ -104,14 +104,6 @@ struct ActionConfig: Decodable {
         let soundTriggerMode: String?
         let soundBlendMode: String?
 
-        // Cursor
-        let cursorOverride: String?
-        let cursorSize: Int?
-        let cursorTrailEnabled: Bool?
-        let cursorTrailCount: Int?
-        let cursorTrailOpacity: Int?
-        let cursorGlowColor: String?
-        let shake: Int?
     }
 }
 
