@@ -76,11 +76,11 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
     );
   }
 
-  /// Run a theme action and catch errors.
-  void _runThemeAction(VoidCallback action) {
+  T? _runThemeAction<T>(T Function() action) {
     try {
-      action();
+      final result = action();
       setState(() => _actionError = '');
+      return result;
     } catch (e) {
       setState(() => _actionError = e.toString());
       _showToast(
@@ -89,6 +89,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
         description: e.toString().replaceFirst('Exception: ', ''),
         destructive: true,
       );
+      return null;
     }
   }
 
@@ -167,8 +168,10 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
   }
 
   void _handleDuplicateTheme(String themeId, ThemeProvider theme) {
-    _runThemeAction(() => theme.duplicateTheme(themeId));
-    _showToast(context, title: '已复制主题');
+    final ok = _runThemeAction(() { theme.duplicateTheme(themeId); return true; });
+    if (ok != null) {
+      _showToast(context, title: '已复制主题');
+    }
   }
 
   void _handleDeleteTheme(ThemeItem item, ThemeProvider theme) {
@@ -185,14 +188,17 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
           ShadButton.destructive(
             onPressed: () {
               Navigator.of(ctx).pop();
-              _runThemeAction(() {
+              final ok = _runThemeAction(() {
                 theme.deleteTheme(item.id);
+                return item.name;
+              });
+              if (ok != null) {
                 _showToast(
                   context,
                   title: '已移除主题',
-                  description: '${item.name} 将在保存后从配置中删除。',
+                  description: '$ok 将在保存后从配置中删除。',
                 );
-              });
+              }
             },
             child: const Text('删除'),
           ),
@@ -243,7 +249,7 @@ class _WorkbenchSidebarState extends State<WorkbenchSidebar> {
     }
 
     final sidebar = _collapsed
-        ? _buildCollapsed(context, cs, theme, library, selectedId)
+        ? _buildCollapsed(context, cs, theme, filtered, selectedId)
         : _buildExpanded(context, cs, theme, library, filtered, selectedId);
 
     return AnimatedContainer(
@@ -662,6 +668,7 @@ class ThemeCard extends StatefulWidget {
 
 class _ThemeCardState extends State<ThemeCard> {
   bool _editingName = false;
+  final _menuController = ShadPopoverController();
   final _nameController = TextEditingController();
   final _nameFocusNode = FocusNode();
 
@@ -679,6 +686,7 @@ class _ThemeCardState extends State<ThemeCard> {
   void dispose() {
     _nameController.dispose();
     _nameFocusNode.dispose();
+    _menuController.dispose();
     super.dispose();
   }
 
@@ -869,61 +877,69 @@ class _ThemeCardState extends State<ThemeCard> {
                       ),
                     ),
                   // More menu
-                  PopupMenuButton<String>(
-                    tooltip: '更多操作',
-                    padding: EdgeInsets.zero,
-                    iconSize: IconSizes.md,
-                    icon: Icon(
-                      LucideIcons.moreHorizontal,
-                      size: IconSizes.md,
-                      color: cs.mutedForeground,
-                    ),
-                    color: cs.popover,
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'rename':
-                          _startRename();
-                          break;
-                        case 'duplicate':
-                          widget.onDuplicate();
-                          break;
-                        case 'export':
-                          widget.onExport();
-                          break;
-                        case 'delete':
-                          widget.onDelete?.call();
-                          break;
-                      }
-                    },
-                    itemBuilder: (ctx) => [
-                      const PopupMenuItem(
-                        value: 'rename',
-                        height: 32,
-                        child: Text('重命名', style: TextStyle(fontSize: FontSizes.small)),
+                  ShadPopover(
+                    controller: _menuController,
+                    closeOnTapOutside: true,
+                    popover: (_) => Container(
+                      width: 140,
+                      padding: const EdgeInsets.all(Spacing.xs),
+                      decoration: BoxDecoration(
+                        color: cs.popover,
+                        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+                        border: Border.all(color: cs.border),
+                        boxShadow: ShadowTokens.cardElevated,
                       ),
-                      const PopupMenuItem(
-                        value: 'duplicate',
-                        height: 32,
-                        child: Text('复制', style: TextStyle(fontSize: FontSizes.small)),
-                      ),
-                      const PopupMenuItem(
-                        value: 'export',
-                        height: 32,
-                        child: Text('导出 JSON', style: TextStyle(fontSize: FontSizes.small)),
-                      ),
-                      if (widget.canDelete)
-                        PopupMenuItem(
-                          value: 'delete',
-                          height: 32,
-                          child: Text(
-                            '删除',
-                            style: TextStyle(
-                              fontSize: FontSizes.small,
-                              color: cs.destructive,
-                            ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _MenuButton(
+                            icon: LucideIcons.pencil,
+                            label: '重命名',
+                            onTap: () {
+                              _menuController.hide();
+                              _startRename();
+                            },
                           ),
+                          _MenuButton(
+                            icon: LucideIcons.copy,
+                            label: '复制',
+                            onTap: () {
+                              _menuController.hide();
+                              widget.onDuplicate();
+                            },
+                          ),
+                          _MenuButton(
+                            icon: LucideIcons.download,
+                            label: '导出 JSON',
+                            onTap: () {
+                              _menuController.hide();
+                              widget.onExport();
+                            },
+                          ),
+                          if (widget.canDelete)
+                            _MenuButton(
+                              icon: LucideIcons.trash2,
+                              label: '删除',
+                              destructive: true,
+                              onTap: () {
+                                _menuController.hide();
+                                widget.onDelete?.call();
+                              },
+                            ),
+                        ],
+                      ),
+                    ),
+                    child: GestureDetector(
+                      onTap: () => _menuController.toggle(),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(
+                          LucideIcons.moreHorizontal,
+                          size: IconSizes.md,
+                          color: cs.mutedForeground,
                         ),
-                    ],
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -956,6 +972,48 @@ class _ThemeCardState extends State<ThemeCard> {
             widget.onUpdateIcon?.call(widget.item.id, name);
             Navigator.of(ctx).pop();
           },
+        ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Menu Button (used by ThemeCard popover)
+// ═══════════════════════════════════════════════════════════
+
+class _MenuButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool destructive;
+  final VoidCallback onTap;
+
+  const _MenuButton({
+    required this.icon,
+    required this.label,
+    this.destructive = false,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = ShadTheme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.xs, vertical: 5),
+        child: Row(
+          children: [
+            Icon(icon, size: IconSizes.md, color: destructive ? cs.destructive : cs.foreground),
+            const SizedBox(width: Spacing.sm),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: FontSizes.small,
+                color: destructive ? cs.destructive : cs.foreground,
+              ),
+            ),
+          ],
         ),
       ),
     );
